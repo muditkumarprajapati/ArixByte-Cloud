@@ -2,7 +2,10 @@
 # ==============================================================================
 # CLOUD INSTALLER & MANAGEMENT SUITE | STANDALONE EDITION (ALL-IN-ONE)
 # Style: Cyberpunk Uplink + Obsidian Neo UI
-# Supports: Ubuntu 20.04/22.04/24.04, Debian 11/12
+# Supported OS:
+#   - Ubuntu 20.04, 22.04, 24.04
+#   - Debian 11, 12, 13
+#   - AlmaLinux 8, 9 (& Rocky Linux / RHEL)
 # ==============================================================================
 set -euo pipefail
 
@@ -19,14 +22,86 @@ DG='\033[0;38;5;244m'    # Steel / Slate Gray
 BG_SHADE='\033[48;5;236m'
 NC='\033[0m'             # Reset Color
 
-VERSION="v2.5.0"
+VERSION="v2.6.0"
 SYSTEM_CODENAME="ARIX-HYPERION"
+
+# --- OS & ENVIRONMENT DETECTION ---
+detect_os() {
+    if [[ -f /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        . /etc/os-release
+        OS_ID="${ID:-unknown}"
+        OS_VER="${VERSION_ID:-0}"
+        OS_NAME="${PRETTY_NAME:-Linux}"
+    else
+        OS_ID="unknown"
+        OS_VER="0"
+        OS_NAME="$(uname -s)"
+    fi
+
+    case "$OS_ID" in
+        ubuntu)
+            PKG_MGR="apt"
+            WEB_USER="www-data"
+            WEB_GROUP="www-data"
+            PHP_FPM_SVC="php8.3-fpm"
+            PHP_FPM_SOCK="/run/php/php8.3-fpm.sock"
+            NGINX_CONF_DIR="/etc/nginx/sites-available"
+            NGINX_CONF_ENABLE="/etc/nginx/sites-enabled"
+            REDIS_SVC="redis-server"
+            ;;
+        debian)
+            PKG_MGR="apt"
+            WEB_USER="www-data"
+            WEB_GROUP="www-data"
+            PHP_FPM_SVC="php8.3-fpm"
+            PHP_FPM_SOCK="/run/php/php8.3-fpm.sock"
+            NGINX_CONF_DIR="/etc/nginx/sites-available"
+            NGINX_CONF_ENABLE="/etc/nginx/sites-enabled"
+            REDIS_SVC="redis-server"
+            ;;
+        almalinux|rocky|centos|rhel)
+            PKG_MGR="dnf"
+            WEB_USER="nginx"
+            WEB_GROUP="nginx"
+            PHP_FPM_SVC="php-fpm"
+            PHP_FPM_SOCK="/run/php-fpm/www.sock"
+            NGINX_CONF_DIR="/etc/nginx/conf.d"
+            NGINX_CONF_ENABLE=""
+            REDIS_SVC="redis"
+            ;;
+        *)
+            if command -v apt-get &>/dev/null; then
+                PKG_MGR="apt"
+                WEB_USER="www-data"
+                WEB_GROUP="www-data"
+                PHP_FPM_SVC="php8.3-fpm"
+                PHP_FPM_SOCK="/run/php/php8.3-fpm.sock"
+                NGINX_CONF_DIR="/etc/nginx/sites-available"
+                NGINX_CONF_ENABLE="/etc/nginx/sites-enabled"
+                REDIS_SVC="redis-server"
+            elif command -v dnf &>/dev/null; then
+                PKG_MGR="dnf"
+                WEB_USER="nginx"
+                WEB_GROUP="nginx"
+                PHP_FPM_SVC="php-fpm"
+                PHP_FPM_SOCK="/run/php-fpm/www.sock"
+                NGINX_CONF_DIR="/etc/nginx/conf.d"
+                NGINX_CONF_ENABLE=""
+                REDIS_SVC="redis"
+            else
+                PKG_MGR="unknown"
+            fi
+            ;;
+    esac
+}
+
+detect_os
 
 # --- SYSTEM DISCOVERY ---
 PUB_IP="$(curl -s --max-time 3 https://api.ipify.org 2>/dev/null || curl -s --max-time 3 https://ifconfig.me 2>/dev/null || echo "127.0.0.1")"
 LOCAL_IP="$(hostname -I 2>/dev/null | awk '{print $1}' || echo "127.0.0.1")"
 ARCH="$(uname -m 2>/dev/null || echo "x86_64")"
-OS_NAME="$(grep -E '^PRETTY_NAME=' /etc/os-release 2>/dev/null | cut -d= -f2 | tr -d '\"' || uname -s)"
 
 # --- UPLINK STAGE 1 INTRO ---
 render_intro() {
@@ -59,7 +134,7 @@ EOF
     echo -e "\n ${Y}[1/1] ENVIRONMENT INTEGRITY CHECK${NC}"
     echo -ne " ${DG}├─ Verifying runtime dependencies...${NC} "
     sleep 0.6
-    echo -e "${G}VERIFIED${NC} ${P}✓${NC}"
+    echo -e "${G}VERIFIED (${PKG_MGR})${NC} ${P}✓${NC}"
 
     echo -e "\n${DG}──────────────────────────────────────────────────────────────────────────────${NC}"
     echo -e " ${P}★★★ UPLINK READY — LAUNCHING CONTROL INTERFACE ★★★${NC}\n"
@@ -117,14 +192,15 @@ render_ui() {
     echo -e "${P}  ██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ${NC}"
     echo -e "${Y}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
     echo -e "${Y}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
-    echo -e "               ${DG}CLOUD INFRASTRUCTURE & PTERODACTYL SUITE ${VERSION}${NC}"
+    echo -e "       ${DG}ARIXBYTE CLOUD SUITE ${VERSION} — UBUNTU / DEBIAN / ALMALINUX${NC}"
 
     echo -e " ${DG}────────────────────────────────────────────────────────────────────────────────${NC}"
     echo -e ""
 
     # System Status Overview
     echo -e " ${W}◉ SYSTEM VITALS${NC}"
-    printf "   ${DG}Node IP:${NC} ${W}%-16s${NC} ${DG}CPU:${NC} ${C}%3s%%${NC}  ${DG}RAM:${NC} ${P}%3s%%${NC}  ${DG}Status:${NC} ${G}● ACTIVE${NC}\n" "$PUB_IP" "$CPU" "$RAM"
+    printf "   ${DG}Node IP :${NC} ${W}%-16s${NC} ${DG}OS:${NC} ${C}%-26s${NC}\n" "$PUB_IP" "$OS_NAME"
+    printf "   ${DG}CPU     :${NC} ${C}%3s%%${NC}             ${DG}RAM:${NC} ${P}%3s%%${NC}             ${DG}Status:${NC} ${G}● ACTIVE${NC}\n" "$CPU" "$RAM"
     echo -e ""
 
     # Categorized Menu Section 1: Core Pterodactyl Services
@@ -138,10 +214,75 @@ render_ui() {
     # Categorized Menu Section 2: VPS Optimization & Cloud Tools
     echo -e " ${P} SYSTEM OPTIMIZATION & DEVOPS${NC}"
     echo -e " ${DG}├─${NC} ${W}[9]${NC}  VPS Fast Optimizer (Swap + BBR) ${DG}├─${NC} ${W}[11]${NC} Dev Stack (Node/Docker/Py)"
-    echo -e " ${DG}├─${NC} ${W}[10]${NC} Firewall Hardening (UFW)       ${DG}└─${NC} ${R}${NC}${BG_SHADE}${W} [0] EXIT DASHBOARD ${NC}${R}${NC}"
+    echo -e " ${DG}├─${NC} ${W}[10]${NC} Firewall Hardening (UFW/Firewalld) └─${NC} ${R}${NC}${BG_SHADE}${W} [0] EXIT DASHBOARD ${NC}${R}${NC}"
 
     echo -e "\n ${DG}────────────────────────────────────────────────────────────────────────────────${NC}"
     echo -ne " ${C}➜${NC} ${W}Select Option${NC} ${DG}(0-11):${NC} "
+}
+
+# ==============================================================================
+# OS REPOSITORY & PACKAGE PROVISIONER
+# ==============================================================================
+install_dependencies() {
+    echo -e "${P}⚙ Provisioning system repositories for ${OS_NAME}...${NC}"
+
+    if [[ "$PKG_MGR" == "apt" ]]; then
+        apt-get update -y -qq
+        apt-get install -y -qq software-properties-common curl wget apt-transport-https ca-certificates gnupg lsb-release
+
+        if [[ "$OS_ID" == "ubuntu" ]]; then
+            LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php >/dev/null 2>&1 || true
+        elif [[ "$OS_ID" == "debian" ]]; then
+            # Debian 11, 12, 13 (Sury PHP Repo)
+            mkdir -p /etc/apt/trusted.gpg.d/
+            curl -fsSL https://packages.sury.org/php/apt.gpg -o /etc/apt/trusted.gpg.d/php.gpg 2>/dev/null || true
+            DEBIAN_CODENAME="$(lsb_release -sc 2>/dev/null || echo "bookworm")"
+            if [[ "$DEBIAN_CODENAME" == "trixie" ]]; then
+                echo "deb https://packages.sury.org/php/ trixie main" > /etc/apt/sources.list.d/php.list || \
+                echo "deb https://packages.sury.org/php/ bookworm main" > /etc/apt/sources.list.d/php.list
+            else
+                echo "deb https://packages.sury.org/php/ ${DEBIAN_CODENAME} main" > /etc/apt/sources.list.d/php.list
+            fi
+        fi
+
+        apt-get update -y -qq
+        apt-get install -y -qq \
+            php8.3 php8.3-{cli,common,gd,mysql,mbstring,bcmath,xml,curl,zip,intl,soap,redis} \
+            nginx mariadb-server mariadb-client redis-server git tar unzip certbot python3-certbot-nginx
+
+    elif [[ "$PKG_MGR" == "dnf" ]]; then
+        # AlmaLinux 8 / 9 / Rocky Linux / RHEL
+        RHEL_MAJOR="${OS_VER%%.*}"
+        [[ -z "$RHEL_MAJOR" || "$RHEL_MAJOR" == "0" ]] && RHEL_MAJOR="9"
+
+        echo -e "${P}⚙ Installing EPEL & Remi PHP 8.3 repos for AlmaLinux ${RHEL_MAJOR}...${NC}"
+        dnf install -y epel-release >/dev/null 2>&1 || true
+        dnf install -y "https://rpms.remirepo.net/enterprise/remi-release-${RHEL_MAJOR}.rpm" >/dev/null 2>&1 || true
+
+        dnf module reset php -y >/dev/null 2>&1 || true
+        dnf module enable php:remi-8.3 -y >/dev/null 2>&1 || true
+
+        dnf install -y \
+            php php-cli php-common php-gd php-mysqlnd php-mbstring php-bcmath php-xml php-curl php-zip php-intl php-soap php-redis \
+            nginx mariadb-server mariadb redis git tar unzip certbot python3-certbot-nginx policycoreutils-python-utils
+
+        # Configure PHP-FPM to run under nginx user
+        if [[ -f /etc/php-fpm.d/www.conf ]]; then
+            sed -i 's/user = apache/user = nginx/' /etc/php-fpm.d/www.conf
+            sed -i 's/group = apache/group = nginx/' /etc/php-fpm.d/www.conf
+            sed -i 's/listen.owner = nobody/listen.owner = nginx/' /etc/php-fpm.d/www.conf
+            sed -i 's/listen.group = nobody/listen.group = nginx/' /etc/php-fpm.d/www.conf
+            mkdir -p /run/php-fpm
+            chown -R nginx:nginx /run/php-fpm
+        fi
+
+        # Adjust SELinux policies if enforcing
+        if command -v getenforce &>/dev/null && [[ "$(getenforce)" != "Disabled" ]]; then
+            setsebool -P httpd_can_network_connect 1 2>/dev/null || true
+            setsebool -P httpd_can_network_connect_db 1 2>/dev/null || true
+            setsebool -P httpd_unified 1 2>/dev/null || true
+        fi
+    fi
 }
 
 # ==============================================================================
@@ -153,6 +294,7 @@ install_panel() {
     require_root || return
     echo -e "\n${C}====================================================${NC}"
     echo -e "${G}▶ STARTING PTERODACTYL PANEL INSTALLATION${NC}"
+    echo -e " ${DG}Target System:${NC} ${W}${OS_NAME} (${PKG_MGR})${NC}"
     echo -e "${C}====================================================${NC}\n"
 
     read -rp "Enter Fully Qualified Domain Name (e.g., panel.yourdomain.com): " FQDN
@@ -169,29 +311,22 @@ install_panel() {
     fi
     PANEL_DB_PASS=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 16 ; echo '')
 
-    echo -e "\n${P}⚙ Updating package repositories...${NC}"
-    apt-get update -y -qq
-    apt-get install -y -qq software-properties-common curl apt-transport-https ca-certificates gnupg lsb-release
+    # Install packages for current OS
+    install_dependencies
 
-    echo -e "${P}⚙ Adding PHP 8.3 & MariaDB repositories...${NC}"
-    LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php >/dev/null 2>&1 || true
-    apt-get update -y -qq
-
-    echo -e "${P}⚙ Installing PHP, Nginx, MariaDB, Redis, and dependencies...${NC}"
-    apt-get install -y -qq \
-        php8.3 php8.3-{cli,common,gd,mysql,mbstring,bcmath,xml,curl,zip,intl,soap,redis} \
-        nginx mariadb-server mariadb-client redis-server git tar unzip certbot python3-certbot-nginx
+    # Enable and start core database & cache services
+    systemctl enable --now mariadb "$REDIS_SVC" "$PHP_FPM_SVC" nginx
 
     echo -e "${P}⚙ Installing Composer...${NC}"
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-    echo -e "${P}⚙ Creating Database & User for Pterodactyl...${NC}"
-    mariadb -e "CREATE DATABASE IF NOT EXISTS ppanel;"
-    mariadb -e "CREATE USER IF NOT EXISTS 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '${PANEL_DB_PASS}';"
-    mariadb -e "GRANT ALL PRIVILEGES ON ppanel.* TO 'pterodactyl'@'127.0.0.1' WITH GRANT OPTION;"
-    mariadb -e "FLUSH PRIVILEGES;"
+    echo -e "${P}⚙ Configuring MariaDB for Pterodactyl...${NC}"
+    mariadb -e "CREATE DATABASE IF NOT EXISTS ppanel;" 2>/dev/null || mysql -e "CREATE DATABASE IF NOT EXISTS ppanel;"
+    mariadb -e "CREATE USER IF NOT EXISTS 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '${PANEL_DB_PASS}';" 2>/dev/null || mysql -e "CREATE USER IF NOT EXISTS 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '${PANEL_DB_PASS}';"
+    mariadb -e "GRANT ALL PRIVILEGES ON ppanel.* TO 'pterodactyl'@'127.0.0.1' WITH GRANT OPTION;" 2>/dev/null || mysql -e "GRANT ALL PRIVILEGES ON ppanel.* TO 'pterodactyl'@'127.0.0.1' WITH GRANT OPTION;"
+    mariadb -e "FLUSH PRIVILEGES;" 2>/dev/null || mysql -e "FLUSH PRIVILEGES;"
 
-    echo -e "${P}⚙ Downloading Pterodactyl Panel release...${NC}"
+    echo -e "${P}⚙ Downloading Pterodactyl Panel...${NC}"
     mkdir -p /var/www/pterodactyl
     cd /var/www/pterodactyl
     curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz
@@ -203,7 +338,7 @@ install_panel() {
     composer install --no-dev --optimize-autoloader --quiet
     php artisan key:generate --force --quiet
 
-    echo -e "${P}⚙ Setting up base settings & database tables...${NC}"
+    echo -e "${P}⚙ Initializing Database & Setup...${NC}"
     php artisan p:environment:setup \
         --author="${ADMIN_EMAIL}" \
         --url="https://${FQDN}" \
@@ -228,19 +363,26 @@ install_panel() {
     echo -e "\n${Y}=== Create Initial Admin Account ===${NC}"
     php artisan p:user:make
 
-    chown -R www-data:www-data /var/www/pterodactyl/* /var/www/pterodactyl/storage
+    chown -R "$WEB_USER":"$WEB_GROUP" /var/www/pterodactyl/* /var/www/pterodactyl/storage
+
+    # SELinux context for AlmaLinux/RHEL
+    if command -v semanage &>/dev/null; then
+        semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/pterodactyl/storage(/.*)?" 2>/dev/null || true
+        semanage fcontext -a -t httpd_sys_rw_content_t "/var/www/pterodactyl/bootstrap/cache(/.*)?" 2>/dev/null || true
+        restorecon -R /var/www/pterodactyl/storage /var/www/pterodactyl/bootstrap/cache 2>/dev/null || true
+    fi
 
     echo -e "${P}⚙ Setting up Queue Worker & Crontab...${NC}"
     (crontab -l 2>/dev/null; echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1") | crontab -
 
-    cat << 'EOF_PTERO_SVC' > /etc/systemd/system/pteroq.service
+    cat << EOF_PTERO_SVC > /etc/systemd/system/pteroq.service
 [Unit]
 Description=Pterodactyl Queue Worker
-After=redis-server.service
+After=${REDIS_SVC}.service
 
 [Service]
-User=www-data
-Group=www-data
+User=${WEB_USER}
+Group=${WEB_GROUP}
 Restart=always
 ExecStart=/usr/bin/php /var/www/pterodactyl/artisan queue:work --queue=high,standard,low --sleep=3 --tries=3
 StartLimitInterval=180
@@ -252,10 +394,13 @@ WantedBy=multi-user.target
 EOF_PTERO_SVC
 
     systemctl daemon-reload
-    systemctl enable --now pteroq.service redis-server
+    systemctl enable --now pteroq.service "$REDIS_SVC"
 
-    echo -e "${P}⚙ Configuring Nginx VirtualHost...${NC}"
-    cat << EOF_NGINX > /etc/nginx/sites-available/pterodactyl.conf
+    echo -e "${P}⚙ Configuring Nginx VirtualHost for ${OS_NAME}...${NC}"
+    mkdir -p "$NGINX_CONF_DIR"
+    
+    CONF_FILE="${NGINX_CONF_DIR}/pterodactyl.conf"
+    cat << EOF_NGINX > "$CONF_FILE"
 server {
     listen 80;
     server_name ${FQDN};
@@ -279,7 +424,7 @@ server {
 
     location ~ \.php$ {
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:${PHP_FPM_SOCK};
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
@@ -298,9 +443,13 @@ server {
 }
 EOF_NGINX
 
-    ln -s -f /etc/nginx/sites-available/pterodactyl.conf /etc/nginx/sites-enabled/pterodactyl.conf
-    rm -f /etc/nginx/sites-enabled/default
-    systemctl restart nginx
+    if [[ -n "$NGINX_CONF_ENABLE" ]]; then
+        mkdir -p "$NGINX_CONF_ENABLE"
+        ln -s -f "$CONF_FILE" "${NGINX_CONF_ENABLE}/pterodactyl.conf"
+        rm -f "${NGINX_CONF_ENABLE}/default"
+    fi
+
+    systemctl restart "$PHP_FPM_SVC" nginx
 
     echo -e "${P}⚙ Obtaining SSL Certificate via Let's Encrypt Certbot...${NC}"
     certbot --nginx -d "${FQDN}" --non-interactive --agree-tos -m "${ADMIN_EMAIL}" --redirect || true
@@ -317,9 +466,10 @@ install_wings() {
     require_root || return
     echo -e "\n${C}====================================================${NC}"
     echo -e "${G}▶ STARTING PTERODACTYL WINGS INSTALLATION${NC}"
+    echo -e " ${DG}Target System:${NC} ${W}${OS_NAME}${NC}"
     echo -e "${C}====================================================${NC}\n"
 
-    echo -e "${P}⚙ Checking & Installing Docker...${NC}"
+    echo -e "${P}⚙ Installing Docker CE...${NC}"
     if ! command -v docker &>/dev/null; then
         curl -sSL https://get.docker.com/ | CHANNEL=stable bash
         systemctl enable --now docker
@@ -401,9 +551,10 @@ install_phpmyadmin() {
     cp config.sample.inc.php config.inc.php
     BLOWFISH_SECRET=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32 ; echo '')
     sed -i "s/\$cfg\['blowfish_secret'\] = '';/\$cfg\['blowfish_secret'\] = '${BLOWFISH_SECRET}';/" config.inc.php
-    chown -R www-data:www-data /var/www/phpmyadmin
+    chown -R "$WEB_USER":"$WEB_GROUP" /var/www/phpmyadmin
 
-    cat << EOF_PMA > /etc/nginx/sites-available/phpmyadmin.conf
+    PMA_CONF="${NGINX_CONF_DIR}/phpmyadmin.conf"
+    cat << EOF_PMA > "$PMA_CONF"
 server {
     listen ${PMA_PORT};
     root /var/www/phpmyadmin;
@@ -414,14 +565,18 @@ server {
     }
 
     location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:${PHP_FPM_SOCK};
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
     }
 }
 EOF_PMA
 
-    ln -s -f /etc/nginx/sites-available/phpmyadmin.conf /etc/nginx/sites-enabled/phpmyadmin.conf
-    systemctl restart nginx
+    if [[ -n "$NGINX_CONF_ENABLE" ]]; then
+        ln -s -f "$PMA_CONF" "${NGINX_CONF_ENABLE}/phpmyadmin.conf"
+    fi
+    systemctl restart "$PHP_FPM_SVC" nginx
 
     PUB_IP=$(curl -s https://api.ipify.org || echo "YOUR-SERVER-IP")
     echo -e "\n${G}✔ phpMyAdmin is online!${NC}"
@@ -453,7 +608,7 @@ install_themes() {
             echo -e "${P}⚙ Installing Blueprint Framework...${NC}"
             cd /var/www/pterodactyl
             bash <(curl -s https://raw.githubusercontent.com/BlueprintFramework/framework/main/install.sh) || true
-            chown -R www-data:www-data /var/www/pterodactyl/*
+            chown -R "$WEB_USER":"$WEB_GROUP" /var/www/pterodactyl/*
             ;;
         2)
             echo -e "${P}⚙ Restoring Vanilla Theme...${NC}"
@@ -464,7 +619,7 @@ install_themes() {
             composer install --no-dev --optimize-autoloader
             php artisan view:clear
             php artisan config:clear
-            chown -R www-data:www-data /var/www/pterodactyl/*
+            chown -R "$WEB_USER":"$WEB_GROUP" /var/www/pterodactyl/*
             echo -e "${G}✔ Reverted to Vanilla successfully!${NC}"
             ;;
         3)
@@ -473,7 +628,7 @@ install_themes() {
             yarn build:production
             php artisan view:clear
             php artisan cache:clear
-            chown -R www-data:www-data /var/www/pterodactyl/*
+            chown -R "$WEB_USER":"$WEB_GROUP" /var/www/pterodactyl/*
             echo -e "${G}✔ Assets rebuilt!${NC}"
             ;;
     esac
@@ -505,9 +660,9 @@ fix_permissions() {
     require_root || return
     echo -e "\n${P}⚙ Fixing permissions and restarting workers...${NC}"
     if [[ -d "/var/www/pterodactyl" ]]; then
-        chown -R www-data:www-data /var/www/pterodactyl/* /var/www/pterodactyl/storage /var/www/pterodactyl/bootstrap/cache
+        chown -R "$WEB_USER":"$WEB_GROUP" /var/www/pterodactyl/* /var/www/pterodactyl/storage /var/www/pterodactyl/bootstrap/cache
         chmod -R 755 /var/www/pterodactyl/storage /var/www/pterodactyl/bootstrap/cache
-        systemctl restart pteroq.service redis-server nginx php8.3-fpm 2>/dev/null || true
+        systemctl restart pteroq.service "$REDIS_SVC" nginx "$PHP_FPM_SVC" 2>/dev/null || true
         echo -e "${G}✔ Permissions repaired and services restarted!${NC}\n"
     else
         echo -e "${R}✘ Pterodactyl path not found.${NC}\n"
@@ -552,12 +707,11 @@ optimize_vps() {
     read -rp "Create Swapfile size in GB (e.g., 2, 4, 8) [Default 4]: " SWAP_SIZE
     SWAP_SIZE=${SWAP_SIZE:-4}
 
-    # Setup Swap
     if grep -q "swapfile" /proc/swaps; then
         echo -e "${Y}● Existing swapfile detected. Skipping swap creation.${NC}"
     else
         echo -e "${P}⚙ Allocating ${SWAP_SIZE}GB Swap space...${NC}"
-        fallocate -l "${SWAP_SIZE}G" /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=$((SWAP_SIZE*1024))
+        fallocate -l "${SWAP_SIZE}G" /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=$((SWAP_SIZE*1024))
         chmod 600 /swapfile
         mkswap /swapfile
         swapon /swapfile
@@ -565,7 +719,6 @@ optimize_vps() {
         echo -e "${G}✔ ${SWAP_SIZE}GB Swap enabled!${NC}"
     fi
 
-    # Enable TCP BBR
     echo -e "${P}⚙ Enabling Google BBR Congestion Control...${NC}"
     if ! grep -q "net.core.default_qdisc=fq" /etc/sysctl.conf; then
         echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
@@ -580,27 +733,44 @@ optimize_vps() {
     read -rp "Press [Enter] to return..."
 }
 
-# [10] FIREWALL HARDENING
+# [10] FIREWALL HARDENING (UFW / FIREWALLD)
 setup_firewall() {
     require_root || return
     echo -e "\n${C}====================================================${NC}"
-    echo -e "${G}▶ UFW FIREWALL PRESETS FOR PTERODACTYL${NC}"
+    echo -e "${G}▶ FIREWALL HARDENING (PORTS 22, 80, 443, 8080, 2022, 25565-25600)${NC}"
     echo -e "${C}====================================================${NC}\n"
 
-    apt-get install -y -qq ufw >/dev/null 2>&1 || true
-    echo -e "${P}⚙ Configuring default ports (SSH:22, HTTP:80, HTTPS:443, Wings:8080, SFTP:2022)...${NC}"
-    ufw allow 22/tcp
-    ufw allow 80/tcp
-    ufw allow 443/tcp
-    ufw allow 8080/tcp
-    ufw allow 2022/tcp
-    ufw allow 25565:25600/tcp
-    ufw allow 25565:25600/udp
-
-    read -rp "Enable UFW Firewall now? [y/N]: " ENABLE_UFW
-    if [[ "$ENABLE_UFW" =~ ^[Yy]$ ]]; then
-        ufw --force enable
-        echo -e "\n${G}✔ UFW Firewall is now ACTIVE and protecting your server!${NC}\n"
+    if command -v firewalld &>/dev/null || command -v firewall-cmd &>/dev/null; then
+        echo -e "${P}⚙ Configuring firewalld rules...${NC}"
+        systemctl enable --now firewalld >/dev/null 2>&1 || true
+        firewall-cmd --permanent --add-port=22/tcp >/dev/null 2>&1 || true
+        firewall-cmd --permanent --add-port=80/tcp >/dev/null 2>&1 || true
+        firewall-cmd --permanent --add-port=443/tcp >/dev/null 2>&1 || true
+        firewall-cmd --permanent --add-port=8080/tcp >/dev/null 2>&1 || true
+        firewall-cmd --permanent --add-port=2022/tcp >/dev/null 2>&1 || true
+        firewall-cmd --permanent --add-port=25565-25600/tcp >/dev/null 2>&1 || true
+        firewall-cmd --permanent --add-port=25565-25600/udp >/dev/null 2>&1 || true
+        firewall-cmd --reload >/dev/null 2>&1 || true
+        echo -e "\n${G}✔ Firewalld rules successfully updated!${NC}\n"
+    else
+        echo -e "${P}⚙ Configuring UFW firewall...${NC}"
+        if [[ "$PKG_MGR" == "apt" ]]; then
+            apt-get install -y -qq ufw >/dev/null 2>&1 || true
+        fi
+        if command -v ufw &>/dev/null; then
+            ufw allow 22/tcp
+            ufw allow 80/tcp
+            ufw allow 443/tcp
+            ufw allow 8080/tcp
+            ufw allow 2022/tcp
+            ufw allow 25565:25600/tcp
+            ufw allow 25565:25600/udp
+            read -rp "Enable UFW Firewall now? [y/N]: " ENABLE_UFW
+            if [[ "$ENABLE_UFW" =~ ^[Yy]$ ]]; then
+                ufw --force enable
+                echo -e "\n${G}✔ UFW Firewall is ACTIVE!${NC}\n"
+            fi
+        fi
     fi
     read -rp "Press [Enter] to return..."
 }
@@ -612,25 +782,28 @@ install_dev_stack() {
     echo -e "${G}▶ INSTALLING DEVELOPER & CLOUD RUNTIME STACK${NC}"
     echo -e "${C}====================================================${NC}\n"
 
-    apt-get update -y -qq
-    apt-get install -y -qq git curl wget build-essential python3 python3-pip
+    if [[ "$PKG_MGR" == "apt" ]]; then
+        apt-get update -y -qq
+        apt-get install -y -qq git curl wget build-essential python3 python3-pip
+        curl -fsSL https://deb.nodesource.com/setup_20.x | bash - >/dev/null 2>&1
+        apt-get install -y -qq nodejs
+    elif [[ "$PKG_MGR" == "dnf" ]]; then
+        dnf groupinstall -y "Development Tools" >/dev/null 2>&1 || true
+        dnf install -y git curl wget python3 python3-pip
+        curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - >/dev/null 2>&1
+        dnf install -y nodejs
+    fi
 
-    # Install Node.js 20 LTS
-    echo -e "${P}⚙ Installing Node.js LTS & Yarn/PM2...${NC}"
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - >/dev/null 2>&1
-    apt-get install -y -qq nodejs
-    npm install -g pm2 yarn --silent
+    npm install -g pm2 yarn --silent >/dev/null 2>&1 || true
 
-    # Install Docker
-    echo -e "${P}⚙ Installing Docker CE...${NC}"
     if ! command -v docker &>/dev/null; then
+        echo -e "${P}⚙ Installing Docker CE...${NC}"
         curl -fsSL https://get.docker.com | bash >/dev/null 2>&1
         systemctl enable --now docker
     fi
 
     echo -e "\n${G}✔ Developer Stack Installed Successfully!${NC}"
-    echo -e " ${W}Node.js :${NC} $(node -v)"
-    echo -e " ${W}NPM     :${NC} $(npm -v)"
+    echo -e " ${W}Node.js :${NC} $(node -v 2>/dev/null || echo 'Installed')"
     echo -e " ${W}Docker  :${NC} $(docker --version 2>/dev/null || echo 'Installed')\n"
     read -rp "Press [Enter] to return..."
 }

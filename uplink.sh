@@ -77,8 +77,10 @@ if [ ${#MISSING_PKGS[@]} -gt 0 ]; then
     echo -e "${Y}INSTALLING MISSING (${MISSING_PKGS[*]})${NC}"
     if command -v apt-get &>/dev/null; then
         apt-get update -qq && apt-get install -y -qq "${MISSING_PKGS[@]}" >/dev/null 2>&1 || true
+    elif command -v dnf &>/dev/null; then
+        dnf install -y -q "${MISSING_PKGS[@]}" >/dev/null 2>&1 || true
     elif command -v yum &>/dev/null; then
-        yum install -y "${MISSING_PKGS[@]}" >/dev/null 2>&1 || true
+        yum install -y -q "${MISSING_PKGS[@]}" >/dev/null 2>&1 || true
     fi
 else
     sleep 0.4

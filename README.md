@@ -1,7 +1,7 @@
 # ⚡ Cloud Infrastructure & Pterodactyl Suite v2.5
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Ubuntu%20%7C%20Debian-orange.svg)](#supported-operating-systems)
+[![Platform](https://img.shields.io/badge/Platform-Ubuntu%20%7C%20Debian%20%7C%20AlmaLinux-orange.svg)](#supported-operating-systems)
 [![Bash](https://img.shields.io/badge/Language-Bash%204.0%2B-green.svg)](#)
 
 > A modern, hyper-visual terminal management suite and automated installer for **Pterodactyl Panel**, **Wings**, **phpMyAdmin**, **Blueprint Themes**, and **VPS Optimization**.
@@ -66,8 +66,17 @@ bash <(curl -sL https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-C
 
 ## 💻 Supported Operating Systems
 
-- Ubuntu 24.04 LTS (Noble Numbat)
-- Ubuntu 22.04 LTS (Jammy Jellyfish)
-- Ubuntu 20.04 LTS (Focal Fossa)
-- Debian 12 (Bookworm)
-- Debian 11 (Bullseye)
+- **Ubuntu**:
+  - Ubuntu 24.04 LTS (Noble Numbat)
+  - Ubuntu 22.04 LTS (Jammy Jellyfish)
+  - Ubuntu 20.04 LTS (Focal Fossa)
+- **Debian**:
+  - Debian 13 (Trixie)
+  - Debian 12 (Bookworm)
+  - Debian 11 (Bullseye)
+- **AlmaLinux**:
+  - AlmaLinux 9 (Emerald Jaguar)
+  - AlmaLinux 8 (Cerulean Leopard)
+- **Enterprise Linux Family**:
+  - Rocky Linux 8 & 9
+  - RHEL 8 & 9
