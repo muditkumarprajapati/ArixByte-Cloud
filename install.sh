@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # CLOUD INSTALLER & MANAGEMENT SUITE | STANDALONE EDITION (ALL-IN-ONE)
-# Theme: Obsidian Sapphire / Cyberpunk Titanium (Ultra-Premium Edition)
+# Theme: Dynamic Theme Engine (Colorful / Clean / Custom Color)
 # Supported OS:
 #   - Ubuntu 20.04, 22.04, 24.04
 #   - Debian 11, 12, 13
@@ -9,28 +9,165 @@
 # ==============================================================================
 set -euo pipefail
 
-# --- PREMIUM PALETTE (Obsidian Sapphire / Cyan / Champagne Gold) ---
-C1='\033[38;5;51m'          # Electric Cyan
-C2='\033[38;5;45m'          # Sky Azure
-C3='\033[38;5;39m'          # Deep Ocean Blue
-P1='\033[38;5;141m'         # Lavender Violet
-P2='\033[38;5;135m'         # Deep Orchid
-P3='\033[38;5;99m'          # Royal Indigo
-GOLD='\033[38;5;221m'       # Champagne Gold
-MINT='\033[38;5;48m'        # Mint Emerald
-CORAL='\033[38;5;204m'      # Coral Accent
-RED='\033[38;5;196m'        # Crimson Alert
-WHITE='\033[1;38;5;255m'    # Crisp Pure White
-GRAY='\033[38;5;244m'       # Steel Gray
-DARK_GRAY='\033[38;5;239m'  # Graphite Border
-BORDER='\033[38;5;238m'     # Dark Border
-BG_PILL='\033[48;5;236m'    # Pill Background
+APP_VERSION="v2.9.0"
+SYSTEM_CODENAME="ARIX-HYPERION"
+NC='\033[0m'
 BOLD='\033[1m'
 DIM='\033[2m'
-NC='\033[0m'                # Reset
 
-APP_VERSION="v2.8.0"
-SYSTEM_CODENAME="ARIX-HYPERION"
+# --- DEFAULT COLOR DEFINITIONS ---
+apply_colorful_theme() {
+    THEME_NAME="COLORFUL (CYBERPUNK)"
+    C1='\033[38;5;51m'          # Electric Cyan
+    C2='\033[38;5;45m'          # Sky Azure
+    C3='\033[38;5;39m'          # Deep Ocean Blue
+    P1='\033[38;5;141m'         # Lavender Violet
+    P2='\033[38;5;135m'         # Deep Orchid
+    P3='\033[38;5;99m'          # Royal Indigo
+    GOLD='\033[38;5;221m'       # Champagne Gold
+    MINT='\033[38;5;48m'        # Mint Emerald
+    CORAL='\033[38;5;204m'      # Coral Accent
+    RED='\033[38;5;196m'        # Crimson Alert
+    WHITE='\033[1;38;5;255m'    # Crisp Pure White
+    GRAY='\033[38;5;244m'       # Steel Gray
+    DARK_GRAY='\033[38;5;239m'  # Graphite Border
+    BORDER='\033[38;5;238m'     # Dark Border
+    BG_PILL='\033[48;5;236m'    # Pill Background
+}
+
+apply_clean_theme() {
+    THEME_NAME="CLEAN (MONOCHROME)"
+    C1='\033[1;38;5;255m'       # Pure White
+    C2='\033[38;5;252m'         # Soft Platinum
+    C3='\033[38;5;248m'         # Light Slate
+    P1='\033[38;5;250m'         # Silver
+    P2='\033[38;5;245m'         # Slate Gray
+    P3='\033[38;5;240m'         # Dark Charcoal
+    GOLD='\033[1;38;5;255m'     # Crisp White
+    MINT='\033[38;5;150m'       # Muted Sage Green
+    CORAL='\033[38;5;246m'      # Neutral Slate
+    RED='\033[38;5;203m'        # Soft Red
+    WHITE='\033[1;38;5;255m'    # Pure White
+    GRAY='\033[38;5;245m'       # Slate Gray
+    DARK_GRAY='\033[38;5;240m'  # Charcoal Border
+    BORDER='\033[38;5;238m'     # Dark Border
+    BG_PILL='\033[48;5;236m'    # Dark Gray Pill
+}
+
+apply_custom_color() {
+    local choice="$1"
+    case "$choice" in
+        1)  # Electric Cyan
+            THEME_NAME="CUSTOM (ELECTRIC CYAN)"
+            C1='\033[38;5;51m'; C2='\033[38;5;45m'; C3='\033[38;5;39m'
+            P1='\033[38;5;38m'; P2='\033[38;5;32m'; P3='\033[38;5;26m'
+            ;;
+        2)  # Emerald Mint
+            THEME_NAME="CUSTOM (EMERALD MINT)"
+            C1='\033[38;5;48m'; C2='\033[38;5;42m'; C3='\033[38;5;36m'
+            P1='\033[38;5;35m'; P2='\033[38;5;29m'; P3='\033[38;5;23m'
+            ;;
+        3)  # Royal Violet
+            THEME_NAME="CUSTOM (ROYAL VIOLET)"
+            C1='\033[38;5;147m'; C2='\033[38;5;141m'; C3='\033[38;5;135m'
+            P1='\033[38;5;129m'; P2='\033[38;5;99m';  P3='\033[38;5;93m'
+            ;;
+        4)  # Neon Pink / Rose
+            THEME_NAME="CUSTOM (NEON PINK)"
+            C1='\033[38;5;213m'; C2='\033[38;5;207m'; C3='\033[38;5;201m'
+            P1='\033[38;5;198m'; P2='\033[38;5;162m'; P3='\033[38;5;126m'
+            ;;
+        5)  # Champagne Gold
+            THEME_NAME="CUSTOM (CHAMPAGNE GOLD)"
+            C1='\033[38;5;222m'; C2='\033[38;5;221m'; C3='\033[38;5;220m'
+            P1='\033[38;5;214m'; P2='\033[38;5;208m'; P3='\033[38;5;172m'
+            ;;
+        6)  # Crimson Red
+            THEME_NAME="CUSTOM (CRIMSON RED)"
+            C1='\033[38;5;203m'; C2='\033[38;5;197m'; C3='\033[38;5;196m'
+            P1='\033[38;5;160m'; P2='\033[38;5;124m'; P3='\033[38;5;88m'
+            ;;
+        7)  # Sky Azure
+            THEME_NAME="CUSTOM (SKY AZURE)"
+            C1='\033[38;5;45m'; C2='\033[38;5;39m'; C3='\033[38;5;33m'
+            P1='\033[38;5;27m'; P2='\033[38;5;21m'; P3='\033[38;5;18m'
+            ;;
+        8)  # Titanium Silver
+            THEME_NAME="CUSTOM (TITANIUM SILVER)"
+            C1='\033[38;5;255m'; C2='\033[38;5;252m'; C3='\033[38;5;250m'
+            P1='\033[38;5;246m'; P2='\033[38;5;244m'; P3='\033[38;5;240m'
+            ;;
+        *)
+            apply_colorful_theme
+            return
+            ;;
+    esac
+    GOLD='\033[38;5;221m'
+    MINT='\033[38;5;48m'
+    CORAL='\033[38;5;204m'
+    RED='\033[38;5;196m'
+    WHITE='\033[1;38;5;255m'
+    GRAY='\033[38;5;244m'
+    DARK_GRAY='\033[38;5;239m'
+    BORDER='\033[38;5;238m'
+    BG_PILL='\033[48;5;236m'
+}
+
+# --- INTERACTIVE THEME SELECTION PROMPT ---
+select_theme() {
+    clear
+    echo -e ""
+    echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
+    echo -e " \033[38;5;239m│\033[0m                 \033[1;38;5;255m◈ PLEASE SELECT YOUR PREFERRED UI THEME ◈\033[0m                   \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m╰─────────────────────────────────────────────────────────────────────────────╯\033[0m"
+    echo -e ""
+    echo -e "   \033[1;38;5;51m[1]\033[0m \033[1;38;5;255mCOLORFUL\033[0m     \033[38;5;244m— Vibrant Cyberpunk Multi-Tone Gradient (Default)\033[0m"
+    echo -e "   \033[1;38;5;250m[2]\033[0m \033[1;38;5;255mCLEAN\033[0m        \033[38;5;244m— Minimalist Monochromatic Slate & Pure White\033[0m"
+    echo -e "   \033[1;38;5;221m[3]\033[0m \033[1;38;5;255mCUSTOM COLOR\033[0m \033[38;5;244m— Load palette and select custom accent color\033[0m"
+    echo -e ""
+    echo -e " \033[38;5;238m─────────────────────────────────────────────────────────────────────────────\033[0m"
+    echo -ne " \033[1;38;5;51m➜\033[0m \033[1;38;5;255mEnter Choice\033[0m \033[38;5;244m(1-3) [Default 1]:\033[0m "
+    
+    local t_choice
+    read -r t_choice 2>/dev/null || t_choice="1"
+    t_choice="${t_choice:-1}"
+
+    case "$t_choice" in
+        2)
+            apply_clean_theme
+            ;;
+        3)
+            clear
+            echo -e ""
+            echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
+            echo -e " \033[38;5;239m│\033[0m                     \033[1;38;5;255m◈ SELECT YOUR CUSTOM ACCENT COLOR ◈\033[0m                     \033[38;5;239m│\033[0m"
+            echo -e " \033[38;5;239m╰─────────────────────────────────────────────────────────────────────────────╯\033[0m"
+            echo -e ""
+            echo -e "   \033[38;5;51m[1] ■ Electric Cyan\033[0m       \033[38;5;244m(Cyberpunk Ice)\033[0m"
+            echo -e "   \033[38;5;48m[2] ■ Emerald Mint\033[0m        \033[38;5;244m(Terminal Matrix)\033[0m"
+            echo -e "   \033[38;5;141m[3] ■ Royal Violet\033[0m        \033[38;5;244m(Hyperion Purple)\033[0m"
+            echo -e "   \033[38;5;201m[4] ■ Neon Pink\033[0m           \033[38;5;244m(Vaporwave Rose)\033[0m"
+            echo -e "   \033[38;5;220m[5] ■ Champagne Gold\033[0m      \033[38;5;244m(Luxury Amber)\033[0m"
+            echo -e "   \033[38;5;196m[6] ■ Crimson Red\033[0m         \033[38;5;244m(Bloodline Red)\033[0m"
+            echo -e "   \033[38;5;45m[7] ■ Sky Azure\033[0m           \033[38;5;244m(Deep Sea Blue)\033[0m"
+            echo -e "   \033[38;5;250m[8] ■ Titanium Silver\033[0m     \033[38;5;244m(Minimal Steel)\033[0m"
+            echo -e ""
+            echo -e " \033[38;5;238m─────────────────────────────────────────────────────────────────────────────\033[0m"
+            echo -ne " \033[1;38;5;255m➜ Select Color (1-8) [Default 1]:\033[0m "
+            
+            local c_choice
+            read -r c_choice 2>/dev/null || c_choice="1"
+            c_choice="${c_choice:-1}"
+            apply_custom_color "$c_choice"
+            ;;
+        *)
+            apply_colorful_theme
+            ;;
+    esac
+}
+
+# Run theme selection before loading interface
+select_theme
 
 # --- OS & ENVIRONMENT DETECTION ---
 detect_os() {
@@ -104,7 +241,7 @@ ARCH="$(uname -m 2>/dev/null || echo "x86_64")"
 render_intro() {
     clear
     echo -e ""
-    # Elegant Multi-Tone Gradient Banner
+    # Dynamic Gradient Banner according to active theme
     echo -e "${C1}   █████╗ ██████╗ ██╗██╗   ██╗██████╗ ██╗   ██╗████████╗███████╗${NC}"
     echo -e "${C2}  ██╔══██╗██╔══██╗██║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝${NC}"
     echo -e "${C3}  ███████║██████╔╝██║ ╚████╔╝ ██████╔╝ ╚████╔╝    ██║   █████╗  ${NC}"
@@ -118,7 +255,7 @@ render_intro() {
     echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
     printf " ${DARK_GRAY}│${NC}  ${C1}◆${NC} ${BOLD}${WHITE}%-20s${NC} ${DARK_GRAY}│${NC} ${P1}⚡ ${SYSTEM_CODENAME}${NC}  ${DARK_GRAY}│${NC} ${MINT}● ONLINE${NC} ${DARK_GRAY}(TLS 1.3)${NC}       ${DARK_GRAY}│${NC}\n" "ARIXBYTE UPLINK"
     printf " ${DARK_GRAY}│${NC}  ${GRAY}Endpoint :${NC} ${WHITE}%-15s${NC}  ${DARK_GRAY}│${NC} ${GRAY}Gateway :${NC} ${WHITE}%-15s${NC}  ${DARK_GRAY}│${NC} ${GRAY}Arch :${NC} ${C2}%-7s${NC}     ${DARK_GRAY}│${NC}\n" "$PUB_IP" "$LOCAL_IP" "$ARCH"
-    printf " ${DARK_GRAY}│${NC}  ${GRAY}System   :${NC} ${C2}%-32s${NC}     ${DARK_GRAY}│${NC} ${GRAY}Engine :${NC} ${GOLD}%-9s${NC}   ${DARK_GRAY}│${NC}\n" "$OS_PRETTY" "$PKG_MGR"
+    printf " ${DARK_GRAY}│${NC}  ${GRAY}System   :${NC} ${C2}%-32s${NC}     ${DARK_GRAY}│${NC} ${GRAY}Theme  :${NC} ${GOLD}%-9s${NC}   ${DARK_GRAY}│${NC}\n" "$OS_PRETTY" "${THEME_NAME:0:9}"
     echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}"
 
     echo -e "\n ${C1}◈${NC} ${BOLD}${WHITE}ENVIRONMENT INTEGRITY VERIFICATION${NC}"
@@ -196,8 +333,6 @@ get_metrics() {
 
     # Live Uptime
     UPT=$(uptime -p 2>/dev/null | sed 's/up //' 2>/dev/null || (uptime 2>/dev/null | awk '{print $3,$4}' | tr -d ',') 2>/dev/null || echo "active")
-    
-    # Disk Usage
     DISK=$(df -h / 2>/dev/null | awk 'NR==2 {print $5}' 2>/dev/null || echo "??")
 }
 
@@ -208,7 +343,6 @@ get_metrics
 
 # --- MAIN UI RENDERER (Obsidian Luxury Dashboard) ---
 render_ui() {
-    # Position cursor at top-left to redraw smoothly without black flickering
     printf '\033[H'
     get_metrics
 

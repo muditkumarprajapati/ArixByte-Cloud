@@ -1,34 +1,171 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # CLOUD INSTALLER & MANAGEMENT SUITE | CORE ENGINE
-# Theme: Obsidian Sapphire / Cyberpunk Titanium (Ultra-Premium Edition)
+# Theme: Dynamic Theme Engine (Colorful / Clean / Custom Color)
 # Supported OS: 
 #   - Ubuntu 20.04, 22.04, 24.04
 #   - Debian 11, 12, 13
 #   - AlmaLinux 8, 9 (& Rocky Linux / RHEL)
 # ==============================================================================
 
-# --- PREMIUM PALETTE (Obsidian Sapphire / Cyan / Champagne Gold) ---
-C1='\033[38;5;51m'          # Electric Cyan
-C2='\033[38;5;45m'          # Sky Azure
-C3='\033[38;5;39m'          # Deep Ocean Blue
-P1='\033[38;5;141m'         # Lavender Violet
-P2='\033[38;5;135m'         # Deep Orchid
-P3='\033[38;5;99m'          # Royal Indigo
-GOLD='\033[38;5;221m'       # Champagne Gold
-MINT='\033[38;5;48m'        # Mint Emerald
-CORAL='\033[38;5;204m'      # Coral Accent
-RED='\033[38;5;196m'        # Crimson Alert
-WHITE='\033[1;38;5;255m'    # Crisp Pure White
-GRAY='\033[38;5;244m'       # Steel Gray
-DARK_GRAY='\033[38;5;239m'  # Graphite Border
-BORDER='\033[38;5;238m'     # Dark Border
-BG_PILL='\033[48;5;236m'    # Pill Background
+APP_VERSION="v2.9.0"
+SYSTEM_CODENAME="ARIX-HYPERION"
+NC='\033[0m'
 BOLD='\033[1m'
 DIM='\033[2m'
-NC='\033[0m'                # Reset
 
-APP_VERSION="v2.8.0"
+# --- DEFAULT COLOR DEFINITIONS ---
+apply_colorful_theme() {
+    THEME_NAME="COLORFUL (CYBERPUNK)"
+    C1='\033[38;5;51m'          # Electric Cyan
+    C2='\033[38;5;45m'          # Sky Azure
+    C3='\033[38;5;39m'          # Deep Ocean Blue
+    P1='\033[38;5;141m'         # Lavender Violet
+    P2='\033[38;5;135m'         # Deep Orchid
+    P3='\033[38;5;99m'          # Royal Indigo
+    GOLD='\033[38;5;221m'       # Champagne Gold
+    MINT='\033[38;5;48m'        # Mint Emerald
+    CORAL='\033[38;5;204m'      # Coral Accent
+    RED='\033[38;5;196m'        # Crimson Alert
+    WHITE='\033[1;38;5;255m'    # Crisp Pure White
+    GRAY='\033[38;5;244m'       # Steel Gray
+    DARK_GRAY='\033[38;5;239m'  # Graphite Border
+    BORDER='\033[38;5;238m'     # Dark Border
+    BG_PILL='\033[48;5;236m'    # Pill Background
+}
+
+apply_clean_theme() {
+    THEME_NAME="CLEAN (MONOCHROME)"
+    C1='\033[1;38;5;255m'       # Pure White
+    C2='\033[38;5;252m'         # Soft Platinum
+    C3='\033[38;5;248m'         # Light Slate
+    P1='\033[38;5;250m'         # Silver
+    P2='\033[38;5;245m'         # Slate Gray
+    P3='\033[38;5;240m'         # Dark Charcoal
+    GOLD='\033[1;38;5;255m'     # Crisp White
+    MINT='\033[38;5;150m'       # Muted Sage Green
+    CORAL='\033[38;5;246m'      # Neutral Slate
+    RED='\033[38;5;203m'        # Soft Red
+    WHITE='\033[1;38;5;255m'    # Pure White
+    GRAY='\033[38;5;245m'       # Slate Gray
+    DARK_GRAY='\033[38;5;240m'  # Charcoal Border
+    BORDER='\033[38;5;238m'     # Dark Border
+    BG_PILL='\033[48;5;236m'    # Dark Gray Pill
+}
+
+apply_custom_color() {
+    local choice="$1"
+    case "$choice" in
+        1)  # Electric Cyan
+            THEME_NAME="CUSTOM (ELECTRIC CYAN)"
+            C1='\033[38;5;51m'; C2='\033[38;5;45m'; C3='\033[38;5;39m'
+            P1='\033[38;5;38m'; P2='\033[38;5;32m'; P3='\033[38;5;26m'
+            ;;
+        2)  # Emerald Mint
+            THEME_NAME="CUSTOM (EMERALD MINT)"
+            C1='\033[38;5;48m'; C2='\033[38;5;42m'; C3='\033[38;5;36m'
+            P1='\033[38;5;35m'; P2='\033[38;5;29m'; P3='\033[38;5;23m'
+            ;;
+        3)  # Royal Violet
+            THEME_NAME="CUSTOM (ROYAL VIOLET)"
+            C1='\033[38;5;147m'; C2='\033[38;5;141m'; C3='\033[38;5;135m'
+            P1='\033[38;5;129m'; P2='\033[38;5;99m';  P3='\033[38;5;93m'
+            ;;
+        4)  # Neon Pink / Rose
+            THEME_NAME="CUSTOM (NEON PINK)"
+            C1='\033[38;5;213m'; C2='\033[38;5;207m'; C3='\033[38;5;201m'
+            P1='\033[38;5;198m'; P2='\033[38;5;162m'; P3='\033[38;5;126m'
+            ;;
+        5)  # Champagne Gold
+            THEME_NAME="CUSTOM (CHAMPAGNE GOLD)"
+            C1='\033[38;5;222m'; C2='\033[38;5;221m'; C3='\033[38;5;220m'
+            P1='\033[38;5;214m'; P2='\033[38;5;208m'; P3='\033[38;5;172m'
+            ;;
+        6)  # Crimson Red
+            THEME_NAME="CUSTOM (CRIMSON RED)"
+            C1='\033[38;5;203m'; C2='\033[38;5;197m'; C3='\033[38;5;196m'
+            P1='\033[38;5;160m'; P2='\033[38;5;124m'; P3='\033[38;5;88m'
+            ;;
+        7)  # Sky Azure
+            THEME_NAME="CUSTOM (SKY AZURE)"
+            C1='\033[38;5;45m'; C2='\033[38;5;39m'; C3='\033[38;5;33m'
+            P1='\033[38;5;27m'; P2='\033[38;5;21m'; P3='\033[38;5;18m'
+            ;;
+        8)  # Titanium Silver
+            THEME_NAME="CUSTOM (TITANIUM SILVER)"
+            C1='\033[38;5;255m'; C2='\033[38;5;252m'; C3='\033[38;5;250m'
+            P1='\033[38;5;246m'; P2='\033[38;5;244m'; P3='\033[38;5;240m'
+            ;;
+        *)
+            apply_colorful_theme
+            return
+            ;;
+    esac
+    GOLD='\033[38;5;221m'
+    MINT='\033[38;5;48m'
+    CORAL='\033[38;5;204m'
+    RED='\033[38;5;196m'
+    WHITE='\033[1;38;5;255m'
+    GRAY='\033[38;5;244m'
+    DARK_GRAY='\033[38;5;239m'
+    BORDER='\033[38;5;238m'
+    BG_PILL='\033[48;5;236m'
+}
+
+# --- INTERACTIVE THEME SELECTION PROMPT ---
+select_theme() {
+    clear
+    echo -e ""
+    echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
+    echo -e " \033[38;5;239m│\033[0m                 \033[1;38;5;255m◈ PLEASE SELECT YOUR PREFERRED UI THEME ◈\033[0m                   \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m╰─────────────────────────────────────────────────────────────────────────────╯\033[0m"
+    echo -e ""
+    echo -e "   \033[1;38;5;51m[1]\033[0m \033[1;38;5;255mCOLORFUL\033[0m     \033[38;5;244m— Vibrant Cyberpunk Multi-Tone Gradient (Default)\033[0m"
+    echo -e "   \033[1;38;5;250m[2]\033[0m \033[1;38;5;255mCLEAN\033[0m        \033[38;5;244m— Minimalist Monochromatic Slate & Pure White\033[0m"
+    echo -e "   \033[1;38;5;221m[3]\033[0m \033[1;38;5;255mCUSTOM COLOR\033[0m \033[38;5;244m— Load palette and select custom accent color\033[0m"
+    echo -e ""
+    echo -e " \033[38;5;238m─────────────────────────────────────────────────────────────────────────────\033[0m"
+    echo -ne " \033[1;38;5;51m➜\033[0m \033[1;38;5;255mEnter Choice\033[0m \033[38;5;244m(1-3) [Default 1]:\033[0m "
+    
+    local t_choice
+    read -r t_choice 2>/dev/null || t_choice="1"
+    t_choice="${t_choice:-1}"
+
+    case "$t_choice" in
+        2)
+            apply_clean_theme
+            ;;
+        3)
+            clear
+            echo -e ""
+            echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
+            echo -e " \033[38;5;239m│\033[0m                     \033[1;38;5;255m◈ SELECT YOUR CUSTOM ACCENT COLOR ◈\033[0m                     \033[38;5;239m│\033[0m"
+            echo -e " \033[38;5;239m╰─────────────────────────────────────────────────────────────────────────────╯\033[0m"
+            echo -e ""
+            echo -e "   \033[38;5;51m[1] ■ Electric Cyan\033[0m       \033[38;5;244m(Cyberpunk Ice)\033[0m"
+            echo -e "   \033[38;5;48m[2] ■ Emerald Mint\033[0m        \033[38;5;244m(Terminal Matrix)\033[0m"
+            echo -e "   \033[38;5;141m[3] ■ Royal Violet\033[0m        \033[38;5;244m(Hyperion Purple)\033[0m"
+            echo -e "   \033[38;5;201m[4] ■ Neon Pink\033[0m           \033[38;5;244m(Vaporwave Rose)\033[0m"
+            echo -e "   \033[38;5;220m[5] ■ Champagne Gold\033[0m      \033[38;5;244m(Luxury Amber)\033[0m"
+            echo -e "   \033[38;5;196m[6] ■ Crimson Red\033[0m         \033[38;5;244m(Bloodline Red)\033[0m"
+            echo -e "   \033[38;5;45m[7] ■ Sky Azure\033[0m           \033[38;5;244m(Deep Sea Blue)\033[0m"
+            echo -e "   \033[38;5;250m[8] ■ Titanium Silver\033[0m     \033[38;5;244m(Minimal Steel)\033[0m"
+            echo -e ""
+            echo -e " \033[38;5;238m─────────────────────────────────────────────────────────────────────────────\033[0m"
+            echo -ne " \033[1;38;5;255m➜ Select Color (1-8) [Default 1]:\033[0m "
+            
+            local c_choice
+            read -r c_choice 2>/dev/null || c_choice="1"
+            c_choice="${c_choice:-1}"
+            apply_custom_color "$c_choice"
+            ;;
+        *)
+            apply_colorful_theme
+            ;;
+    esac
+}
+
+select_theme
 
 # --- OS & ENVIRONMENT DETECTION ---
 detect_os() {
@@ -167,7 +304,6 @@ get_metrics
 
 # --- MAIN UI RENDERER (Obsidian Luxury Dashboard) ---
 render_ui() {
-    # Position cursor at top-left to redraw smoothly without black flickering
     printf '\033[H'
     get_metrics
 
@@ -206,67 +342,6 @@ render_ui() {
 
     echo -e "\n ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
     echo -ne " ${C1}➜${NC} ${WHITE}Select Option${NC} ${GRAY}(0-11) [Live ${MINT}●${GRAY}]:${NC} \033[K"
-}
-
-# ==============================================================================
-# OS REPOSITORY & PACKAGE PROVISIONER
-# ==============================================================================
-install_dependencies() {
-    echo -e "${P1}⚙ Provisioning enterprise repositories for ${OS_PRETTY}...${NC}"
-
-    if [[ "$PKG_MGR" == "apt" ]]; then
-        apt-get update -y -qq
-        apt-get install -y -qq software-properties-common curl wget apt-transport-https ca-certificates gnupg lsb-release
-
-        if [[ "$OS_ID" == "ubuntu" ]]; then
-            LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php >/dev/null 2>&1 || true
-        elif [[ "$OS_ID" == "debian" ]]; then
-            mkdir -p /etc/apt/trusted.gpg.d/
-            curl -fsSL https://packages.sury.org/php/apt.gpg -o /etc/apt/trusted.gpg.d/php.gpg 2>/dev/null || true
-            DEBIAN_CODENAME="$(lsb_release -sc 2>/dev/null || echo "bookworm")"
-            if [[ "$DEBIAN_CODENAME" == "trixie" ]]; then
-                echo "deb https://packages.sury.org/php/ trixie main" > /etc/apt/sources.list.d/php.list || \
-                echo "deb https://packages.sury.org/php/ bookworm main" > /etc/apt/sources.list.d/php.list
-            else
-                echo "deb https://packages.sury.org/php/ ${DEBIAN_CODENAME} main" > /etc/apt/sources.list.d/php.list
-            fi
-        fi
-
-        apt-get update -y -qq
-        apt-get install -y -qq \
-            php8.3 php8.3-{cli,common,gd,mysql,mbstring,bcmath,xml,curl,zip,intl,soap,redis} \
-            nginx mariadb-server mariadb-client redis-server git tar unzip certbot python3-certbot-nginx
-
-    elif [[ "$PKG_MGR" == "dnf" ]]; then
-        RHEL_MAJOR="${OS_VER_ID%%.*}"
-        [[ -z "$RHEL_MAJOR" || "$RHEL_MAJOR" == "0" ]] && RHEL_MAJOR="9"
-
-        echo -e "${P1}⚙ Installing EPEL & Remi PHP 8.3 repos for AlmaLinux ${RHEL_MAJOR}...${NC}"
-        dnf install -y epel-release >/dev/null 2>&1 || true
-        dnf install -y "https://rpms.remirepo.net/enterprise/remi-release-${RHEL_MAJOR}.rpm" >/dev/null 2>&1 || true
-
-        dnf module reset php -y >/dev/null 2>&1 || true
-        dnf module enable php:remi-8.3 -y >/dev/null 2>&1 || true
-
-        dnf install -y \
-            php php-cli php-common php-gd php-mysqlnd php-mbstring php-bcmath php-xml php-curl php-zip php-intl php-soap php-redis \
-            nginx mariadb-server mariadb redis git tar unzip certbot python3-certbot-nginx policycoreutils-python-utils
-
-        if [[ -f /etc/php-fpm.d/www.conf ]]; then
-            sed -i 's/user = apache/user = nginx/' /etc/php-fpm.d/www.conf
-            sed -i 's/group = apache/group = nginx/' /etc/php-fpm.d/www.conf
-            sed -i 's/listen.owner = nobody/listen.owner = nginx/' /etc/php-fpm.d/www.conf
-            sed -i 's/listen.group = nobody/listen.group = nginx/' /etc/php-fpm.d/www.conf
-            mkdir -p /run/php-fpm
-            chown -R nginx:nginx /run/php-fpm
-        fi
-
-        if command -v getenforce &>/dev/null && [[ "$(getenforce)" != "Disabled" ]]; then
-            setsebool -P httpd_can_network_connect 1 2>/dev/null || true
-            setsebool -P httpd_can_network_connect_db 1 2>/dev/null || true
-            setsebool -P httpd_unified 1 2>/dev/null || true
-        fi
-    fi
 }
 
 # ==============================================================================
@@ -828,15 +903,12 @@ while true; do
                 exit 0
                 ;;
             $'\n'|"")
-                # User pressed Enter, redraw
                 continue
                 ;;
             *)
-                # Unrecognized key
                 ;;
         esac
     else
-        # Timed out 2.5s without input -> loops and updates live CPU / RAM / Uptime in real time!
         continue
     fi
 done
