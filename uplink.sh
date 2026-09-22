@@ -27,7 +27,7 @@ NC='\033[0m'                # Reset
 
 # --- CONFIGURATION ---
 PAYLOAD_URL="${PAYLOAD_URL:-https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/dashboard.sh}"
-VERSION="v2.7.0"
+VERSION="v1.0.0"
 SYSTEM_CODENAME="ARIX-HYPERION"
 
 # --- SYSTEM DISCOVERY ---
@@ -49,6 +49,7 @@ render_header() {
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
     echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
     echo -e "       ${DIM}${GRAY}Made with Love ${RED}♥${NC}${DIM}${GRAY} & Brain ${PINK}🧠${NC}${DIM}${GRAY} by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
+    echo -e "                           ${DIM}${GRAY}ArixByte v1.0.0${NC}"
     echo -e ""
 
     # Mathematically Formatted Telemetry Card

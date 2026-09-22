@@ -9,7 +9,7 @@
 # ==============================================================================
 set -euo pipefail
 
-APP_VERSION="v2.9.0"
+APP_VERSION="v1.0.0"
 SYSTEM_CODENAME="ARIX-HYPERION"
 NC='\033[0m'
 BOLD='\033[1m'
@@ -190,7 +190,7 @@ select_theme() {
     clear
     echo -e ""
     # Top Status Bar (Discovery Pills)
-    echo -e " \033[38;5;39m\033[0m\033[48;5;236m\033[1;38;5;255m  $CURRENT_HOST \033[0m\033[38;5;39m\033[0m  \033[38;5;135m\033[0m\033[48;5;236m\033[1;38;5;255m 🖥  $OS_PRETTY \033[0m\033[38;5;135m\033[0m  \033[38;5;48m\033[0m\033[48;5;236m\033[1;38;5;255m 🌐 $PUB_IP \033[0m\033[38;5;48m\033[0m  \033[38;5;51m\033[0m\033[48;5;236m\033[1;38;5;255m ⚡ ARIXBYTE $APP_VERSION \033[0m\033[38;5;51m\033[0m"
+    echo -e " \033[38;5;39m\033[0m\033[48;5;236m\033[1;38;5;255m  $CURRENT_HOST \033[0m\033[38;5;39m\033[0m  \033[38;5;135m\033[0m\033[48;5;236m\033[1;38;5;255m 🖥  $OS_PRETTY \033[0m\033[38;5;135m\033[0m  \033[38;5;48m\033[0m\033[48;5;236m\033[1;38;5;255m 🌐 $PUB_IP \033[0m\033[38;5;48m\033[0m"
     echo -e ""
     echo -e "\033[38;5;51m   █████╗ ██████╗ ██╗██╗   ██╗██████╗ ██╗   ██╗████████╗███████╗\033[0m"
     echo -e "\033[38;5;45m  ██╔══██╗██╔══██╗██║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝\033[0m"
@@ -200,6 +200,7 @@ select_theme() {
     echo -e "\033[38;5;99m  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝\033[0m"
     echo -e "       \033[38;5;45m⚡ NEXT-GEN CLOUD INFRASTRUCTURE\033[0m \033[38;5;238m•\033[0m \033[38;5;141mAUTOMATION PLATFORM\033[0m"
     echo -e "       \033[2m\033[38;5;244mMade with Love \033[0m\033[38;5;196m♥\033[0m\033[2m\033[38;5;244m & Brain \033[0m\033[38;5;213m🧠\033[0m\033[2m\033[38;5;244m by \033[0m\033[1;38;5;255mMudit\033[0m\033[2m\033[38;5;244m @ \033[0m\033[38;5;51mArixByte Studios\033[0m"
+    echo -e "                           \033[2m\033[38;5;244mArixByte v1.0.0\033[0m"
     echo -e ""
     echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
     echo -e " \033[38;5;239m│\033[0m                 \033[38;5;51m◈\033[0m \033[1;38;5;255mSELECT YOUR PREFERRED VISUAL EXPERIENCE\033[0m \033[38;5;51m◈\033[0m                 \033[38;5;239m│\033[0m"
@@ -274,6 +275,7 @@ render_intro() {
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
     echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
     echo -e "       ${DIM}${GRAY}Made with Love ${RED}♥${NC}${DIM}${GRAY} & Brain ${PINK}🧠${NC}${DIM}${GRAY} by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
+    echo -e "                           ${DIM}${GRAY}ArixByte v1.0.0${NC}"
     echo -e ""
 
     # Mathematically Formatted Telemetry Card
@@ -384,6 +386,7 @@ render_ui() {
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
     echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
     echo -e "       ${DIM}${GRAY}Made with Love ${RED}♥${NC}${DIM}${GRAY} & Brain ${PINK}🧠${NC}${DIM}${GRAY} by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
+    echo -e "                           ${DIM}${GRAY}ArixByte v1.0.0${NC}"
 
     echo -e " ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
     printf "   ${GRAY}Public IP :${NC} ${WHITE}%-15s${NC}  ${GRAY}Platform :${NC} ${C2}%-25s${NC}  ${GRAY}State :${NC} ${MINT}● ACTIVE${NC}\n" "$PUB_IP" "$OS_PRETTY"
@@ -423,6 +426,7 @@ render_page_header() {
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
     echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
     echo -e "       ${DIM}${GRAY}Made with Love ${RED}♥${NC}${DIM}${GRAY} & Brain ${PINK}🧠${NC}${DIM}${GRAY} by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
+    echo -e "                           ${DIM}${GRAY}ArixByte v1.0.0${NC}"
     echo -e ""
     echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
     printf " ${DARK_GRAY}│${NC}  ${C1}▶${NC} ${BOLD}${WHITE}%-42s${NC} ${GRAY}Node:${NC} ${C2}%-21s${NC} ${DARK_GRAY}│${NC}\n" "$title" "$CURRENT_HOST"
