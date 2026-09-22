@@ -121,7 +121,7 @@ get_metrics() {
     fi
     [[ -z "$RAM" ]] && RAM="18"
 
-    UPT=$(uptime -p 2>/dev/null | sed 's/up //' 2>/dev/null || uptime | awk '{print $3,$4}' | tr -d ',' || echo "online")
+    UPT=$(uptime -p 2>/dev/null || (uptime 2>/dev/null | awk '{print $3,$4}' | tr -d ',') 2>/dev/null || echo "active")
     DISK=$(df -h / 2>/dev/null | awk 'NR==2 {print $5}' 2>/dev/null || echo "??")
     PUBLIC_IP=$(curl -s --max-time 2 https://api.ipify.org 2>/dev/null || echo "Protected")
 }
