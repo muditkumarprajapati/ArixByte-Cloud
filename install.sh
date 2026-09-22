@@ -347,7 +347,7 @@ render_ui() {
     get_metrics
 
     # Top Status Bar (Powerline Pill Badges)
-    echo -e " ${C3}${NC}${BG_PILL}${WHITE}  $CURRENT_HOST ${NC}${C3}${NC}  ${P2}${NC}${BG_PILL}${WHITE}  $UPT ${NC}${P2}${NC}  ${MINT}${NC}${BG_PILL}${WHITE}  $DISK ${NC}${MINT}${NC}  ${C1}${NC}${BG_PILL}${WHITE}  CPU ${C1}%3s%%${NC} ${BORDER}|${NC} ${WHITE}RAM ${P1}%3s%%${NC}${BG_PILL} ${NC}${C1}${NC} " | sed "s/%3s%%/${CPU}%/;s/%3s%%/${RAM}%/"
+    echo -e " ${C3}${NC}${BG_PILL}${WHITE}  $CURRENT_HOST ${NC}${C3}${NC}  ${P2}${NC}${BG_PILL}${WHITE}  $UPT ${NC}${P2}${NC}  ${MINT}${NC}${BG_PILL}${WHITE}  $DISK ${NC}${MINT}${NC}  ${C1}${NC}${BG_PILL}${WHITE}  CPU ${C1}${CPU}% ${GRAY}│ ${WHITE}RAM ${P1}${RAM}% ${NC}${C1}${NC}"
     echo -e ""
 
     # Banner with Vertical Gradient
