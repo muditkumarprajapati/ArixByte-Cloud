@@ -1,26 +1,32 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # CLOUD INSTALLER & MANAGEMENT SUITE | SECURE UPLINK LOADER
-# High-Visual Cyberpunk Stage 1 Fast-Loader
+# Theme: Obsidian Sapphire / Cyberpunk Titanium (Ultra-Premium Edition)
 # ==============================================================================
 set -euo pipefail
 
-# --- COLOR PALETTE (ANSI 256 / High Vibrancy) ---
-R='\033[1;38;5;196m'     # Crimson Red
-G='\033[1;38;5;82m'      # Emerald Green
-Y='\033[1;38;5;220m'     # Gold / Amber
-C='\033[1;38;5;51m'      # Cyber Cyan
-P='\033[1;38;5;201m'     # Neon Purple / Hot Pink
-VIOLET='\033[1;38;5;135m' # Deep Violet
-NEON='\033[1;38;5;198m'  # Bright Neon Pink
-W='\033[1;38;5;255m'     # Crisp White
-DG='\033[0;38;5;244m'    # Steel / Slate Gray
-NC='\033[0m'             # Reset Color
+# --- PREMIUM PALETTE (Obsidian Sapphire / Cyan / Champagne Gold) ---
+C1='\033[38;5;51m'          # Electric Cyan
+C2='\033[38;5;45m'          # Sky Azure
+C3='\033[38;5;39m'          # Deep Ocean Blue
+P1='\033[38;5;141m'         # Lavender Violet
+P2='\033[38;5;135m'         # Deep Orchid
+P3='\033[38;5;99m'          # Royal Indigo
+GOLD='\033[38;5;221m'       # Champagne Gold
+MINT='\033[38;5;48m'        # Mint Emerald
+CORAL='\033[38;5;204m'      # Coral Accent
+RED='\033[38;5;196m'        # Crimson Alert
+WHITE='\033[1;38;5;255m'    # Crisp Pure White
+GRAY='\033[38;5;244m'       # Steel Gray
+DARK_GRAY='\033[38;5;239m'  # Graphite Border
+BORDER='\033[38;5;238m'     # Dark Border
+BOLD='\033[1m'
+DIM='\033[2m'
+NC='\033[0m'                # Reset
 
 # --- CONFIGURATION ---
-# Change this to your raw GitHub URL, Cloudflare Worker, or custom domain endpoint
 PAYLOAD_URL="${PAYLOAD_URL:-https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/dashboard.sh}"
-VERSION="v2.5.0"
+VERSION="v2.7.0"
 SYSTEM_CODENAME="ARIX-HYPERION"
 
 # --- SYSTEM DISCOVERY ---
@@ -32,39 +38,30 @@ OS_NAME="$(grep -E '^PRETTY_NAME=' /etc/os-release 2>/dev/null | cut -d= -f2 | t
 # --- HEADER BANNER ---
 render_header() {
     clear
-    echo -e "${P}"
-    cat << "EOF"
- █████╗ ██████╗ ██╗██╗   ██╗██████╗ ██╗   ██╗████████╗███████╗
-██╔══██╗██╔══██╗██║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝
-███████║██████╔╝██║ ╚████╔╝ ██████╔╝ ╚████╔╝    ██║   █████╗  
-██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  
-██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗
-╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝
-EOF
-    echo -e "${NC}"
+    echo -e ""
+    # Elegant Multi-Tone Gradient Banner
+    echo -e "${C1}   █████╗ ██████╗ ██╗██╗   ██╗██████╗ ██╗   ██╗████████╗███████╗${NC}"
+    echo -e "${C2}  ██╔══██╗██╔══██╗██║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝${NC}"
+    echo -e "${C3}  ███████║██████╔╝██║ ╚████╔╝ ██████╔╝ ╚████╔╝    ██║   █████╗  ${NC}"
+    echo -e "${P1}  ██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ${NC}"
+    echo -e "${P2}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
+    echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
+    echo -e "       ${GRAY}ARIXBYTE CLOUD SUITE ${P1}${VERSION}${NC} ${BORDER}•${NC} ${MINT}ENTERPRISE EDITION${NC}"
+    echo -e ""
 
-    echo -e "${VIOLET}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${VIOLET}║${NC}             ${P}⚡ ${SYSTEM_CODENAME} UPLINK ${NEON}— ${Y}NEXT-GEN SYSTEM DEPLOYER${NC}            ${VIOLET}║${NC}"
-    echo -e "${VIOLET}║${NC}          ${DG}${VERSION}${NC} ${W}|${NC} ${G}SECURE RUNTIME${NC} ${W}|${NC} ${DG}$(date +"%Y-%m-%d %H:%M:%S")${NC}   ${VIOLET}║${NC}"
-    echo -e "${VIOLET}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
-    echo -e "\n${Y}                  ★★★ INITIALIZING SECURE UPLINK ★★★${NC}\n"
+    # Mathematically Formatted Telemetry Card
+    echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
+    printf " ${DARK_GRAY}│${NC}  ${C1}◆${NC} ${BOLD}${WHITE}%-20s${NC} ${DARK_GRAY}│${NC} ${P1}⚡ ${SYSTEM_CODENAME}${NC}  ${DARK_GRAY}│${NC} ${MINT}● ONLINE${NC} ${DARK_GRAY}(TLS 1.3)${NC}       ${DARK_GRAY}│${NC}\n" "ARIXBYTE UPLINK"
+    printf " ${DARK_GRAY}│${NC}  ${GRAY}Endpoint :${NC} ${WHITE}%-15s${NC}  ${DARK_GRAY}│${NC} ${GRAY}Gateway :${NC} ${WHITE}%-15s${NC}  ${DARK_GRAY}│${NC} ${GRAY}Arch :${NC} ${C2}%-7s${NC}     ${DARK_GRAY}│${NC}\n" "$PUB_IP" "$LOCAL_IP" "$ARCH"
+    printf " ${DARK_GRAY}│${NC}  ${GRAY}System   :${NC} ${C2}%-49s${NC}  ${DARK_GRAY}│${NC}\n" "$OS_NAME"
+    echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}"
 }
 
 render_header
 
-# --- HARDWARE & NETWORK DIAGNOSTICS ---
-echo -e " ${C}◉ SYSTEM & NETWORK ROUTE DIAGNOSTICS${NC}"
-echo -e " ${DG}├─ Public Endpoint     :${NC} ${W}${PUB_IP}${NC}"
-echo -e " ${DG}├─ Local Gateway       :${NC} ${W}${LOCAL_IP}${NC}"
-echo -e " ${DG}├─ Architecture        :${NC} ${W}${ARCH}${NC}"
-echo -e " ${DG}├─ Operating System    :${NC} ${W}${OS_NAME}${NC}"
-echo -e " ${DG}├─ Target Payload      :${NC} ${W}${PAYLOAD_URL}${NC}"
-echo -e " ${DG}└─ Security Protocol   :${NC} ${G}TLS 1.3 ${P}★ QUANTUM READY${NC}"
-echo -e "${DG}──────────────────────────────────────────────────────────────────────────────${NC}"
-
 # --- DEPENDENCY CHECK ---
-echo -e "\n ${Y}[1/2] ENVIRONMENT VERIFICATION${NC}"
-echo -ne " ${DG}├─ Checking curl, bash, tar, sudo...${NC} "
+echo -e "\n ${C1}◈${NC} ${BOLD}${WHITE}ENVIRONMENT INTEGRITY VERIFICATION${NC}"
+echo -ne "   ${DARK_GRAY}├─${NC} Runtime Toolchain     ${DARK_GRAY}···${NC} "
 
 MISSING_PKGS=()
 for cmd in curl bash tar; do
@@ -74,7 +71,7 @@ for cmd in curl bash tar; do
 done
 
 if [ ${#MISSING_PKGS[@]} -gt 0 ]; then
-    echo -e "${Y}INSTALLING MISSING (${MISSING_PKGS[*]})${NC}"
+    echo -e "${GOLD}PROVISIONING (${MISSING_PKGS[*]})${NC}"
     if command -v apt-get &>/dev/null; then
         apt-get update -qq && apt-get install -y -qq "${MISSING_PKGS[@]}" >/dev/null 2>&1 || true
     elif command -v dnf &>/dev/null; then
@@ -83,34 +80,28 @@ if [ ${#MISSING_PKGS[@]} -gt 0 ]; then
         yum install -y -q "${MISSING_PKGS[@]}" >/dev/null 2>&1 || true
     fi
 else
-    sleep 0.4
-    echo -e "${G}VERIFIED${NC} ${P}✓${NC}"
+    sleep 0.3
+    echo -e "${MINT}OPTIMAL${NC} ${MINT}✔${NC}"
 fi
 
+echo -e "   ${DARK_GRAY}├─${NC} Network Transport     ${DARK_GRAY}···${NC} ${C1}ESTABLISHED${NC} ${DARK_GRAY}[${WHITE}${PUB_IP}${DARK_GRAY}]${NC}"
+
 # --- PAYLOAD RETRIEVAL & LAUNCH ---
-echo -e "\n ${Y}[2/2] ESTABLISHING UPLINK TO CORE ENGINE${NC}"
-echo -ne " ${DG}├─ Downloading Management Payload...${NC} "
+echo -ne "   ${DARK_GRAY}└─${NC} Core Engine Uplink    ${DARK_GRAY}···${NC} "
 
 PAYLOAD="$(mktemp /tmp/uplink_payload.XXXXXX)"
 trap 'rm -f "$PAYLOAD"' EXIT
 
-if curl -fsSL -A "Arix-Installer-Agent/2.5" -o "$PAYLOAD" "$PAYLOAD_URL"; then
-    echo -e "${G}SUCCESS${NC} ${P}★${NC}"
-    echo -e " ${DG}└─ Core Engine Status  :${NC} ${G}INTEGRITY VERIFIED (200 OK)${NC}"
+if curl -fsSL -A "Arix-Installer-Agent/2.7" -o "$PAYLOAD" "$PAYLOAD_URL"; then
+    echo -e "${P1}AUTHENTICATED (200 OK)${NC}"
 
-    echo -e "\n${DG}──────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${P}★★★ UPLINK READY — LAUNCHING CONTROL INTERFACE IN 1s ★★★${NC}\n"
+    echo -e "\n ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
+    echo -e "   ${P1}⚡ Launching Interactive Control Center...${NC}\n"
+    sleep 0.8
 
-    echo -ne " ${W}Starting in ${R}1${NC} "
-    echo -ne "${R}●${NC}"
-    sleep 1
-    echo -e "\n"
-
-    # Handover control to the primary dashboard
     bash "$PAYLOAD" "$@"
 else
-    echo -e "${R}FAILED${NC}"
-    echo -e " ${DG}└─ Error Detail:${NC} ${R}Could not fetch dashboard payload from ${PAYLOAD_URL}${NC}"
-    echo -e "\n ${R}[!] CRITICAL:${NC} Ensure the PAYLOAD_URL is accessible and valid."
+    echo -e "${RED}FAILED${NC}"
+    echo -e "\n ${RED}[!] CRITICAL:${NC} Could not fetch dashboard payload from ${PAYLOAD_URL}"
     exit 1
 fi
