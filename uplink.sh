@@ -16,6 +16,7 @@ GOLD='\033[38;5;221m'       # Champagne Gold
 MINT='\033[38;5;48m'        # Mint Emerald
 CORAL='\033[38;5;204m'      # Coral Accent
 RED='\033[38;5;196m'        # Crimson Alert
+PINK='\033[38;5;213m'       # Brain Pink
 WHITE='\033[1;38;5;255m'    # Crisp Pure White
 GRAY='\033[38;5;244m'       # Steel Gray
 DARK_GRAY='\033[38;5;239m'  # Graphite Border
@@ -47,7 +48,7 @@ render_header() {
     echo -e "${P2}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
     echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
-    echo -e "       ${DIM}${GRAY}Made with ${RED}♥${NC}${DIM}${GRAY} & Brain by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
+    echo -e "       ${DIM}${GRAY}Made with Love ${RED}♥${NC}${DIM}${GRAY} & Brain ${PINK}🧠${NC}${DIM}${GRAY} by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
     echo -e ""
 
     # Mathematically Formatted Telemetry Card

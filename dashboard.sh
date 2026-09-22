@@ -27,6 +27,7 @@ apply_colorful_theme() {
     MINT='\033[38;5;48m'        # Mint Emerald
     CORAL='\033[38;5;204m'      # Coral Accent
     RED='\033[38;5;196m'        # Crimson Alert
+    PINK='\033[38;5;213m'       # Brain Pink
     WHITE='\033[1;38;5;255m'    # Crisp Pure White
     GRAY='\033[38;5;244m'       # Steel Gray
     DARK_GRAY='\033[38;5;239m'  # Graphite Border
@@ -46,6 +47,7 @@ apply_clean_theme() {
     MINT='\033[38;5;150m'       # Muted Sage Green
     CORAL='\033[38;5;246m'      # Neutral Slate
     RED='\033[38;5;203m'        # Soft Red
+    PINK='\033[38;5;213m'       # Brain Pink
     WHITE='\033[1;38;5;255m'    # Pure White
     GRAY='\033[38;5;245m'       # Slate Gray
     DARK_GRAY='\033[38;5;240m'  # Charcoal Border
@@ -105,76 +107,13 @@ apply_custom_color() {
     MINT='\033[38;5;48m'
     CORAL='\033[38;5;204m'
     RED='\033[38;5;196m'
+    PINK='\033[38;5;213m'
     WHITE='\033[1;38;5;255m'
     GRAY='\033[38;5;244m'
     DARK_GRAY='\033[38;5;239m'
     BORDER='\033[38;5;238m'
     BG_PILL='\033[48;5;236m'
 }
-
-# --- INTERACTIVE THEME SELECTION PROMPT ---
-select_theme() {
-    clear
-    echo -e ""
-    echo -e "\033[38;5;51m   █████╗ ██████╗ ██╗██╗   ██╗██████╗ ██╗   ██╗████████╗███████╗\033[0m"
-    echo -e "\033[38;5;45m  ██╔══██╗██╔══██╗██║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝\033[0m"
-    echo -e "\033[38;5;39m  ███████║██████╔╝██║ ╚████╔╝ ██████╔╝ ╚████╔╝    ██║   █████╗  \033[0m"
-    echo -e "\033[38;5;141m  ██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  \033[0m"
-    echo -e "\033[38;5;135m  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗\033[0m"
-    echo -e "\033[38;5;99m  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝\033[0m"
-    echo -e "       \033[38;5;45m⚡ NEXT-GEN CLOUD INFRASTRUCTURE\033[0m \033[38;5;238m•\033[0m \033[38;5;141mAUTOMATION PLATFORM\033[0m"
-    echo -e "       \033[2m\033[38;5;244mMade with \033[38;5;196m♥\033[0m\033[2m\033[38;5;244m & Brain by \033[1;38;5;255mMudit\033[0m\033[2m\033[38;5;244m @ \033[38;5;51mArixByte Studios\033[0m"
-    echo -e ""
-    echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
-    echo -e " \033[38;5;239m│\033[0m                 \033[1;38;5;255m◈ PLEASE SELECT YOUR PREFERRED UI THEME ◈\033[0m                   \033[38;5;239m│\033[0m"
-    echo -e " \033[38;5;239m╰─────────────────────────────────────────────────────────────────────────────╯\033[0m"
-    echo -e ""
-    echo -e "   \033[1;38;5;51m[1]\033[0m \033[1;38;5;255mCOLORFUL\033[0m     \033[38;5;244m— Vibrant Cyberpunk Multi-Tone Gradient (Default)\033[0m"
-    echo -e "   \033[1;38;5;250m[2]\033[0m \033[1;38;5;255mCLEAN\033[0m        \033[38;5;244m— Minimalist Monochromatic Slate & Pure White\033[0m"
-    echo -e "   \033[1;38;5;221m[3]\033[0m \033[1;38;5;255mCUSTOM COLOR\033[0m \033[38;5;244m— Load palette and select custom accent color\033[0m"
-    echo -e ""
-    echo -e " \033[38;5;238m─────────────────────────────────────────────────────────────────────────────\033[0m"
-    echo -ne " \033[1;38;5;51m➜\033[0m \033[1;38;5;255mEnter Choice\033[0m \033[38;5;244m(1-3) [Default 1]:\033[0m "
-    
-    local t_choice
-    read -r t_choice 2>/dev/null || t_choice="1"
-    t_choice="${t_choice:-1}"
-
-    case "$t_choice" in
-        2)
-            apply_clean_theme
-            ;;
-        3)
-            clear
-            echo -e ""
-            echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
-            echo -e " \033[38;5;239m│\033[0m                     \033[1;38;5;255m◈ SELECT YOUR CUSTOM ACCENT COLOR ◈\033[0m                     \033[38;5;239m│\033[0m"
-            echo -e " \033[38;5;239m╰─────────────────────────────────────────────────────────────────────────────╯\033[0m"
-            echo -e ""
-            echo -e "   \033[38;5;51m[1] ■ Electric Cyan\033[0m       \033[38;5;244m(Cyberpunk Ice)\033[0m"
-            echo -e "   \033[38;5;48m[2] ■ Emerald Mint\033[0m        \033[38;5;244m(Terminal Matrix)\033[0m"
-            echo -e "   \033[38;5;141m[3] ■ Royal Violet\033[0m        \033[38;5;244m(Hyperion Purple)\033[0m"
-            echo -e "   \033[38;5;201m[4] ■ Neon Pink\033[0m           \033[38;5;244m(Vaporwave Rose)\033[0m"
-            echo -e "   \033[38;5;220m[5] ■ Champagne Gold\033[0m      \033[38;5;244m(Luxury Amber)\033[0m"
-            echo -e "   \033[38;5;196m[6] ■ Crimson Red\033[0m         \033[38;5;244m(Bloodline Red)\033[0m"
-            echo -e "   \033[38;5;45m[7] ■ Sky Azure\033[0m           \033[38;5;244m(Deep Sea Blue)\033[0m"
-            echo -e "   \033[38;5;250m[8] ■ Titanium Silver\033[0m     \033[38;5;244m(Minimal Steel)\033[0m"
-            echo -e ""
-            echo -e " \033[38;5;238m─────────────────────────────────────────────────────────────────────────────\033[0m"
-            echo -ne " \033[1;38;5;255m➜ Select Color (1-8) [Default 1]:\033[0m "
-            
-            local c_choice
-            read -r c_choice 2>/dev/null || c_choice="1"
-            c_choice="${c_choice:-1}"
-            apply_custom_color "$c_choice"
-            ;;
-        *)
-            apply_colorful_theme
-            ;;
-    esac
-}
-
-select_theme
 
 # --- OS & ENVIRONMENT DETECTION ---
 detect_os() {
@@ -238,6 +177,87 @@ detect_os() {
 }
 
 detect_os
+
+# --- TELEMETRY DISCOVERY ---
+PUB_IP="$(curl -s --max-time 2 https://api.ipify.org 2>/dev/null || curl -s --max-time 2 https://ifconfig.me 2>/dev/null || echo "127.0.0.1")"
+LOCAL_IP="$(hostname -I 2>/dev/null | awk '{print $1}' || echo "127.0.0.1")"
+ARCH="$(uname -m 2>/dev/null || echo "x86_64")"
+CURRENT_HOST="$(hostname 2>/dev/null || echo "vps-node")"
+
+# --- INTERACTIVE THEME SELECTION PROMPT ---
+select_theme() {
+    clear
+    echo -e ""
+    # Top Status Bar (Discovery Pills)
+    echo -e " \033[38;5;39m\033[0m\033[48;5;236m\033[1;38;5;255m  $CURRENT_HOST \033[0m\033[38;5;39m\033[0m  \033[38;5;135m\033[0m\033[48;5;236m\033[1;38;5;255m 🖥  $OS_PRETTY \033[0m\033[38;5;135m\033[0m  \033[38;5;48m\033[0m\033[48;5;236m\033[1;38;5;255m 🌐 $PUB_IP \033[0m\033[38;5;48m\033[0m  \033[38;5;51m\033[0m\033[48;5;236m\033[1;38;5;255m ⚡ ARIXBYTE $APP_VERSION \033[0m\033[38;5;51m\033[0m"
+    echo -e ""
+    echo -e "\033[38;5;51m   █████╗ ██████╗ ██╗██╗   ██╗██████╗ ██╗   ██╗████████╗███████╗\033[0m"
+    echo -e "\033[38;5;45m  ██╔══██╗██╔══██╗██║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝\033[0m"
+    echo -e "\033[38;5;39m  ███████║██████╔╝██║ ╚████╔╝ ██████╔╝ ╚████╔╝    ██║   █████╗  \033[0m"
+    echo -e "\033[38;5;141m  ██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  \033[0m"
+    echo -e "\033[38;5;135m  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗\033[0m"
+    echo -e "\033[38;5;99m  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝\033[0m"
+    echo -e "       \033[38;5;45m⚡ NEXT-GEN CLOUD INFRASTRUCTURE\033[0m \033[38;5;238m•\033[0m \033[38;5;141mAUTOMATION PLATFORM\033[0m"
+    echo -e "       \033[2m\033[38;5;244mMade with Love \033[0m\033[38;5;196m♥\033[0m\033[2m\033[38;5;244m & Brain \033[0m\033[38;5;213m🧠\033[0m\033[2m\033[38;5;244m by \033[0m\033[1;38;5;255mMudit\033[0m\033[2m\033[38;5;244m @ \033[0m\033[38;5;51mArixByte Studios\033[0m"
+    echo -e ""
+    echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
+    echo -e " \033[38;5;239m│\033[0m                 \033[38;5;51m◈\033[0m \033[1;38;5;255mSELECT YOUR PREFERRED VISUAL EXPERIENCE\033[0m \033[38;5;51m◈\033[0m                 \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m├─────────────────────────────────────────────────────────────────────────────┤\033[0m"
+    echo -e " \033[38;5;239m│\033[0m                                                                             \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m   \033[1;38;5;51m[1]\033[0m \033[1;38;5;255mCOLORFUL CYBERPUNK\033[0m                     \033[38;5;221m★ RECOMMENDED\033[0m               \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m       \033[38;5;244mSwatches :\033[0m \033[38;5;51m■\033[0m \033[38;5;45m■\033[0m \033[38;5;39m■\033[0m \033[38;5;141m■\033[0m \033[38;5;135m■\033[0m \033[38;5;48m■\033[0m \033[38;5;221m■\033[0m  \033[2m(Electric Cyan ➜ Orchid ➜ Gold)\033[0m   \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m       \033[38;5;244mProfile  :\033[0m \033[1;38;5;255mVibrant multi-tone gradient with luxury powerline pills\033[0m   \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m                                                                             \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m   \033[1;38;5;250m[2]\033[0m \033[1;38;5;255mCLEAN MONOCHROME\033[0m                       \033[38;5;244m⚪ MINIMALIST\033[0m               \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m       \033[38;5;244mSwatches :\033[0m \033[1;38;5;255m■\033[0m \033[38;5;252m■\033[0m \033[38;5;248m■\033[0m \033[38;5;244m■\033[0m \033[38;5;240m■\033[0m  \033[2m(Pure White ➜ Slate Platinum ➜ Dark)\033[0m     \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m       \033[38;5;244mProfile  :\033[0m \033[1;38;5;255mDistraction-free, crisp studio contrast aesthetic\033[0m         \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m                                                                             \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m   \033[1;38;5;221m[3]\033[0m \033[1;38;5;255mCUSTOM COLOR ACCENT\033[0m                    \033[38;5;45m🎨 STUDIO PALETTE\033[0m           \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m       \033[38;5;244mSwatches :\033[0m \033[38;5;51m■\033[0m \033[38;5;48m■\033[0m \033[38;5;141m■\033[0m \033[38;5;201m■\033[0m \033[38;5;220m■\033[0m \033[38;5;196m■\033[0m \033[38;5;45m■\033[0m \033[38;5;250m■\033[0m  \033[2m(Cyan, Mint, Violet, Rose...)\033[0m    \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m       \033[38;5;244mProfile  :\033[0m \033[1;38;5;255mPersonalize with 8 bespoke hand-tuned colorways\033[0m           \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m│\033[0m                                                                             \033[38;5;239m│\033[0m"
+    echo -e " \033[38;5;239m╰─────────────────────────────────────────────────────────────────────────────╯\033[0m"
+    echo -e ""
+    echo -e " \033[38;5;238m─────────────────────────────────────────────────────────────────────────────\033[0m"
+    echo -ne " \033[1;38;5;51m➜\033[0m \033[1;38;5;255mEnter Choice\033[0m \033[38;5;244m(1-3) [Default 1]:\033[0m "
+    
+    local t_choice
+    read -r t_choice 2>/dev/null || t_choice="1"
+    t_choice="${t_choice:-1}"
+
+    case "$t_choice" in
+        2)
+            apply_clean_theme
+            ;;
+        3)
+            clear
+            echo -e ""
+            echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
+            echo -e " \033[38;5;239m│\033[0m                 \033[38;5;221m◈\033[0m \033[1;38;5;255mSELECT BESPOKE COLOR ACCENT PALETTE\033[0m \033[38;5;221m◈\033[0m                     \033[38;5;239m│\033[0m"
+            echo -e " \033[38;5;239m├─────────────────────────────────────────────────────────────────────────────┤\033[0m"
+            echo -e " \033[38;5;239m│\033[0m                                                                             \033[38;5;239m│\033[0m"
+            echo -e " \033[38;5;239m│\033[0m   \033[38;5;51m[1] ■ Electric Cyan\033[0m    \033[38;5;244m(Cyberpunk)\033[0m      \033[38;5;220m[5] ■ Champagne Gold\033[0m   \033[38;5;244m(Luxury)\033[0m   \033[38;5;239m│\033[0m"
+            echo -e " \033[38;5;239m│\033[0m   \033[38;5;48m[2] ■ Emerald Mint\033[0m     \033[38;5;244m(Terminal)\033[0m       \033[38;5;196m[6] ■ Crimson Red\033[0m      \033[38;5;244m(Alert)\033[0m    \033[38;5;239m│\033[0m"
+            echo -e " \033[38;5;239m│\033[0m   \033[38;5;141m[3] ■ Royal Violet\033[0m     \033[38;5;244m(Hyperion)\033[0m       \033[38;5;45m[7] ■ Sky Azure\033[0m        \033[38;5;244m(Ocean)\033[0m    \033[38;5;239m│\033[0m"
+            echo -e " \033[38;5;239m│\033[0m   \033[38;5;201m[4] ■ Neon Pink\033[0m        \033[38;5;244m(Vaporwave)\033[0m      \033[38;5;250m[8] ■ Titanium Silver\033[0m  \033[38;5;244m(Minimal)\033[0m  \033[38;5;239m│\033[0m"
+            echo -e " \033[38;5;239m│\033[0m                                                                             \033[38;5;239m│\033[0m"
+            echo -e " \033[38;5;239m╰─────────────────────────────────────────────────────────────────────────────╯\033[0m"
+            echo -e ""
+            echo -e " \033[38;5;238m─────────────────────────────────────────────────────────────────────────────\033[0m"
+            echo -ne " \033[38;5;221m➜\033[0m \033[1;38;5;255mSelect Color\033[0m \033[38;5;244m(1-8) [Default 1]:\033[0m "
+            
+            local c_choice
+            read -r c_choice 2>/dev/null || c_choice="1"
+            c_choice="${c_choice:-1}"
+            apply_custom_color "$c_choice"
+            ;;
+        *)
+            apply_colorful_theme
+            ;;
+    esac
+}
+
+select_theme
 
 # --- ROOT CHECK ---
 require_root() {
@@ -328,7 +348,7 @@ render_ui() {
     echo -e "${P2}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
     echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
-    echo -e "       ${DIM}${GRAY}Made with ${RED}♥${NC}${DIM}${GRAY} & Brain by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
+    echo -e "       ${DIM}${GRAY}Made with Love ${RED}♥${NC}${DIM}${GRAY} & Brain ${PINK}🧠${NC}${DIM}${GRAY} by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
 
     echo -e " ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
     printf "   ${GRAY}Public IP :${NC} ${WHITE}%-15s${NC}  ${GRAY}Platform :${NC} ${C2}%-25s${NC}  ${GRAY}State :${NC} ${MINT}● ACTIVE${NC}\n" "$PUBLIC_IP" "$OS_PRETTY"
@@ -367,7 +387,7 @@ render_page_header() {
     echo -e "${P2}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
     echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
-    echo -e "       ${DIM}${GRAY}Made with ${RED}♥${NC}${DIM}${GRAY} & Brain by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
+    echo -e "       ${DIM}${GRAY}Made with Love ${RED}♥${NC}${DIM}${GRAY} & Brain ${PINK}🧠${NC}${DIM}${GRAY} by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
     echo -e ""
     echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
     printf " ${DARK_GRAY}│${NC}  ${C1}▶${NC} ${BOLD}${WHITE}%-42s${NC} ${GRAY}Node:${NC} ${C2}%-21s${NC} ${DARK_GRAY}│${NC}\n" "$title" "$CURRENT_HOST"
