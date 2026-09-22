@@ -46,7 +46,7 @@ render_header() {
     echo -e "${P1}  ██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ${NC}"
     echo -e "${P2}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
-    echo -e "       ${GRAY}ARIXBYTE CLOUD SUITE ${P1}${VERSION}${NC} ${BORDER}•${NC} ${MINT}ENTERPRISE EDITION${NC}"
+    echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION ENGINE${NC}"
     echo -e ""
 
     # Mathematically Formatted Telemetry Card

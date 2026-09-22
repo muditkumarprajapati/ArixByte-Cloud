@@ -28,7 +28,7 @@ BOLD='\033[1m'
 DIM='\033[2m'
 NC='\033[0m'                # Reset
 
-VERSION="v2.7.0"
+APP_VERSION="v2.8.0"
 
 # --- OS & ENVIRONMENT DETECTION ---
 detect_os() {
@@ -36,12 +36,12 @@ detect_os() {
         # shellcheck disable=SC1091
         . /etc/os-release
         OS_ID="${ID:-unknown}"
-        OS_VER="${VERSION_ID:-0}"
-        OS_NAME="${PRETTY_NAME:-Linux}"
+        OS_VER_ID="${VERSION_ID:-0}"
+        OS_PRETTY="${PRETTY_NAME:-Linux}"
     else
         OS_ID="unknown"
-        OS_VER="0"
-        OS_NAME="$(uname -s)"
+        OS_VER_ID="0"
+        OS_PRETTY="$(uname -s)"
     fi
 
     case "$OS_ID" in
@@ -104,35 +104,75 @@ require_root() {
     return 0
 }
 
-# --- SYSTEM METRICS COLLECTOR ---
+# --- REAL-TIME METRICS SAMPLER ---
+PREV_TOTAL=0
+PREV_IDLE=0
+
 get_metrics() {
     CURRENT_HOST="$(hostname 2>/dev/null || echo "vps-node")"
-    if command -v top &>/dev/null; then
-        CPU=$(top -bn1 2>/dev/null | grep -E "Cpu\(s\)|CPU" | awk '{printf "%.0f", $2+$4}' 2>/dev/null || echo "12")
+    
+    # Accurate Instantaneous CPU % (0-100%)
+    if [[ -r /proc/stat ]]; then
+        local _ u n s i rest
+        read -r _ u n s i rest < /proc/stat 2>/dev/null || true
+        local total=$((u + n + s + i))
+        local idle=$i
+        if (( PREV_TOTAL > 0 && total > PREV_TOTAL )); then
+            local diff_total=$((total - PREV_TOTAL))
+            local diff_idle=$((idle - PREV_IDLE))
+            if (( diff_total > 0 )); then
+                local usage=$(( (diff_total - diff_idle) * 100 / diff_total ))
+                (( usage > 100 )) && usage=100
+                (( usage < 0 )) && usage=0
+                CPU="$usage"
+            else
+                CPU="0"
+            fi
+        else
+            CPU="5"
+        fi
+        PREV_TOTAL=$total
+        PREV_IDLE=$idle
     else
-        CPU="--"
+        CPU=$(top -bn1 2>/dev/null | awk '/%?Cpu\(s\):/ {printf "%.0f", $2+$4; exit}' 2>/dev/null || echo "5")
+        [[ -z "$CPU" || "$CPU" -gt 100 ]] && CPU="10"
     fi
-    [[ -z "$CPU" ]] && CPU="5"
 
-    if command -v free &>/dev/null; then
-        RAM=$(free -m 2>/dev/null | awk '/Mem:/ {printf "%.0f", $3*100/$2}' 2>/dev/null || echo "24")
+    # Accurate RAM % (0-100%)
+    if [[ -r /proc/meminfo ]]; then
+        local m_tot m_avail
+        m_tot=$(awk '/MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null)
+        m_avail=$(awk '/MemAvailable:/ {print $2}' /proc/meminfo 2>/dev/null)
+        if [[ -n "$m_tot" && -n "$m_avail" && "$m_tot" -gt 0 ]]; then
+            RAM=$(( (m_tot - m_avail) * 100 / m_tot ))
+            (( RAM > 100 )) && RAM=100
+            (( RAM < 0 )) && RAM=0
+        else
+            RAM="20"
+        fi
     else
-        RAM="--"
+        RAM=$(free -m 2>/dev/null | awk '/Mem:/ {if ($2 > 0) printf "%.0f", $3*100/$2; exit}' 2>/dev/null || echo "20")
     fi
-    [[ -z "$RAM" ]] && RAM="18"
 
-    UPT=$(uptime -p 2>/dev/null || (uptime 2>/dev/null | awk '{print $3,$4}' | tr -d ',') 2>/dev/null || echo "active")
+    # Live Uptime
+    UPT=$(uptime -p 2>/dev/null | sed 's/up //' 2>/dev/null || (uptime 2>/dev/null | awk '{print $3,$4}' | tr -d ',') 2>/dev/null || echo "active")
     DISK=$(df -h / 2>/dev/null | awk 'NR==2 {print $5}' 2>/dev/null || echo "??")
     PUBLIC_IP=$(curl -s --max-time 2 https://api.ipify.org 2>/dev/null || echo "Protected")
 }
 
+# Baseline initial measurement so diff works immediately
+get_metrics
+sleep 0.1
+get_metrics
+
 # --- MAIN UI RENDERER (Obsidian Luxury Dashboard) ---
 render_ui() {
-    clear
+    # Position cursor at top-left to redraw smoothly without black flickering
+    printf '\033[H'
     get_metrics
 
     # Top Status Bar (Powerline Pill Badges)
-    echo -e " ${C3}${NC}${BG_PILL}${WHITE}  $CURRENT_HOST ${NC}${C3}${NC}  ${P2}${NC}${BG_PILL}${WHITE}  $UPT ${NC}${P2}${NC}  ${MINT}${NC}${BG_PILL}${WHITE}  $DISK ${NC}${MINT}${NC}  ${C1}${NC}${BG_PILL}${WHITE}  CPU ${C1}${CPU}%${NC} ${BORDER}|${NC} ${WHITE}RAM ${P1}${RAM}%${NC}${BG_PILL} ${NC}${C1}${NC}"
+    echo -e " ${C3}${NC}${BG_PILL}${WHITE}  $CURRENT_HOST ${NC}${C3}${NC}  ${P2}${NC}${BG_PILL}${WHITE}  $UPT ${NC}${P2}${NC}  ${MINT}${NC}${BG_PILL}${WHITE}  $DISK ${NC}${MINT}${NC}  ${C1}${NC}${BG_PILL}${WHITE}  CPU ${C1}%3s%%${NC} ${BORDER}|${NC} ${WHITE}RAM ${P1}%3s%%${NC}${BG_PILL} ${NC}${C1}${NC} " | sed "s/%3s%%/${CPU}%/;s/%3s%%/${RAM}%/"
     echo -e ""
 
     # Banner with Vertical Gradient
@@ -142,10 +182,10 @@ render_ui() {
     echo -e "${P1}  ██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ${NC}"
     echo -e "${P2}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
-    echo -e "       ${GRAY}ARIXBYTE CLOUD SUITE ${P1}${VERSION}${NC} ${BORDER}•${NC} ${MINT}ENTERPRISE EDITION${NC}"
+    echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
 
     echo -e " ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    printf "   ${GRAY}Public IP :${NC} ${WHITE}%-15s${NC}  ${GRAY}Platform :${NC} ${C2}%-25s${NC}  ${GRAY}State :${NC} ${MINT}● ACTIVE${NC}\n" "$PUBLIC_IP" "$OS_NAME"
+    printf "   ${GRAY}Public IP :${NC} ${WHITE}%-15s${NC}  ${GRAY}Platform :${NC} ${C2}%-25s${NC}  ${GRAY}State :${NC} ${MINT}● ACTIVE${NC}\n" "$PUBLIC_IP" "$OS_PRETTY"
     echo -e " ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
     echo -e ""
 
@@ -165,14 +205,14 @@ render_ui() {
     echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}"
 
     echo -e "\n ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -ne " ${C1}➜${NC} ${WHITE}Select Option${NC} ${GRAY}(0-11):${NC} "
+    echo -ne " ${C1}➜${NC} ${WHITE}Select Option${NC} ${GRAY}(0-11) [Live ${MINT}●${GRAY}]:${NC} \033[K"
 }
 
 # ==============================================================================
 # OS REPOSITORY & PACKAGE PROVISIONER
 # ==============================================================================
 install_dependencies() {
-    echo -e "${P1}⚙ Provisioning enterprise repositories for ${OS_NAME}...${NC}"
+    echo -e "${P1}⚙ Provisioning enterprise repositories for ${OS_PRETTY}...${NC}"
 
     if [[ "$PKG_MGR" == "apt" ]]; then
         apt-get update -y -qq
@@ -198,7 +238,7 @@ install_dependencies() {
             nginx mariadb-server mariadb-client redis-server git tar unzip certbot python3-certbot-nginx
 
     elif [[ "$PKG_MGR" == "dnf" ]]; then
-        RHEL_MAJOR="${OS_VER%%.*}"
+        RHEL_MAJOR="${OS_VER_ID%%.*}"
         [[ -z "$RHEL_MAJOR" || "$RHEL_MAJOR" == "0" ]] && RHEL_MAJOR="9"
 
         echo -e "${P1}⚙ Installing EPEL & Remi PHP 8.3 repos for AlmaLinux ${RHEL_MAJOR}...${NC}"
@@ -238,7 +278,7 @@ install_panel() {
     require_root || return
     echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
     echo -e " ${C1}▶ STARTING PTERODACTYL PANEL INSTALLATION${NC}"
-    echo -e " ${GRAY}Target System:${NC} ${WHITE}${OS_NAME} (${PKG_MGR})${NC}"
+    echo -e " ${GRAY}Target System:${NC} ${WHITE}${OS_PRETTY} (${PKG_MGR})${NC}"
     echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     read -rp "Enter Fully Qualified Domain Name (e.g., panel.yourdomain.com): " FQDN
@@ -337,7 +377,7 @@ EOF_PTERO_SVC
     systemctl daemon-reload
     systemctl enable --now pteroq.service "$REDIS_SVC"
 
-    echo -e "${P1}⚙ Configuring Nginx VirtualHost for ${OS_NAME}...${NC}"
+    echo -e "${P1}⚙ Configuring Nginx VirtualHost for ${OS_PRETTY}...${NC}"
     mkdir -p "$NGINX_CONF_DIR"
     
     CONF_FILE="${NGINX_CONF_DIR}/pterodactyl.conf"
@@ -407,7 +447,7 @@ install_wings() {
     require_root || return
     echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
     echo -e " ${C1}▶ STARTING PTERODACTYL WINGS INSTALLATION${NC}"
-    echo -e " ${GRAY}Target System:${NC} ${WHITE}${OS_NAME}${NC}"
+    echo -e " ${GRAY}Target System:${NC} ${WHITE}${OS_PRETTY}${NC}"
     echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     echo -e "${P1}⚙ Installing Docker CE...${NC}"
@@ -750,31 +790,53 @@ install_dev_stack() {
 }
 
 # ==============================================================================
-# MAIN EVENT LOOP
+# MAIN EVENT LOOP (REAL-TIME LIVE UPDATING WITH INSTANT KEY RESPONSE)
 # ==============================================================================
+clear
 while true; do
     render_ui
-    read -r OPTION
 
-    case $OPTION in
-        1) install_panel ;;
-        2) install_wings ;;
-        3) install_full_stack ;;
-        4) install_phpmyadmin ;;
-        5) install_themes ;;
-        6) manage_ssl ;;
-        7) fix_permissions ;;
-        8) backup_panel ;;
-        9) optimize_vps ;;
-        10) setup_firewall ;;
-        11) install_dev_stack ;;
-        0|exit|quit|q)
-            echo -e "\n ${P1}● DISCONNECTED${NC}  Session terminated gracefully. Have a great day!"
-            exit 0
-            ;;
-        *)
-            echo -e "\n ${RED}✘ Invalid selection! Please enter a number between 0 and 11.${NC}"
-            sleep 1.2
-            ;;
-    esac
+    # Wait up to 2.5 seconds for user input; if timeout, auto-refresh metrics live!
+    if read -t 2.5 -N 1 KEY; then
+        case "$KEY" in
+            1)
+                # Check for two-digit options 10 or 11
+                if read -t 0.9 -N 1 NEXT_KEY; then
+                    if [[ "$NEXT_KEY" == "0" ]]; then
+                        clear; setup_firewall; clear
+                    elif [[ "$NEXT_KEY" == "1" ]]; then
+                        clear; install_dev_stack; clear
+                    elif [[ -z "$NEXT_KEY" || "$NEXT_KEY" == $'\n' ]]; then
+                        clear; install_panel; clear
+                    else
+                        clear; install_panel; clear
+                    fi
+                else
+                    clear; install_panel; clear
+                fi
+                ;;
+            2) clear; install_wings; clear ;;
+            3) clear; install_full_stack; clear ;;
+            4) clear; install_phpmyadmin; clear ;;
+            5) clear; install_themes; clear ;;
+            6) clear; manage_ssl; clear ;;
+            7) clear; fix_permissions; clear ;;
+            8) clear; backup_panel; clear ;;
+            9) clear; optimize_vps; clear ;;
+            0|q|Q)
+                echo -e "\n ${P1}● DISCONNECTED${NC}  Session terminated gracefully. Have a great day!"
+                exit 0
+                ;;
+            $'\n'|"")
+                # User pressed Enter, redraw
+                continue
+                ;;
+            *)
+                # Unrecognized key
+                ;;
+        esac
+    else
+        # Timed out 2.5s without input -> loops and updates live CPU / RAM / Uptime in real time!
+        continue
+    fi
 done
