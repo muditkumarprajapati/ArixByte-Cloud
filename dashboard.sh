@@ -116,6 +116,15 @@ apply_custom_color() {
 select_theme() {
     clear
     echo -e ""
+    echo -e "\033[38;5;51m   █████╗ ██████╗ ██╗██╗   ██╗██████╗ ██╗   ██╗████████╗███████╗\033[0m"
+    echo -e "\033[38;5;45m  ██╔══██╗██╔══██╗██║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝\033[0m"
+    echo -e "\033[38;5;39m  ███████║██████╔╝██║ ╚████╔╝ ██████╔╝ ╚████╔╝    ██║   █████╗  \033[0m"
+    echo -e "\033[38;5;141m  ██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  \033[0m"
+    echo -e "\033[38;5;135m  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗\033[0m"
+    echo -e "\033[38;5;99m  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝\033[0m"
+    echo -e "       \033[38;5;45m⚡ NEXT-GEN CLOUD INFRASTRUCTURE\033[0m \033[38;5;238m•\033[0m \033[38;5;141mAUTOMATION PLATFORM\033[0m"
+    echo -e "       \033[2m\033[38;5;244mMade with \033[38;5;196m♥\033[0m\033[2m\033[38;5;244m & Brain by \033[1;38;5;255mMudit\033[0m\033[2m\033[38;5;244m @ \033[38;5;51mArixByte Studios\033[0m"
+    echo -e ""
     echo -e " \033[38;5;239m╭─────────────────────────────────────────────────────────────────────────────╮\033[0m"
     echo -e " \033[38;5;239m│\033[0m                 \033[1;38;5;255m◈ PLEASE SELECT YOUR PREFERRED UI THEME ◈\033[0m                   \033[38;5;239m│\033[0m"
     echo -e " \033[38;5;239m╰─────────────────────────────────────────────────────────────────────────────╯\033[0m"
@@ -319,6 +328,7 @@ render_ui() {
     echo -e "${P2}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
     echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
     echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
+    echo -e "       ${DIM}${GRAY}Made with ${RED}♥${NC}${DIM}${GRAY} & Brain by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
 
     echo -e " ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
     printf "   ${GRAY}Public IP :${NC} ${WHITE}%-15s${NC}  ${GRAY}Platform :${NC} ${C2}%-25s${NC}  ${GRAY}State :${NC} ${MINT}● ACTIVE${NC}\n" "$PUBLIC_IP" "$OS_PRETTY"
@@ -341,7 +351,28 @@ render_ui() {
     echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}"
 
     echo -e "\n ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -ne " ${C1}➜${NC} ${WHITE}Select Option${NC} ${GRAY}(0-11) [Live ${MINT}●${GRAY}]:${NC} \033[K"
+    echo -ne " ${C1}➜${NC} ${WHITE}Select Option${NC} ${GRAY}(0-11):${NC} \033[K"
+}
+
+# --- UNIVERSAL PAGE HEADER (ARIXBYTE BRANDING) ---
+render_page_header() {
+    local title="${1:-OPERATIONS}"
+    local ip="${PUBLIC_IP:-${PUB_IP:-127.0.0.1}}"
+    clear
+    echo -e ""
+    echo -e "${C1}   █████╗ ██████╗ ██╗██╗   ██╗██████╗ ██╗   ██╗████████╗███████╗${NC}"
+    echo -e "${C2}  ██╔══██╗██╔══██╗██║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝${NC}"
+    echo -e "${C3}  ███████║██████╔╝██║ ╚████╔╝ ██████╔╝ ╚████╔╝    ██║   █████╗  ${NC}"
+    echo -e "${P1}  ██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ${NC}"
+    echo -e "${P2}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
+    echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
+    echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
+    echo -e "       ${DIM}${GRAY}Made with ${RED}♥${NC}${DIM}${GRAY} & Brain by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
+    echo -e ""
+    echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
+    printf " ${DARK_GRAY}│${NC}  ${C1}▶${NC} ${BOLD}${WHITE}%-42s${NC} ${GRAY}Node:${NC} ${C2}%-21s${NC} ${DARK_GRAY}│${NC}\n" "$title" "$CURRENT_HOST"
+    printf " ${DARK_GRAY}│${NC}  ${GRAY}OS:${NC} ${WHITE}%-41s${NC} ${GRAY}IP:${NC} ${WHITE}%-23s${NC} ${DARK_GRAY}│${NC}\n" "$OS_PRETTY" "$ip"
+    echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
 }
 
 # ==============================================================================
@@ -350,11 +381,8 @@ render_ui() {
 
 # [1] INSTALL PTERODACTYL PANEL
 install_panel() {
+    render_page_header "PTERODACTYL PANEL INSTALLATION"
     require_root || return
-    echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${C1}▶ STARTING PTERODACTYL PANEL INSTALLATION${NC}"
-    echo -e " ${GRAY}Target System:${NC} ${WHITE}${OS_PRETTY} (${PKG_MGR})${NC}"
-    echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     read -rp "Enter Fully Qualified Domain Name (e.g., panel.yourdomain.com): " FQDN
     if [[ -z "$FQDN" ]]; then
@@ -519,11 +547,8 @@ EOF_NGINX
 
 # [2] INSTALL PTERODACTYL WINGS
 install_wings() {
+    render_page_header "PTERODACTYL WINGS INSTALLATION"
     require_root || return
-    echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${C1}▶ STARTING PTERODACTYL WINGS INSTALLATION${NC}"
-    echo -e " ${GRAY}Target System:${NC} ${WHITE}${OS_PRETTY}${NC}"
-    echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     echo -e "${P1}⚙ Installing Docker CE...${NC}"
     if ! command -v docker &>/dev/null; then
@@ -584,16 +609,16 @@ EOF_WINGS
 
 # [3] FULL STACK (PANEL + WINGS)
 install_full_stack() {
+    render_page_header "FULL STACK (PANEL + WINGS)"
+    require_root || return
     install_panel
     install_wings
 }
 
 # [4] PHPMYADMIN & MARIADB
 install_phpmyadmin() {
+    render_page_header "PHPMYADMIN & MARIADB TOOLS"
     require_root || return
-    echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${C1}▶ INSTALLING PHPMYADMIN WEB DATABASE MANAGER${NC}"
-    echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     read -rp "Enter Port for phpMyAdmin [Default 8085]: " PMA_PORT
     PMA_PORT=${PMA_PORT:-8085}
@@ -642,10 +667,8 @@ EOF_PMA
 
 # [5] BLUEPRINT & THEMES MANAGER
 install_themes() {
+    render_page_header "BLUEPRINT FRAMEWORK & THEMES"
     require_root || return
-    echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${C1}▶ BLUEPRINT FRAMEWORK & THEMES MANAGER${NC}"
-    echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     if [[ ! -d "/var/www/pterodactyl" ]]; then
         echo -e "${RED}✘ Pterodactyl Panel directory not found (/var/www/pterodactyl)!${NC}"
@@ -693,10 +716,8 @@ install_themes() {
 
 # [6] SSL CERTBOT & NGINX
 manage_ssl() {
+    render_page_header "SSL CERTIFICATE & NGINX PROXY"
     require_root || return
-    echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${C1}▶ SSL CERTIFICATE & LET'S ENCRYPT MANAGER${NC}"
-    echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     read -rp "Enter Domain Name: " SSL_DOMAIN
     read -rp "Enter Email Address: " SSL_EMAIL
@@ -713,8 +734,9 @@ manage_ssl() {
 
 # [7] FIX PERMISSIONS & QUEUE WORKER
 fix_permissions() {
+    render_page_header "REPAIR PERMISSIONS & WORKERS"
     require_root || return
-    echo -e "\n${P1}⚙ Fixing permissions and restarting workers...${NC}"
+    echo -e "${P1}⚙ Fixing permissions and restarting workers...${NC}"
     if [[ -d "/var/www/pterodactyl" ]]; then
         chown -R "$WEB_USER":"$WEB_GROUP" /var/www/pterodactyl/* /var/www/pterodactyl/storage /var/www/pterodactyl/bootstrap/cache
         chmod -R 755 /var/www/pterodactyl/storage /var/www/pterodactyl/bootstrap/cache
@@ -728,10 +750,8 @@ fix_permissions() {
 
 # [8] BACKUP PANEL & DATABASE
 backup_panel() {
+    render_page_header "COMPLETE SYSTEM & DB BACKUP"
     require_root || return
-    echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${C1}▶ CREATING SYSTEM BACKUP${NC}"
-    echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     BACKUP_DIR="/var/backups/pterodactyl_$(date +%Y%m%d_%H%M%S)"
     mkdir -p "$BACKUP_DIR"
@@ -755,10 +775,8 @@ backup_panel() {
 
 # [9] VPS FAST OPTIMIZER (SWAP + BBR)
 optimize_vps() {
+    render_page_header "VPS TURBO OPTIMIZER (SWAP+BBR)"
     require_root || return
-    echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${C1}▶ VPS PERFORMANCE OPTIMIZATION (SWAP + TCP BBR)${NC}"
-    echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     read -rp "Create Swapfile size in GB (e.g., 2, 4, 8) [Default 4]: " SWAP_SIZE
     SWAP_SIZE=${SWAP_SIZE:-4}
@@ -791,10 +809,8 @@ optimize_vps() {
 
 # [10] FIREWALL HARDENING (UFW / FIREWALLD)
 setup_firewall() {
+    render_page_header "FIREWALL SHIELD (UFW / FIREWALLD)"
     require_root || return
-    echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${C1}▶ FIREWALL HARDENING (PORTS 22, 80, 443, 8080, 2022, 25565-25600)${NC}"
-    echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     if command -v firewalld &>/dev/null || command -v firewall-cmd &>/dev/null; then
         echo -e "${P1}⚙ Configuring firewalld rules...${NC}"
@@ -833,10 +849,8 @@ setup_firewall() {
 
 # [11] DEV STACK (Node.js, Docker, Python, Git)
 install_dev_stack() {
+    render_page_header "DEVELOPER RUNTIME STACK"
     require_root || return
-    echo -e "\n${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
-    echo -e " ${C1}▶ INSTALLING DEVELOPER & CLOUD RUNTIME STACK${NC}"
-    echo -e "${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
 
     if [[ "$PKG_MGR" == "apt" ]]; then
         apt-get update -y -qq
@@ -865,50 +879,37 @@ install_dev_stack() {
 }
 
 # ==============================================================================
-# MAIN EVENT LOOP (REAL-TIME LIVE UPDATING WITH INSTANT KEY RESPONSE)
+# MAIN EVENT LOOP (ENTER TO CONFIRM - NO ACCIDENTAL EXECUTION)
 # ==============================================================================
 clear
 while true; do
     render_ui
 
-    # Wait up to 2.5 seconds for user input; if timeout, auto-refresh metrics live!
-    if read -t 2.5 -N 1 KEY; then
-        case "$KEY" in
-            1)
-                # Check for two-digit options 10 or 11
-                if read -t 0.9 -N 1 NEXT_KEY; then
-                    if [[ "$NEXT_KEY" == "0" ]]; then
-                        clear; setup_firewall; clear
-                    elif [[ "$NEXT_KEY" == "1" ]]; then
-                        clear; install_dev_stack; clear
-                    elif [[ -z "$NEXT_KEY" || "$NEXT_KEY" == $'\n' ]]; then
-                        clear; install_panel; clear
-                    else
-                        clear; install_panel; clear
-                    fi
-                else
-                    clear; install_panel; clear
-                fi
-                ;;
-            2) clear; install_wings; clear ;;
-            3) clear; install_full_stack; clear ;;
-            4) clear; install_phpmyadmin; clear ;;
-            5) clear; install_themes; clear ;;
-            6) clear; manage_ssl; clear ;;
-            7) clear; fix_permissions; clear ;;
-            8) clear; backup_panel; clear ;;
-            9) clear; optimize_vps; clear ;;
-            0|q|Q)
-                echo -e "\n ${P1}● DISCONNECTED${NC}  Session terminated gracefully. Have a great day!"
-                exit 0
-                ;;
-            $'\n'|"")
-                continue
-                ;;
-            *)
-                ;;
-        esac
-    else
-        continue
-    fi
+    read -r CHOICE || true
+    case "$CHOICE" in
+        1)  install_panel; clear ;;
+        2)  install_wings; clear ;;
+        3)  install_full_stack; clear ;;
+        4)  install_phpmyadmin; clear ;;
+        5)  install_themes; clear ;;
+        6)  manage_ssl; clear ;;
+        7)  fix_permissions; clear ;;
+        8)  backup_panel; clear ;;
+        9)  optimize_vps; clear ;;
+        10) setup_firewall; clear ;;
+        11) install_dev_stack; clear ;;
+        0|q|Q)
+            echo -e "\n ${P1}● DISCONNECTED${NC}  Session terminated gracefully. Have a great day!\n"
+            exit 0
+            ;;
+        "")
+            # User pressed Enter with no input -> Redraw with fresh real-time metrics!
+            continue
+            ;;
+        *)
+            echo -e "\n ${RED}✘ Invalid selection '${CHOICE}'!${NC} ${GRAY}Please enter a number between 0 and 11.${NC}"
+            sleep 1.2
+            clear
+            ;;
+    esac
 done
