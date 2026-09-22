@@ -33,11 +33,11 @@ Inside this folder, you have three production-ready scripts:
 2. Upload `standalone.sh`, `uplink.sh`, and `dashboard.sh`.
 3. Get your Raw URL:
    ```text
-   https://raw.githubusercontent.com/<YOUR_GITHUB_USER>/<REPO>/main/standalone.sh
+   https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/install.sh
    ```
 4. Now, any Linux server can execute it instantly with:
    ```bash
-   bash <(curl -sL https://raw.githubusercontent.com/<YOUR_GITHUB_USER>/<REPO>/main/standalone.sh)
+   bash <(curl -sL https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/install.sh)
    ```
 
 ---

@@ -19,7 +19,7 @@ NC='\033[0m'             # Reset Color
 
 # --- CONFIGURATION ---
 # Change this to your raw GitHub URL, Cloudflare Worker, or custom domain endpoint
-PAYLOAD_URL="${PAYLOAD_URL:-https://raw.githubusercontent.com/your-username/cloud-installer/main/dashboard.sh}"
+PAYLOAD_URL="${PAYLOAD_URL:-https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/dashboard.sh}"
 VERSION="v2.5.0"
 SYSTEM_CODENAME="ARIX-HYPERION"
 

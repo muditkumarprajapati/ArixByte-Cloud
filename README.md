@@ -13,7 +13,7 @@
 Run the following command on any Ubuntu or Debian VPS as `root`:
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/YOUR_USERNAME/cloud-installer/main/install.sh)
+bash <(curl -sL https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/install.sh)
 ```
 
 ---
