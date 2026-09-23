@@ -2005,6 +2005,13 @@ manage_single_vps_panel() {
                 echo -e "\n${P1}⚙ Installing ${panel_name}...${NC}"
                 read -rp "Enter Admin Email for ${panel_name}: " ADM_MAIL
                 ADM_MAIL="${ADM_MAIL:-admin@local.host}"
+                read -rp "Enter Admin Password for ${panel_name}: " ADM_PASS
+                while [[ -z "$ADM_PASS" ]]; do
+                    echo -e " ${RED}✘ Password cannot be empty.${NC}"
+                    read -rp "Enter Admin Password for ${panel_name}: " ADM_PASS
+                done
+                read -rp "Enter Admin Username/Name for ${panel_name} [Admin]: " ADM_NAME
+                ADM_NAME="${ADM_NAME:-Admin}"
                 case "$panel_name" in
                     Proxmox)
                         if [[ "$OS_ID" == "debian" ]]; then
@@ -2081,11 +2088,14 @@ manage_single_vps_panel() {
                         docker compose exec -T workspace php artisan optimize 2>/dev/null || true
                         docker compose exec -T workspace php artisan migrate --force 2>/dev/null || true
 
-                        echo -e "\n${CYAN}✦ Create your Convoy Administrator Account:${NC}"
-                        docker compose exec workspace php artisan c:user:make || true
+                        echo -e "\n${CYAN}✦ Provisioning Convoy Administrator Account (${ADM_MAIL})...${NC}"
+                        docker compose exec -T workspace php artisan c:user:make --email="$ADM_MAIL" --name="$ADM_NAME" --password="$ADM_PASS" --admin=1 2>/dev/null || docker compose exec workspace php artisan c:user:make || true
 
                         cd - &>/dev/null
-                        echo -e "\n${MINT}✔ Convoy Stack Ready! Access at: http://${PUB_IP}${NC}"
+                        echo -e "\n${MINT}✔ Convoy Stack Ready!${NC}"
+                        echo -e " ${GRAY}Web URL  :${NC} ${WHITE}http://${PUB_IP}${NC}"
+                        echo -e " ${GRAY}Admin    :${NC} ${WHITE}${ADM_MAIL}${NC}"
+                        echo -e " ${GRAY}Password :${NC} ${GOLD}${ADM_PASS}${NC}"
                         ;;
                 esac
                 read -rp "Press [Enter] to continue..."
@@ -2143,10 +2153,15 @@ manage_single_vps_panel() {
                             ;;
                         Convoy)
                             if [[ -d "/var/www/convoy" && -f "/var/www/convoy/docker-compose.yml" ]]; then
-                                echo -e "${P1}⚙ Managing Convoy User Accounts...${NC}"
+                                echo -e "${P1}⚙ Updating Convoy Admin Credentials...${NC}"
+                                read -rp "Enter Admin Email: " U_EMAIL
+                                U_EMAIL="${U_EMAIL:-admin@local.host}"
+                                read -rp "Enter Admin Name [Admin]: " U_NAME
+                                U_NAME="${U_NAME:-Admin}"
                                 cd /var/www/convoy
-                                docker compose exec workspace php artisan c:user:make || true
+                                docker compose exec -T workspace php artisan c:user:make --email="$U_EMAIL" --name="$U_NAME" --password="$NEW_PW" --admin=1 2>/dev/null || docker compose exec workspace php artisan c:user:make || true
                                 cd - &>/dev/null
+                                echo -e "${MINT}✔ Convoy Admin credentials updated successfully!${NC}"
                             else
                                 echo -e "${RED}✘ Convoy is not installed.${NC}"
                             fi
