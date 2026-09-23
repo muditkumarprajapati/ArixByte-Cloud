@@ -2080,8 +2080,9 @@ manage_single_vps_panel() {
                         tar -xzf panel.tar.gz
                         rm -f panel.tar.gz
 
-                        # Patch Dockerfile to prevent Debian Bullseye apt cache 404 error
+                        # Patch Dockerfiles to use Bookworm and prevent Debian Bullseye EOL 404 apt errors
                         if [[ -f dockerfiles/workspace/Dockerfile ]]; then
+                            sed -i 's/FROM php:8.2-bullseye/FROM php:8.2-bookworm/g' dockerfiles/workspace/Dockerfile
                             sed -i 's/^RUN apt-get update$/RUN apt-get update \&\& apt-get -y --no-install-recommends install ca-certificates gnupg software-properties-common curl sudo unzip default-mysql-client/' dockerfiles/workspace/Dockerfile
                             sed -i '/RUN apt-get -y install ca-certificates/d' dockerfiles/workspace/Dockerfile
                         fi
@@ -2103,6 +2104,7 @@ manage_single_vps_panel() {
                         fi
 
                         echo -e "${GRAY}Building and launching Convoy containers (this may take 2-3 minutes)...${NC}"
+                        docker compose build --no-cache workspace
                         docker compose up -d --build
 
                         echo -e "${GRAY}Waiting for workspace service to initialize...${NC}"
@@ -2157,7 +2159,16 @@ manage_single_vps_panel() {
                             curl -sSL https://github.com/ConvoyPanel/panel/releases/latest/download/panel.tar.gz -o panel.tar.gz
                             tar -xzf panel.tar.gz
                             rm -f panel.tar.gz
+                            if [[ -f dockerfiles/workspace/Dockerfile ]]; then
+                                sed -i 's/FROM php:8.2-bullseye/FROM php:8.2-bookworm/g' dockerfiles/workspace/Dockerfile
+                                sed -i 's/^RUN apt-get update$/RUN apt-get update \&\& apt-get -y --no-install-recommends install ca-certificates gnupg software-properties-common curl sudo unzip default-mysql-client/' dockerfiles/workspace/Dockerfile
+                                sed -i '/RUN apt-get -y install ca-certificates/d' dockerfiles/workspace/Dockerfile
+                            fi
+                            if [[ -f dockerfiles/caddy/Dockerfile ]]; then
+                                sed -i 's/Caddyfile-production/Caddyfile-development/g' dockerfiles/caddy/Dockerfile
+                            fi
                             chmod -R o+w storage bootstrap/cache 2>/dev/null || true
+                            docker compose build --no-cache workspace
                             docker compose up -d --build
                             docker compose exec -T workspace php artisan migrate --force 2>/dev/null || true
                             docker compose exec -T workspace php artisan optimize 2>/dev/null || true
