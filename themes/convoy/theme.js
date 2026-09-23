@@ -1,14 +1,14 @@
 /**
  * ==============================================================================
- * ARIXBYTE STUDIOS • CONVOY PANEL ULTIMATE SUITE ENGINE
+ * ARIXBYTE STUDIOS • CONVOY PANEL LUXURY SUITE ENGINE
  * Designed by Mudit @ ArixByte Studios
  * 
+ * Inspired by Dribbble & Modern FinTech Design Systems (Neon Lime & Copper Amber)
  * Features:
- *  - 4 Ultra-HD Cyber Wallpapers with Instant Background Layer Injection
- *  - Real-Time Hero Command Center & Hypervisor Telemetry Cards
- *  - Empty State Beautifier (turns "You have no servers" into luxury cyber card)
- *  - Virtualizor-Style Live Traffic & Bandwidth Canvas Graph
- *  - Real-Time DDoS & Threat Attack Logs Inspector
+ *  - 4 Curated Themes: Dribbble Lime, Copper Amber, Electric Cyan, Cyberpunk
+ *  - FinTech Mountain Spline Chart with Pinned Tooltip Card (Image 2 style)
+ *  - Dribbble Donut Chart & Speedometer Gauge Overview (Image 1 style)
+ *  - Hero Command Center Bar & Empty State Beautifier
  *  - Tamper-Proof Protected Footer Watchdog
  * ==============================================================================
  */
@@ -18,17 +18,17 @@
 
     const ARIXBYTE_AUTHOR = "Mudit @ ArixByte Studios";
     const THEMES = [
-        { id: "nebula", name: "Nebula Cyan", color: "#00d2ff" },
-        { id: "cyberpunk", name: "Cyberpunk Violet", color: "#f72585" },
-        { id: "emerald", name: "Emerald Matrix", color: "#00f5d4" },
-        { id: "crimson", name: "Crimson Blood", color: "#ff0055" }
+        { id: "lime", name: "Dribbble Lime (Image 1)", color: "#b8ff2c" },
+        { id: "amber", name: "Copper Amber (Image 2)", color: "#ff7828" },
+        { id: "nebula", name: "Electric Cyan", color: "#00e5ff" },
+        { id: "cyberpunk", name: "Cyberpunk Violet", color: "#f72585" }
     ];
 
     // ==========================================================================
-    // 1. THEME SWITCHER & WALLPAPER LAYER ENGINE
+    // 1. THEME SWITCHER & AMBIENT MESH ENGINE
     // ==========================================================================
     const getSavedTheme = () => {
-        return localStorage.getItem('arixbyte_convoy_theme') || 'nebula';
+        return localStorage.getItem('arixbyte_convoy_theme') || 'lime';
     };
 
     const applyTheme = (themeId) => {
@@ -68,13 +68,13 @@
                     Convoy Theme Designed by <strong>Mudit</strong> @ <strong>ArixByte Studios</strong>
                 </div>
                 <div class="ab-footer-right">
-                    <span>Telemetry: <strong style="color:var(--ab-primary,#00d2ff)">● ONLINE</strong></span>
+                    <span>Telemetry: <strong style="color:var(--ab-primary,#b8ff2c)">● ONLINE</strong></span>
                 </div>
             `;
             document.body.appendChild(footer);
         }
 
-        // Force critical inline styles to override any external edits
+        // Force critical inline styles to override external tampering
         footer.style.setProperty('display', 'flex', 'important');
         footer.style.setProperty('visibility', 'visible', 'important');
         footer.style.setProperty('opacity', '1', 'important');
@@ -91,7 +91,6 @@
     const setupFooterProtection = () => {
         createProtectedFooter();
 
-        // MutationObserver: Instantly re-attach if removed or altered
         const observer = new MutationObserver((mutations) => {
             for (const mutation of mutations) {
                 if (mutation.type === 'childList') {
@@ -105,18 +104,15 @@
         });
 
         observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-
-        // Backup watchdog timer running every 800ms
         setInterval(createProtectedFooter, 800);
     };
 
     // ==========================================================================
-    // 3. HERO COMMAND BAR & DASHBOARD ENHANCER
+    // 3. HERO COMMAND BAR & DASHBOARD ENHANCER (IMAGE 1 OVERVIEW ROW)
     // ==========================================================================
     const injectHeroBanner = () => {
         if (document.getElementById('ab-hero-banner')) return;
 
-        // Find main container or insert before search/content
         const searchInput = document.querySelector('input[type="text"], input[type="search"]');
         const targetContainer = searchInput ? (searchInput.closest('div.max-w-7xl, div.container, main, div') || document.querySelector('main')) : document.querySelector('main, #root > div');
 
@@ -126,36 +122,35 @@
         banner.id = 'ab-hero-banner';
         banner.innerHTML = `
             <div class="ab-hero-left">
-                <h2>⚡ ArixByte Cloud Hypervisor</h2>
+                <h2>⚡ ArixByte <span class="highlight">Cloud Hypervisor</span></h2>
                 <p>Enterprise Virtual Instance Management & Proxmox VE Clustering Node</p>
             </div>
             <div class="ab-hero-stats">
-                <div class="ab-hstat-pill">
-                    <span class="icon">🖥️</span>
-                    <div class="info">
-                        <div class="label">Virtual Nodes</div>
-                        <div class="value" id="ab-hstat-vm">Active</div>
+                <div class="ab-hstat-card">
+                    <div class="label">Virtual Nodes</div>
+                    <div class="val-row">
+                        <span class="val" id="ab-hstat-vm">Active</span>
+                        <span class="ab-pill-delta">▲ 100%</span>
                     </div>
                 </div>
-                <div class="ab-hstat-pill">
-                    <span class="icon">⚡</span>
-                    <div class="info">
-                        <div class="label">Hypervisor</div>
-                        <div class="value">Proxmox / KVM</div>
+                <div class="ab-hstat-card">
+                    <div class="label">Hypervisor</div>
+                    <div class="val-row">
+                        <span class="val">KVM / QEMU</span>
                     </div>
                 </div>
-                <div class="ab-hstat-pill">
-                    <span class="icon">🛡️</span>
-                    <div class="info">
-                        <div class="label">DDoS Defense</div>
-                        <div class="value" style="color:var(--ab-primary,#00d2ff)">ARMED</div>
+                <div class="ab-hstat-card">
+                    <div class="label">DDoS Shield</div>
+                    <div class="val-row">
+                        <span class="val" style="color:var(--ab-primary,#b8ff2c)">ARMED</span>
+                        <span class="ab-pill-delta">▲ 0.00% Leak</span>
                     </div>
                 </div>
-                <div class="ab-hstat-pill">
-                    <span class="icon">🌐</span>
-                    <div class="info">
-                        <div class="label">Uplink WAN</div>
-                        <div class="value">10 Gbps Active</div>
+                <div class="ab-hstat-card">
+                    <div class="label">Uplink WAN</div>
+                    <div class="val-row">
+                        <span class="val">10 Gbps</span>
+                        <span class="ab-pill-delta">● Online</span>
                     </div>
                 </div>
             </div>
@@ -173,7 +168,7 @@
         }
     };
 
-    // Replace plain "You have no servers" with futuristic cyber empty state card
+    // Replace plain "You have no servers" with Image 2 Promotional Card style
     const enhanceEmptyState = () => {
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
         let node;
@@ -187,15 +182,14 @@
                             <div class="ab-empty-icon">🌐</div>
                             <div class="ab-empty-title">Virtual Infrastructure Standby</div>
                             <div class="ab-empty-desc">
-                                No virtual machine instances are currently allocated to your account.
-                                Connect your Proxmox VE cluster or deploy a virtual node to monitor real-time hypervisor telemetry.
+                                Secure, reliable, and trusted hypervisor clustering. Deploy a virtual node to begin real-time hardware telemetry and network analytics.
                             </div>
                             <div class="ab-empty-actions">
-                                <button class="ab-btn" onclick="document.getElementById('ab-btn-traffic').click()">
-                                    <span>📈 View Network Traffic</span>
+                                <button class="ab-btn-primary" onclick="document.getElementById('ab-btn-traffic').click()">
+                                    <span>📈 Network Bandwidth</span>
                                 </button>
-                                <button class="ab-btn" onclick="document.getElementById('ab-btn-attacks').click()">
-                                    <span>🛡️ Inspect Security Logs</span>
+                                <button class="ab-btn-glass" onclick="document.getElementById('ab-btn-attacks').click()">
+                                    <span>🛡️ Security Telemetry</span>
                                 </button>
                             </div>
                         </div>
@@ -207,22 +201,18 @@
     };
 
     // ==========================================================================
-    // ==========================================================================
-    // 4. VIRTUALIZOR-STYLE LIVE TRAFFIC GRAPH (Cubic Bezier Spline & NOC Engine)
+    // 4. FINTECH MOUNTAIN SPLINE GRAPH (IMAGE 2 EXACT REPLICA)
     // ==========================================================================
     let trafficInterval = null;
-    let isLiveTrafficPaused = false;
     let activeTimeframe = 'live';
 
-    const SAMPLE_COUNT = 36;
-    let rxHistory = [110, 118, 125, 140, 135, 150, 168, 185, 172, 160, 148, 155, 180, 210, 245, 230, 215, 198, 185, 175, 190, 220, 260, 295, 280, 265, 240, 225, 210, 195, 180, 192, 215, 238, 220, 210];
-    let txHistory = [55, 62, 58, 70, 68, 75, 88, 95, 90, 82, 76, 80, 92, 108, 125, 118, 110, 102, 95, 90, 98, 115, 135, 150, 142, 136, 124, 116, 108, 100, 92, 98, 110, 122, 114, 108];
+    let rxHistory = [120, 130, 142, 160, 155, 172, 190, 210, 195, 182, 170, 178, 205, 235, 270, 255, 240, 222, 208, 198, 215, 245, 285, 320, 305, 290, 265, 250, 235, 220, 205, 218, 240, 265, 248, 238];
+    let txHistory = [60, 68, 65, 78, 75, 82, 95, 102, 98, 90, 84, 88, 100, 115, 132, 125, 118, 110, 102, 98, 105, 122, 142, 158, 150, 144, 132, 124, 116, 108, 100, 106, 118, 130, 122, 116];
 
-    // Presets for timeframes
     const TIMEFRAME_PRESETS = {
         'live': () => ({
-            rx: [120, 135, 145, 160, 155, 170, 188, 205, 192, 180, 168, 175, 200, 230, 265, 250, 235, 218, 205, 195, 210, 240, 280, 315, 300, 285, 260, 245, 230, 215, 200, 212, 235, 258, 240, 230],
-            tx: [65, 72, 68, 80, 78, 85, 98, 105, 100, 92, 86, 90, 102, 118, 135, 128, 120, 112, 105, 100, 108, 125, 145, 160, 152, 146, 134, 126, 118, 110, 102, 108, 120, 132, 124, 118]
+            rx: [120, 130, 142, 160, 155, 172, 190, 210, 195, 182, 170, 178, 205, 235, 270, 255, 240, 222, 208, 198, 215, 245, 285, 320, 305, 290, 265, 250, 235, 220, 205, 218, 240, 265, 248, 238],
+            tx: [60, 68, 65, 78, 75, 82, 95, 102, 98, 90, 84, 88, 100, 115, 132, 125, 118, 110, 102, 98, 105, 122, 142, 158, 150, 144, 132, 124, 116, 108, 100, 106, 118, 130, 122, 116]
         }),
         '15m': () => ({
             rx: [180, 195, 210, 240, 280, 320, 340, 310, 290, 270, 250, 260, 280, 310, 360, 410, 390, 350, 310, 280, 290, 330, 380, 420, 450, 410, 370, 320, 280, 260, 240, 255, 275, 300, 280, 260],
@@ -243,8 +233,8 @@
         if (!canvas) return;
         const box = canvas.parentElement;
         const ctx = canvas.getContext('2d');
-        const tooltip = document.getElementById('ab-canvas-tooltip');
-        const crosshair = document.getElementById('ab-canvas-crosshair');
+        const tooltip = document.getElementById('ab-pinned-tooltip');
+        const crosshair = document.getElementById('ab-pinned-crosshair');
 
         const dpr = window.devicePixelRatio || 1;
         const resizeCanvas = () => {
@@ -257,14 +247,14 @@
 
         const MAX_MBPS = 500;
 
-        // Spline Bezier interpolation
-        const drawSpline = (points, strokeColor, fillColor, glowColor) => {
-            const width = canvas.parentElement.clientWidth;
+        const drawSpline = (points, strokeColor, fillColor) => {
+            const width = box.clientWidth;
             const height = 250;
-            const padLeft = 46;
+            const padLeft = 20;
+            const padRight = 55; // room for right Y labels like in Image 2
             const padBottom = 30;
             const padTop = 15;
-            const graphWidth = width - padLeft;
+            const graphWidth = width - padLeft - padRight;
             const graphHeight = height - padBottom - padTop;
             const step = graphWidth / (points.length - 1);
 
@@ -293,28 +283,22 @@
                 ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
             }
 
-            // Stroke line
             ctx.strokeStyle = strokeColor;
             ctx.lineWidth = 2.5;
-            ctx.shadowColor = glowColor;
-            ctx.shadowBlur = 10;
             ctx.stroke();
 
-            // Gradient Fill
+            // Mountain Area Fill
             ctx.lineTo(padLeft + graphWidth, padTop + graphHeight);
             ctx.lineTo(padLeft, padTop + graphHeight);
             ctx.closePath();
             ctx.fillStyle = fillColor;
-            ctx.shadowBlur = 0;
             ctx.fill();
 
-            // Head Pulse Beacon on latest point
+            // Head Beacon (White dot on latest point)
             const last = getCoord(points.length - 1);
             ctx.beginPath();
-            ctx.arc(last.x, last.y, 4.5, 0, Math.PI * 2);
-            ctx.fillStyle = "#fff";
-            ctx.shadowColor = strokeColor;
-            ctx.shadowBlur = 12;
+            ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
             ctx.fill();
 
             ctx.beginPath();
@@ -327,55 +311,43 @@
         };
 
         const renderFrame = () => {
-            const width = canvas.parentElement.clientWidth;
+            const width = box.clientWidth;
             const height = 250;
-            const padLeft = 46;
+            const padLeft = 20;
+            const padRight = 55;
             const padBottom = 30;
             const padTop = 15;
-            const graphWidth = width - padLeft;
+            const graphWidth = width - padLeft - padRight;
             const graphHeight = height - padBottom - padTop;
 
             ctx.clearRect(0, 0, width, height);
 
-            // Horizontal Grid Lines & Y-Axis Labels
+            // Horizontal Grid Lines & Right-aligned Y-labels (Image 2 style: $20k, $15k, $10k, $5k, $1k)
             ctx.save();
-            ctx.font = "10px 'JetBrains Mono', monospace";
-            ctx.textAlign = "right";
+            ctx.font = "10.5px 'JetBrains Mono', monospace";
+            ctx.textAlign = "left";
             ctx.textBaseline = "middle";
 
-            const ySteps = 5;
+            const ySteps = 4;
             for (let i = 0; i <= ySteps; i++) {
                 const val = (MAX_MBPS / ySteps) * (ySteps - i);
                 const y = padTop + (graphHeight / ySteps) * i;
 
-                ctx.fillStyle = "rgba(148, 163, 184, 0.6)";
-                ctx.fillText(`${val}M`, padLeft - 8, y);
+                ctx.fillStyle = "rgba(148, 163, 184, 0.45)";
+                ctx.fillText(`$${val}M`, width - padRight + 12, y);
 
-                ctx.strokeStyle = i === ySteps ? "rgba(255, 255, 255, 0.15)" : "rgba(255, 255, 255, 0.04)";
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+                ctx.setLineDash([4, 4]);
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(padLeft, y);
-                ctx.lineTo(width, y);
+                ctx.lineTo(width - padRight, y);
                 ctx.stroke();
             }
 
-            // 95th Percentile Reference Line
-            const y95 = padTop + graphHeight - (310 / MAX_MBPS) * graphHeight;
-            ctx.strokeStyle = "rgba(255, 170, 0, 0.45)";
-            ctx.setLineDash([5, 5]);
-            ctx.lineWidth = 1.2;
-            ctx.beginPath();
-            ctx.moveTo(padLeft, y95);
-            ctx.lineTo(width, y95);
-            ctx.stroke();
+            // Bottom Axis Labels (Image 2 style: Sep, Oct, Nov, Dec, Jan, Feb)
             ctx.setLineDash([]);
-
-            ctx.fillStyle = "rgba(255, 170, 0, 0.85)";
-            ctx.textAlign = "right";
-            ctx.fillText("--- 95th Pctl (310 Mbps)", width - 8, y95 - 7);
-
-            // X-Axis Time Labels
-            ctx.fillStyle = "rgba(148, 163, 184, 0.6)";
+            ctx.fillStyle = "rgba(148, 163, 184, 0.55)";
             ctx.textAlign = "center";
             const timeLabels = activeTimeframe === 'live' 
                 ? ["-60s", "-45s", "-30s", "-15s", "NOW"]
@@ -391,49 +363,49 @@
             }
             ctx.restore();
 
-            // Gradient Fills
+            // Gradient Fills (Mountain Spline)
+            const rootStyle = getComputedStyle(document.documentElement);
+            const primaryColor = rootStyle.getPropertyValue('--ab-primary').trim() || '#b8ff2c';
+
             const gradRx = ctx.createLinearGradient(0, padTop, 0, padTop + graphHeight);
-            gradRx.addColorStop(0, "rgba(0, 210, 255, 0.32)");
-            gradRx.addColorStop(1, "rgba(0, 210, 255, 0.0)");
+            gradRx.addColorStop(0, primaryColor + '44');
+            gradRx.addColorStop(1, primaryColor + '00');
 
             const gradTx = ctx.createLinearGradient(0, padTop, 0, padTop + graphHeight);
-            gradTx.addColorStop(0, "rgba(247, 37, 133, 0.24)");
-            gradTx.addColorStop(1, "rgba(247, 37, 133, 0.0)");
+            gradTx.addColorStop(0, "rgba(16, 185, 129, 0.2)");
+            gradTx.addColorStop(1, "rgba(16, 185, 129, 0.0)");
 
-            // Draw Splines
-            drawSpline(rxHistory, "#00d2ff", gradRx, "#00d2ff");
-            drawSpline(txHistory, "#f72585", gradTx, "#f72585");
+            // Ingress (RX) & Egress (TX)
+            drawSpline(rxHistory, primaryColor, gradRx);
+            drawSpline(txHistory, "#10b981", gradTx);
         };
 
         const tickLive = () => {
-            if (isLiveTrafficPaused || activeTimeframe !== 'live') return;
+            if (activeTimeframe !== 'live') return;
 
             const prevRx = rxHistory[rxHistory.length - 1];
             const prevTx = txHistory[txHistory.length - 1];
-            const newRx = Math.max(40, Math.min(480, prevRx + (Math.random() * 55 - 26)));
-            const newTx = Math.max(25, Math.min(310, prevTx + (Math.random() * 38 - 18)));
+            const newRx = Math.max(40, Math.min(480, prevRx + (Math.random() * 50 - 24)));
+            const newTx = Math.max(25, Math.min(310, prevTx + (Math.random() * 32 - 15)));
 
             rxHistory.shift(); rxHistory.push(newRx);
             txHistory.shift(); txHistory.push(newTx);
 
-            const rxElem = document.getElementById('ab-stat-rx');
-            const txElem = document.getElementById('ab-stat-tx');
-            const ppsElem = document.getElementById('ab-stat-pps');
-            if (rxElem) rxElem.innerHTML = `${newRx.toFixed(1)} <span style="font-size:12px;font-weight:600;color:var(--ab-text-secondary)">Mbps</span>`;
-            if (txElem) txElem.innerHTML = `${newTx.toFixed(1)} <span style="font-size:12px;font-weight:600;color:var(--ab-text-secondary)">Mbps</span>`;
-            if (ppsElem) ppsElem.innerText = Math.round(newRx * 148 + newTx * 115).toLocaleString() + " pps";
+            const rxElem = document.getElementById('ab-chart-metric-rx');
+            if (rxElem) rxElem.innerHTML = `${newRx.toFixed(1)} Mbps`;
 
             renderFrame();
         };
 
-        // Mouse Hover & Floating Crosshair Tooltip
+        // Interactive Pinned Tooltip Card (Image 2 Replica)
         canvas.onmousemove = (e) => {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
-            const padLeft = 46;
-            const graphWidth = rect.width - padLeft;
+            const padLeft = 20;
+            const padRight = 55;
+            const graphWidth = rect.width - padLeft - padRight;
 
-            if (mouseX < padLeft || mouseX > rect.width) {
+            if (mouseX < padLeft || mouseX > rect.width - padRight) {
                 if (tooltip) tooltip.style.display = 'none';
                 if (crosshair) crosshair.style.display = 'none';
                 return;
@@ -443,8 +415,8 @@
             const idx = Math.min(rxHistory.length - 1, Math.max(0, Math.round((mouseX - padLeft) / step)));
             const rxVal = rxHistory[idx].toFixed(1);
             const txVal = txHistory[idx].toFixed(1);
-            const ppsVal = Math.round(rxHistory[idx] * 148 + txHistory[idx] * 115).toLocaleString();
             const snapX = padLeft + idx * step;
+            const snapY = 15 + (250 - 45) - (rxHistory[idx] / MAX_MBPS) * (250 - 45);
 
             if (crosshair) {
                 crosshair.style.display = 'block';
@@ -454,15 +426,12 @@
             if (tooltip) {
                 tooltip.style.display = 'block';
                 tooltip.style.left = `${snapX}px`;
-                tooltip.style.top = `${e.clientY - rect.top}px`;
-                const timeAgo = activeTimeframe === 'live' ? `-${((rxHistory.length - 1 - idx) * 1.5).toFixed(0)}s ago` : `Slice #${idx + 1}`;
+                tooltip.style.top = `${snapY}px`;
+                const timeAgo = activeTimeframe === 'live' ? `-${((rxHistory.length - 1 - idx) * 1.2).toFixed(0)}s ago` : `Slice #${idx + 1}`;
                 tooltip.innerHTML = `
-                    <div style="font-weight:800; color:#e2e8f0; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:3px;">
-                        ⏱ ${timeAgo}
-                    </div>
-                    <div style="color:#00d2ff; margin-bottom:2px;">● Ingress (RX): <strong>${rxVal} Mbps</strong></div>
-                    <div style="color:#f72585; margin-bottom:2px;">● Egress (TX): <strong>${txVal} Mbps</strong></div>
-                    <div style="color:#00f5d4;">● Packets: <strong>${ppsVal} pps</strong></div>
+                    <div style="color:#64748b; font-size:10px; font-weight:700; margin-bottom:2px;">${timeAgo} ↗</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#0b0f19; font-family:'JetBrains Mono',monospace;">${rxVal} Mbps (RX)</div>
+                    <div style="font-size:10px; color:#10b981; font-weight:700; margin-top:2px;">TX: ${txVal} Mbps</div>
                 `;
             }
         };
@@ -478,82 +447,62 @@
     };
 
     // ==========================================================================
-    // 5. ATTACK LOGS DATA MATRIX & DEFENSE ENGINE
+    // 5. ATTACK LOGS & DRIBBBLE DONUT ENGINE (IMAGE 1 EXACT REPLICA)
     // ==========================================================================
     let attackCounter = 1842;
     const ATTACK_LOGS_DATA = [
-        { id: 1, time: "Just now", exact: "21:18:42", vector: "SYN Flood", layer: "L4", port: "Port 80 • HTTP", ip: "185.220.101.0/24", country: "🇷🇺 RU", rate: "1.4 Gbps", pps: "340 kpps", severity: "CRITICAL", action: "BLOCKED" },
-        { id: 2, time: "2m ago", exact: "21:16:15", vector: "UDP Amplification", layer: "L4", port: "Port 443 • HTTPS", ip: "45.154.255.0/24", country: "🇺🇸 US", rate: "4.8 Gbps", pps: "1.1 Mpps", severity: "CRITICAL", action: "MITIGATED" },
-        { id: 3, time: "7m ago", exact: "21:11:03", vector: "HTTP Slowloris", layer: "L7", port: "Port 80 • Web API", ip: "193.106.191.0/24", country: "🇩🇪 DE", rate: "650 Req/s", pps: "45 kpps", severity: "HIGH", action: "DROPPED" },
-        { id: 4, time: "15m ago", exact: "21:03:22", vector: "SSH Brute-Force Botnet", layer: "AUTH", port: "Port 22 • OpenSSH", ip: "103.149.28.0/24", country: "🇨🇳 CN", rate: "120 Conn/s", pps: "18 kpps", severity: "HIGH", action: "BANNED" },
-        { id: 5, time: "32m ago", exact: "20:46:50", vector: "ICMP Ping of Death", layer: "L3", port: "WAN • Direct", ip: "91.240.118.0/24", country: "🇳🇱 NL", rate: "850 Mbps", pps: "190 kpps", severity: "NORMAL", action: "ABSORBED" },
-        { id: 6, time: "48m ago", exact: "20:30:11", vector: "NTP Reflection Flood", layer: "L4", port: "Port 123 • NTP", ip: "194.26.29.0/24", country: "🇷🇺 RU", rate: "2.1 Gbps", pps: "520 kpps", severity: "HIGH", action: "MITIGATED" },
-        { id: 7, time: "1h ago", exact: "20:18:04", vector: "DNS Query Flooding", layer: "L7", port: "Port 53 • DNS", ip: "178.62.199.0/24", country: "🇬🇧 GB", rate: "1.8 Gbps", pps: "410 kpps", severity: "CRITICAL", action: "BLOCKED" }
+        { id: 1, name: "Danny Liu", flag: "🇷🇺", ip: "185.220.101.0/24", vector: "SYN Flood (L4)", port: "Port 80 • HTTP", rate: "1.4 Gbps", pps: "340 kpps", action: "BLOCKED", val: "$37,431" },
+        { id: 2, name: "Bella Deviant", flag: "🇺🇸", ip: "45.154.255.0/24", vector: "UDP Amplification", port: "Port 443 • HTTPS", rate: "4.8 Gbps", pps: "1.1 Mpps", action: "MITIGATED", val: "$30,423" },
+        { id: 3, name: "Darrell Steward", flag: "🇩🇪", ip: "193.106.191.0/24", vector: "HTTP Slowloris", port: "Port 80 • Web API", rate: "650 Req/s", pps: "45 kpps", action: "DROPPED", val: "$28,549" },
+        { id: 4, name: "Lucas Bennett", flag: "🇨🇳", ip: "103.149.28.0/24", vector: "SSH Brute Botnet", port: "Port 22 • OpenSSH", rate: "120 Conn/s", pps: "18 kpps", action: "BLOCKED", val: "$19,210" },
+        { id: 5, name: "Kate Morrison", flag: "🇳🇱", ip: "91.240.118.0/24", vector: "ICMP Ping of Death", port: "WAN • Direct", rate: "850 Mbps", pps: "190 kpps", action: "MITIGATED", val: "$14,800" }
     ];
 
-    let currentFilterSeverity = 'ALL';
-    let currentSearchQuery = '';
+    let currentSearch = '';
+    let currentFilter = 'ALL';
 
     const renderAttackTable = () => {
         const tbody = document.getElementById('ab-attack-tbody');
         if (!tbody) return;
 
         const filtered = ATTACK_LOGS_DATA.filter(row => {
-            const matchSev = currentFilterSeverity === 'ALL' || 
-                (currentFilterSeverity === 'CRITICAL' && row.severity === 'CRITICAL') ||
-                (currentFilterSeverity === 'HIGH' && row.severity === 'HIGH') ||
-                (currentFilterSeverity === 'MITIGATED' && (row.action === 'MITIGATED' || row.action === 'ABSORBED'));
+            const matchFilter = currentFilter === 'ALL' ||
+                (currentFilter === 'BLOCKED' && row.action === 'BLOCKED') ||
+                (currentFilter === 'MITIGATED' && row.action === 'MITIGATED');
 
-            const query = currentSearchQuery.toLowerCase();
-            const matchSearch = !query || 
-                row.vector.toLowerCase().includes(query) ||
+            const query = currentSearch.toLowerCase();
+            const matchQuery = !query ||
+                row.name.toLowerCase().includes(query) ||
                 row.ip.toLowerCase().includes(query) ||
-                row.port.toLowerCase().includes(query) ||
-                row.country.toLowerCase().includes(query) ||
-                row.action.toLowerCase().includes(query);
+                row.vector.toLowerCase().includes(query) ||
+                row.port.toLowerCase().includes(query);
 
-            return matchSev && matchSearch;
+            return matchFilter && matchQuery;
         });
 
-        if (filtered.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align:center; padding:30px; color:var(--ab-text-secondary);">
-                        🔍 No attack logs matching current filter or search criteria.
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-
         tbody.innerHTML = filtered.map(row => {
-            const layerClass = row.layer === 'L4' ? 'ab-tag-l4' : row.layer === 'L7' ? 'ab-tag-l7' : row.layer === 'AUTH' ? 'ab-tag-auth' : 'ab-tag-l3';
-            const actionClass = row.action === 'BLOCKED' ? 'ab-status-blocked' : row.action === 'MITIGATED' ? 'ab-status-mitigated' : row.action === 'DROPPED' ? 'ab-status-dropped' : row.action === 'BANNED' ? 'ab-status-banned' : 'ab-status-absorbed';
-
+            const capClass = row.action === 'BLOCKED' ? 'ab-cap-blocked' : 'ab-cap-mitigated';
             return `
-                <tr id="threat-row-${row.id}">
+                <tr>
                     <td>
-                        <div style="font-weight:700; color:#fff;">${row.time}</div>
-                        <div style="font-size:10.5px; color:#64748b;">${row.exact} UTC</div>
+                        <div class="ab-avatar-cell">
+                            <div class="ab-avatar-circle">${row.flag}</div>
+                            <div>
+                                <div style="font-weight:700; color:#fff;">${row.name}</div>
+                                <div style="font-size:11px; color:#64748b; font-family:'JetBrains Mono',monospace;">${row.ip}</div>
+                            </div>
+                        </div>
                     </td>
                     <td>
-                        <span class="ab-layer-tag ${layerClass}">${row.layer}</span>
                         <strong style="color:#e2e8f0">${row.vector}</strong>
+                        <div style="font-size:10.5px; color:#64748b;">${row.port}</div>
                     </td>
                     <td>
-                        <span class="ab-port-pill">${row.port}</span>
-                    </td>
-                    <td>
-                        <span style="font-size:14px; margin-right:4px;">${row.country.split(' ')[0]}</span>
-                        <span style="color:#e2e8f0">${row.ip}</span>
-                        <span style="font-size:10px; color:#64748b; margin-left:4px;">[${row.country.split(' ')[1]}]</span>
-                    </td>
-                    <td>
-                        <div style="color:var(--ab-primary); font-weight:700;">${row.rate}</div>
+                        <span style="font-family:'JetBrains Mono',monospace; font-weight:700; color:#fff;">${row.rate}</span>
                         <div style="font-size:10.5px; color:#64748b;">${row.pps}</div>
                     </td>
                     <td>
-                        <span class="ab-status-pill ${actionClass}">
+                        <span class="ab-status-capsule ${capClass}">
                             ● ${row.action}
                         </span>
                     </td>
@@ -562,59 +511,40 @@
         }).join('');
     };
 
-    // Live Threat Simulation: Adds a realistic attack every 14 seconds
+    // Live Threat Simulation
     const startThreatSimulation = () => {
-        const simulatedVectors = [
-            { vector: "Memcached Reflection", layer: "L4", port: "Port 11211", country: "🇺🇸 US", rate: "3.2 Gbps", pps: "820 kpps", severity: "CRITICAL", action: "BLOCKED" },
-            { vector: "TCP RST Flood", layer: "L4", port: "Port 80 • Web", country: "🇷🇺 RU", rate: "1.1 Gbps", pps: "280 kpps", severity: "HIGH", action: "MITIGATED" },
-            { vector: "Mirai Botnet Scan", layer: "AUTH", port: "Port 23 • Telnet", country: "🇧🇷 BR", rate: "450 Conn/s", pps: "62 kpps", severity: "HIGH", action: "BANNED" },
-            { vector: "XML-RPC WordPress Flood", layer: "L7", port: "Port 443 • TLS", country: "🇫🇷 FR", rate: "890 Req/s", pps: "75 kpps", severity: "NORMAL", action: "DROPPED" }
+        const simTemplates = [
+            { name: "Daniel Craig", flag: "🇷🇺", vector: "TCP RST Flood", port: "Port 80", rate: "2.1 Gbps", pps: "520 kpps", action: "BLOCKED" },
+            { name: "Elisabeth Wayne", flag: "🇫🇷", vector: "WordPress XML-RPC", port: "Port 443", rate: "920 Req/s", pps: "82 kpps", action: "MITIGATED" },
+            { name: "Felicia Raspet", flag: "🇧🇷", vector: "Memcached UDP", port: "Port 11211", rate: "3.4 Gbps", pps: "780 kpps", action: "BLOCKED" }
         ];
 
         setInterval(() => {
-            const template = simulatedVectors[Math.floor(Math.random() * simulatedVectors.length)];
-            const now = new Date();
-            const timeStr = `${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}:${String(now.getUTCSeconds()).padStart(2,'0')}`;
+            const tmpl = simTemplates[Math.floor(Math.random() * simTemplates.length)];
             const randomIp = `${Math.floor(Math.random()*150)+40}.${Math.floor(Math.random()*200)}.${Math.floor(Math.random()*250)}.0/24`;
 
             attackCounter++;
-            const counterElem = document.getElementById('ab-stat-blocked-count');
+            const counterElem = document.getElementById('ab-stat-threats-count');
             if (counterElem) counterElem.innerText = attackCounter.toLocaleString();
 
             const newThreat = {
                 id: Date.now(),
-                time: "Just now",
-                exact: timeStr,
-                vector: template.vector,
-                layer: template.layer,
-                port: template.port,
+                name: tmpl.name,
+                flag: tmpl.flag,
                 ip: randomIp,
-                country: template.country,
-                rate: template.rate,
-                pps: template.pps,
-                severity: template.severity,
-                action: template.action
+                vector: tmpl.vector,
+                port: tmpl.port,
+                rate: tmpl.rate,
+                pps: tmpl.pps,
+                action: tmpl.action,
+                val: "$31,000"
             };
 
             ATTACK_LOGS_DATA.unshift(newThreat);
-            if (ATTACK_LOGS_DATA.length > 25) ATTACK_LOGS_DATA.pop();
+            if (ATTACK_LOGS_DATA.length > 15) ATTACK_LOGS_DATA.pop();
 
             renderAttackTable();
-
-            const firstRow = document.getElementById(`threat-row-${newThreat.id}`);
-            if (firstRow) firstRow.classList.add('new-threat');
-        }, 14000);
-    };
-
-    // Live UTC Clock in Modal
-    const startUtcClock = () => {
-        setInterval(() => {
-            const clock = document.getElementById('ab-live-utc-clock');
-            if (clock) {
-                const now = new Date();
-                clock.innerText = `UTC ${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')}:${String(now.getUTCSeconds()).padStart(2,'0')}`;
-            }
-        }, 1000);
+        }, 12000);
     };
 
     // ==========================================================================
@@ -627,8 +557,8 @@
         const bar = document.createElement('div');
         bar.id = 'arixbyte-suite-bar';
         bar.innerHTML = `
-            <span class="ab-badge">ArixByte Suite</span>
-            <select id="ab-palette-selector" title="Switch Theme Wallpaper & Accents">
+            <span class="ab-badge">DWISON Suite</span>
+            <select id="ab-palette-selector" title="Switch Theme Palette">
                 ${THEMES.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
             </select>
             <button class="ab-btn" id="ab-btn-traffic" title="Live Traffic & Bandwidth Graph">
@@ -652,223 +582,252 @@
         const modalsContainer = document.createElement('div');
         modalsContainer.id = 'arixbyte-modals';
         modalsContainer.innerHTML = `
-            <!-- Traffic Graph Modal -->
+            <!-- Traffic Graph Modal (Image 2 Replica) -->
             <div class="ab-modal-overlay" id="ab-modal-traffic">
                 <div class="ab-modal">
                     <div class="ab-modal-header">
-                        <div class="ab-modal-header-left">
-                            <div class="ab-radar-box">
-                                <div class="ab-radar-sweep"></div>
-                                <div class="ab-radar-ring"></div>
-                                <div class="ab-radar-cross"></div>
-                            </div>
+                        <div>
+                            <h3 class="ab-modal-title">📈 Total Bandwidth & Uplink Operations</h3>
+                            <div class="ab-modal-subtitle">Sub-second hardware packet telemetry & BGP transit monitoring</div>
+                        </div>
+                        <button class="ab-modal-close" onclick="document.getElementById('ab-modal-traffic').classList.remove('active')">✕</button>
+                    </div>
+
+                    <!-- Main Spline Mountain Card (Image 2 style) -->
+                    <div class="ab-chart-card">
+                        <div class="ab-chart-header">
                             <div>
-                                <h3 class="ab-modal-title">📈 Real-Time Bandwidth & Network Operations Center</h3>
-                                <div class="ab-modal-subtitle">
-                                    <span>Primary Uplink: <strong>10 Gbps SFP+ Direct</strong></span>
-                                    <span>•</span>
-                                    <span>Telemetry: <strong>Sub-Second Spline</strong></span>
+                                <div class="ab-chart-metric-title">Total Inbound Throughput</div>
+                                <div class="ab-chart-metric-val">
+                                    <span id="ab-chart-metric-rx">142.8 Mbps</span>
+                                    <span class="ab-pill-delta">↑ 2.92%</span>
+                                </div>
+                            </div>
+                            <div class="ab-timeframe-pills">
+                                <button class="ab-tf-pill" data-tf="24h">24h</button>
+                                <button class="ab-tf-pill" data-tf="1h">1h</button>
+                                <button class="ab-tf-pill" data-tf="15m">15m</button>
+                                <button class="ab-tf-pill active" data-tf="live">Live (5s)</button>
+                            </div>
+                        </div>
+
+                        <!-- Canvas with Pinned Tooltip Card -->
+                        <div class="ab-canvas-wrap">
+                            <canvas id="ab-traffic-canvas"></canvas>
+                            <div class="ab-pinned-crosshair" id="ab-pinned-crosshair"></div>
+                            <div class="ab-pinned-tooltip" id="ab-pinned-tooltip"></div>
+                        </div>
+
+                        <!-- Chart Legend -->
+                        <div class="ab-chart-legend">
+                            <div class="ab-chart-legend-left">
+                                <span><span class="ab-chart-dot" style="background:var(--ab-primary)"></span> Ingress (RX)</span>
+                                <span><span class="ab-chart-dot" style="background:#10b981"></span> Egress (TX)</span>
+                            </div>
+                            <div>Average annual throughput: <strong>$84,000 • 168 Mbps</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Secondary Row: Bar Spikes & Uplink Cards (Image 2 style) -->
+                    <div class="ab-chart-subrow">
+                        <!-- Left: Bar Chart Spikes ("Investments" style) -->
+                        <div class="ab-subcard">
+                            <div class="ab-subcard-title">
+                                <span>Throughput Spikes (Last 6 Hours)</span>
+                                <span class="ab-pill-delta">↑ 1.52%</span>
+                            </div>
+                            <div class="ab-bar-chart">
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$200</span>
+                                    <div class="ab-bar-stick" style="height:35px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">15:00</span>
+                                </div>
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$300</span>
+                                    <div class="ab-bar-stick" style="height:55px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">16:00</span>
+                                </div>
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$400</span>
+                                    <div class="ab-bar-stick" style="height:70px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">17:00</span>
+                                </div>
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$400</span>
+                                    <div class="ab-bar-stick" style="height:70px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">18:00</span>
+                                </div>
+                                <div class="ab-bar-col peak">
+                                    <span class="ab-bar-pill">$500</span>
+                                    <div class="ab-bar-stick" style="height:95px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">19:00</span>
+                                </div>
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$400</span>
+                                    <div class="ab-bar-stick" style="height:70px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">20:00</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="ab-modal-header-right">
-                            <div class="ab-beacon">
-                                <div class="ab-beacon-dot"></div>
-                                <span>LIVE TELEMETRY</span>
+
+                        <!-- Right: Uplink Interface Cards ("My cards" style) -->
+                        <div class="ab-subcard">
+                            <div class="ab-subcard-title">
+                                <span>Network Uplink Hardware</span>
+                                <span style="font-size:11px; color:var(--ab-primary); cursor:pointer;">+ Add Link</span>
                             </div>
-                            <button class="ab-modal-close" onclick="document.getElementById('ab-modal-traffic').classList.remove('active')">✕</button>
-                        </div>
-                    </div>
-
-                    <!-- Top Telemetry Metrics -->
-                    <div class="ab-stat-grid">
-                        <div class="ab-stat-card">
-                            <div class="lbl">Inbound Traffic (RX)</div>
-                            <div class="val" id="ab-stat-rx" style="color:#00d2ff">142.5 <span style="font-size:12px;font-weight:600;color:var(--ab-text-secondary)">Mbps</span></div>
-                            <div class="sub">▲ Peak: 485.0 Mbps • 95th: 310M</div>
-                        </div>
-                        <div class="ab-stat-card">
-                            <div class="lbl">Outbound Traffic (TX)</div>
-                            <div class="val" id="ab-stat-tx" style="color:#f72585">78.4 <span style="font-size:12px;font-weight:600;color:var(--ab-text-secondary)">Mbps</span></div>
-                            <div class="sub">▼ Peak: 295.0 Mbps • Ratio: 1:1.8</div>
-                        </div>
-                        <div class="ab-stat-card">
-                            <div class="lbl">Packet Throughput</div>
-                            <div class="val" id="ab-stat-pps" style="color:#00f5d4">31,420 pps</div>
-                            <div class="sub">⚡ MTU: 9000 (Jumbo Frames OK)</div>
-                        </div>
-                        <div class="ab-stat-card">
-                            <div class="lbl">Transit Latency</div>
-                            <div class="val" style="color:#fff">11.8 ms</div>
-                            <div class="sub">● Jitter: 0.4 ms • Loss: 0.00%</div>
-                        </div>
-                    </div>
-
-                    <!-- Graph Topbar & Timeframe Selector -->
-                    <div class="ab-graph-topbar">
-                        <div class="ab-graph-iface">
-                            <span style="color:var(--ab-primary)">🌐</span>
-                            <span>Interface: <strong>eth0 (WAN Uplink)</strong></span>
-                            <span style="color:#00f5d4; font-size:10px;">[LINK UP]</span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <div class="ab-timeframe-selector">
-                                <button class="ab-tf-btn active" data-tf="live">Live (5s)</button>
-                                <button class="ab-tf-btn" data-tf="15m">15m</button>
-                                <button class="ab-tf-btn" data-tf="1h">1h</button>
-                                <button class="ab-tf-btn" data-tf="24h">24h</button>
+                            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:14px 18px; margin-bottom:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:12px; font-weight:700; color:#fff;">eth0 (SFP+ Direct)</span>
+                                    <span style="font-size:10px; color:#10b981; font-weight:700;">● 10 Gbps UP</span>
+                                </div>
+                                <div style="font-size:20px; font-weight:800; font-family:'JetBrains Mono',monospace; color:#fff;">
+                                    $12,850.00 <span class="ab-pill-delta">↑ 3.52%</span>
+                                </div>
                             </div>
-                            <button class="ab-btn" id="ab-btn-pause-traffic" style="padding:5px 10px; font-size:11px;" title="Pause / Resume Live Feed">
-                                ⏸ Pause
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Spline Canvas Box -->
-                    <div class="ab-canvas-box">
-                        <canvas id="ab-traffic-canvas"></canvas>
-                        <div class="ab-canvas-crosshair" id="ab-canvas-crosshair"></div>
-                        <div class="ab-canvas-tooltip" id="ab-canvas-tooltip"></div>
-                    </div>
-
-                    <!-- Graph Footer & Status -->
-                    <div class="ab-graph-footer">
-                        <div style="display:flex; align-items:center; gap:16px;">
-                            <span style="display:flex; align-items:center; gap:6px;">
-                                <span style="width:10px; height:10px; border-radius:2px; background:#00d2ff; display:inline-block; box-shadow:0 0 6px #00d2ff;"></span>
-                                <strong style="color:#fff;">Ingress (RX)</strong> [Hardware Ring]
-                            </span>
-                            <span style="display:flex; align-items:center; gap:6px;">
-                                <span style="width:10px; height:10px; border-radius:2px; background:#f72585; display:inline-block; box-shadow:0 0 6px #f72585;"></span>
-                                <strong style="color:#fff;">Egress (TX)</strong> [Transit Core]
-                            </span>
-                        </div>
-                        <div>
-                            <span>Hardware Offload: <strong>SR-IOV / DPDK</strong></span>
-                            <span style="margin:0 6px;">•</span>
-                            <span>Sampling: <strong>1,200ms</strong></span>
+                            <div style="display:flex; gap:10px;">
+                                <button class="ab-btn-glass" style="flex:1;">↘ Request Ping</button>
+                                <button class="ab-btn-primary" style="flex:1;">↗ Transfer Link</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Attack Logs Modal -->
+            <!-- Attack Logs Modal (Image 1 Replica) -->
             <div class="ab-modal-overlay" id="ab-modal-attacks">
                 <div class="ab-modal">
                     <div class="ab-modal-header">
-                        <div class="ab-modal-header-left">
-                            <div class="ab-radar-box">
-                                <div class="ab-radar-sweep"></div>
-                                <div class="ab-radar-ring"></div>
-                                <div class="ab-radar-cross"></div>
+                        <div>
+                            <h3 class="ab-modal-title">🛡️ Security & Threat Defense Matrix</h3>
+                            <div class="ab-modal-subtitle">Autonomous BGP Anycast Scrubbing & Deep Packet Inspection (DPI)</div>
+                        </div>
+                        <button class="ab-modal-close" onclick="document.getElementById('ab-modal-attacks').classList.remove('active')">✕</button>
+                    </div>
+
+                    <!-- Top 4 Overview Metric Cards (Image 1 Overview row) -->
+                    <div class="ab-overview-grid">
+                        <div class="ab-overview-card">
+                            <div class="card-title">Scrubbed Bandwidth</div>
+                            <div class="card-value">$3,131,021</div>
+                            <div class="card-footer">
+                                <span class="ab-pill-delta">↑ 0.4% vs last month</span>
                             </div>
-                            <div>
-                                <h3 class="ab-modal-title">🛡️ Real-Time DDoS & Threat Defense Matrix</h3>
-                                <div class="ab-modal-subtitle">
-                                    <span>Global Scrubbing: <strong>12 BGP PoPs Active</strong></span>
-                                    <span>•</span>
-                                    <span>Deep Packet Inspection (DPI): <strong style="color:#00f5d4;">ON</strong></span>
+                        </div>
+                        <div class="ab-overview-card">
+                            <div class="card-title">Threats Neutralized</div>
+                            <div class="card-value" id="ab-stat-threats-count">1,842</div>
+                            <div class="card-footer">
+                                <span class="ab-pill-delta">↑ 32% vs last quarter</span>
+                            </div>
+                        </div>
+                        <div class="ab-overview-card">
+                            <div class="card-title">Quarterly Mitigation Goal</div>
+                            <div class="ab-gauge-wrap">
+                                <div class="card-value" style="margin:0;">71%</div>
+                                <svg class="ab-gauge-svg" viewBox="0 0 36 36">
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3.5" />
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="var(--ab-primary)" stroke-dasharray="71, 100" stroke-width="3.5" />
+                                </svg>
+                            </div>
+                            <div class="card-footer" style="margin-top:6px;">
+                                <span style="color:#64748b;">Goal: $1.1M Filtered</span>
+                            </div>
+                        </div>
+                        <div class="ab-overview-card">
+                            <div class="card-title">Shield Status</div>
+                            <div class="card-value" style="color:var(--ab-primary)">ARMED</div>
+                            <div class="card-footer">
+                                <span class="ab-pill-delta">● L3/L4/L7 Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donut Chart & Category Row (Image 1 "Sales Overview 102k" style) -->
+                    <div class="ab-donut-grid">
+                        <!-- Donut Chart Card -->
+                        <div class="ab-donut-card">
+                            <div class="ab-donut-svg-wrap">
+                                <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform:rotate(-90deg);">
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"></circle>
+                                    <!-- SYN Flood 44% (Lime) -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="var(--ab-primary)" stroke-width="5" stroke-dasharray="38.7 88" stroke-dashoffset="0"></circle>
+                                    <!-- UDP Amp 28% (Emerald) -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="24.6 88" stroke-dashoffset="-38.7"></circle>
+                                    <!-- HTTP L7 16% (Orange) -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#ff7828" stroke-width="5" stroke-dasharray="14.1 88" stroke-dashoffset="-63.3"></circle>
+                                    <!-- SSH 8% (Purple) -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#7209b7" stroke-width="5" stroke-dasharray="7 88" stroke-dashoffset="-77.4"></circle>
+                                </svg>
+                                <div class="ab-donut-center-text">
+                                    <span class="num">102k</span>
+                                    <span class="sub">Threat Events</span>
+                                </div>
+                            </div>
+                            <div class="ab-donut-legend">
+                                <div class="ab-donut-legend-row">
+                                    <span class="ab-donut-legend-label">
+                                        <span class="ab-donut-legend-dot" style="background:var(--ab-primary)"></span>
+                                        SYN Flood (L4)
+                                    </span>
+                                    <span class="ab-donut-legend-val">$55,640</span>
+                                </div>
+                                <div class="ab-donut-legend-row">
+                                    <span class="ab-donut-legend-label">
+                                        <span class="ab-donut-legend-dot" style="background:#10b981"></span>
+                                        UDP Amplification
+                                    </span>
+                                    <span class="ab-donut-legend-val">$11,420</span>
+                                </div>
+                                <div class="ab-donut-legend-row">
+                                    <span class="ab-donut-legend-label">
+                                        <span class="ab-donut-legend-dot" style="background:#ff7828"></span>
+                                        HTTP Slowloris
+                                    </span>
+                                    <span class="ab-donut-legend-val">$1,840</span>
+                                </div>
+                                <div class="ab-donut-legend-row">
+                                    <span class="ab-donut-legend-label">
+                                        <span class="ab-donut-legend-dot" style="background:#7209b7"></span>
+                                        SSH Brute Botnet
+                                    </span>
+                                    <span class="ab-donut-legend-val">$2,120</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="ab-modal-header-right">
-                            <div class="ab-beacon">
-                                <div class="ab-beacon-dot"></div>
-                                <span id="ab-live-utc-clock">UTC 21:18:42</span>
+
+                        <!-- Total Profit Mountain Mini Card (Image 1 style) -->
+                        <div class="ab-subcard" style="display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div class="ab-subcard-title">
+                                    <span>Total Scrubbed Traffic</span>
+                                    <span class="ab-pill-delta">↑ 24% Efficiency</span>
+                                </div>
+                                <div style="font-size:24px; font-weight:800; font-family:'JetBrains Mono',monospace; color:#fff; margin-bottom:8px;">
+                                    $136,755.77
+                                </div>
                             </div>
-                            <button class="ab-modal-close" onclick="document.getElementById('ab-modal-attacks').classList.remove('active')">✕</button>
+                            <svg viewBox="0 0 200 60" style="width:100%; height:75px;">
+                                <path d="M0,45 Q30,55 60,35 T120,40 T160,15 T200,30 L200,60 L0,60 Z" fill="rgba(184,255,44,0.15)"></path>
+                                <path d="M0,45 Q30,55 60,35 T120,40 T160,15 T200,30" fill="none" stroke="var(--ab-primary)" stroke-width="2.5"></path>
+                                <circle cx="200" cy="30" r="4" fill="#fff" stroke="var(--ab-primary)" stroke-width="2"></circle>
+                            </svg>
                         </div>
                     </div>
 
-                    <!-- Top Security Metrics -->
-                    <div class="ab-stat-grid">
-                        <div class="ab-stat-card">
-                            <div class="lbl">Shield Status</div>
-                            <div class="val" style="color:#00f5d4">
-                                <span class="ab-beacon-dot" style="margin-right:6px;"></span>
-                                ARMED
-                            </div>
-                            <div class="sub">Hardware BGP Scrubbing Active</div>
+                    <!-- Customer List / Threat Logs Table (Image 1 style) -->
+                    <div class="ab-table-card">
+                        <div class="ab-table-header-row">
+                            <span class="ab-table-title">Customer List (Threat Origin)</span>
+                            <input type="text" id="ab-attack-search" class="ab-table-search-input" placeholder="Search... ⌘ K" autocomplete="off">
                         </div>
-                        <div class="ab-stat-card">
-                            <div class="lbl">Threats Neutralized (24h)</div>
-                            <div class="val" id="ab-stat-blocked-count">1,842</div>
-                            <div class="sub">▲ +14.2% • 48.2 GB Dropped</div>
-                        </div>
-                        <div class="ab-stat-card">
-                            <div class="lbl">Scrubbing Efficiency</div>
-                            <div class="val" style="color:#00f5d4">99.99%</div>
-                            <div class="sub">Packet Leakage: &lt;0.001% (Zero Leak)</div>
-                        </div>
-                        <div class="ab-stat-card">
-                            <div class="lbl">Global Capacity</div>
-                            <div class="val">3.2 <span style="font-size:12px;font-weight:600;color:var(--ab-text-secondary)">Tbps</span></div>
-                            <div class="sub">Latency Overhead: &lt;0.2ms</div>
-                        </div>
-                    </div>
-
-                    <!-- Threat Vector Distribution Visualizer Bar -->
-                    <div class="ab-vector-distribution">
-                        <div class="ab-vector-bar-header">
-                            <span>◈ Threat Vector Distribution (Last 24 Hours)</span>
-                            <span style="font-size:10.5px; color:var(--ab-primary)">Total: 1,842 Recorded Events</span>
-                        </div>
-                        <div class="ab-vector-bar-wrap">
-                            <div class="ab-vector-seg" style="width:44%; background:#00d2ff;" title="SYN Flood: 44%"></div>
-                            <div class="ab-vector-seg" style="width:28%; background:#f72585;" title="UDP Amplification: 28%"></div>
-                            <div class="ab-vector-seg" style="width:16%; background:#ffaa00;" title="HTTP Slowloris: 16%"></div>
-                            <div class="ab-vector-seg" style="width:8%; background:#d066ff;" title="SSH Botnet: 8%"></div>
-                            <div class="ab-vector-seg" style="width:4%; background:#00f5d4;" title="ICMP / Other: 4%"></div>
-                        </div>
-                        <div class="ab-vector-legend">
-                            <div class="ab-vector-legend-item">
-                                <span class="ab-vector-legend-dot" style="background:#00d2ff;"></span>
-                                <span>SYN Flood (44%)</span>
-                            </div>
-                            <div class="ab-vector-legend-item">
-                                <span class="ab-vector-legend-dot" style="background:#f72585;"></span>
-                                <span>UDP Amp (28%)</span>
-                            </div>
-                            <div class="ab-vector-legend-item">
-                                <span class="ab-vector-legend-dot" style="background:#ffaa00;"></span>
-                                <span>HTTP L7 (16%)</span>
-                            </div>
-                            <div class="ab-vector-legend-item">
-                                <span class="ab-vector-legend-dot" style="background:#d066ff;"></span>
-                                <span>SSH Botnet (8%)</span>
-                            </div>
-                            <div class="ab-vector-legend-item">
-                                <span class="ab-vector-legend-dot" style="background:#00f5d4;"></span>
-                                <span>ICMP (4%)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Filter Controls & Real-Time Search -->
-                    <div class="ab-table-controls">
-                        <div class="ab-search-wrap">
-                            <span class="ab-search-icon">🔍</span>
-                            <input type="text" id="ab-attack-search" placeholder="Search by vector, IP range, port, country..." autocomplete="off">
-                        </div>
-                        <div class="ab-filter-tabs">
-                            <button class="ab-tab-btn active" data-filter="ALL">ALL (1,842)</button>
-                            <button class="ab-tab-btn" data-filter="CRITICAL">🔴 CRITICAL</button>
-                            <button class="ab-tab-btn" data-filter="HIGH">🟡 HIGH</button>
-                            <button class="ab-tab-btn" data-filter="MITIGATED">🟢 MITIGATED</button>
-                        </div>
-                    </div>
-
-                    <!-- Attack Logs Table -->
-                    <div class="ab-table-container">
                         <table class="ab-table">
                             <thead>
                                 <tr>
-                                    <th>Timestamp</th>
+                                    <th>Name & Origin IP</th>
                                     <th>Attack Vector</th>
-                                    <th>Target Port</th>
-                                    <th>Source & Origin</th>
-                                    <th>Peak Intensity</th>
-                                    <th>Defense Action</th>
+                                    <th>Intensity Throughput</th>
+                                    <th>Status Action</th>
                                 </tr>
                             </thead>
                             <tbody id="ab-attack-tbody">
@@ -881,24 +840,24 @@
         `;
         document.body.appendChild(modalsContainer);
 
-        // Traffic Modal Open & Init
+        // Open Traffic Modal
         document.getElementById('ab-btn-traffic').addEventListener('click', () => {
             const modal = document.getElementById('ab-modal-traffic');
             modal.classList.add('active');
             initTrafficGraph();
         });
 
-        // Attack Logs Modal Open & Init
+        // Open Attack Logs Modal
         document.getElementById('ab-btn-attacks').addEventListener('click', () => {
             const modal = document.getElementById('ab-modal-attacks');
             modal.classList.add('active');
             renderAttackTable();
         });
 
-        // Timeframe selector clicks
-        document.querySelectorAll('.ab-tf-btn').forEach(btn => {
+        // Timeframe selector buttons
+        document.querySelectorAll('.ab-tf-pill').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.ab-tf-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.ab-tf-pill').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 const tf = e.target.getAttribute('data-tf');
                 activeTimeframe = tf;
@@ -911,34 +870,14 @@
             });
         });
 
-        // Pause / Resume Traffic Feed
-        const pauseBtn = document.getElementById('ab-btn-pause-traffic');
-        if (pauseBtn) {
-            pauseBtn.addEventListener('click', () => {
-                isLiveTrafficPaused = !isLiveTrafficPaused;
-                pauseBtn.innerText = isLiveTrafficPaused ? '▶ Resume' : '⏸ Pause';
-                pauseBtn.style.color = isLiveTrafficPaused ? 'var(--ab-primary)' : '#e2e8f0';
-            });
-        }
-
-        // Attack Logs Search Filter
+        // Search Input Filter
         const searchInput = document.getElementById('ab-attack-search');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
-                currentSearchQuery = e.target.value.trim();
+                currentSearch = e.target.value.trim();
                 renderAttackTable();
             });
         }
-
-        // Attack Logs Severity Tabs
-        document.querySelectorAll('.ab-tab-btn').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                document.querySelectorAll('.ab-tab-btn').forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
-                currentFilterSeverity = e.target.getAttribute('data-filter');
-                renderAttackTable();
-            });
-        });
 
         // Close on Backdrop Click
         document.querySelectorAll('.ab-modal-overlay').forEach(overlay => {
@@ -950,13 +889,11 @@
             });
         });
 
-        // Start background engines
         startThreatSimulation();
-        startUtcClock();
     };
 
     // ==========================================================================
-    // 6. BOOTSTRAPPER & CONTINUOUS DOM WATCHDOG
+    // 7. BOOTSTRAPPER & CONTINUOUS DOM WATCHDOG
     // ==========================================================================
     const initArixByteSuite = () => {
         injectBackgroundLayer();
@@ -966,7 +903,6 @@
         enhanceEmptyState();
         setupFooterProtection();
 
-        // Watch for React re-renders or page navigation
         const reactObserver = new MutationObserver(() => {
             injectBackgroundLayer();
             injectHeroBanner();

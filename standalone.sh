@@ -2447,20 +2447,20 @@ install_convoy_theme() {
     fi
 
     echo -e "\n ${C1}◈ Select Initial Default Color Palette:${NC}"
-    echo -e "   ${CYAN}[1] Nebula Azure / Electric Cyan (Deep Space Glass)${NC}"
-    echo -e "   ${P1}[2] Cyberpunk Violet / Neon Amethyst (Vibrant Synthwave)${NC}"
-    echo -e "   ${MINT}[3] Emerald Matrix / Hyper Mint (Futuristic Tech)${NC}"
-    echo -e "   ${RED}[4] Crimson Blood / Obsidian Ruby (Stealth Dark)${NC}"
+    echo -e "   ${MINT}[1] Dribbble Lime / Neon Chartreuse (Dark Minimalist - Image 1 Style)${NC}"
+    echo -e "   ${GOLD}[2] Copper Amber / FinTech Luxury (Warm Obsidian - Image 2 Style)${NC}"
+    echo -e "   ${CYAN}[3] Nebula Azure / Electric Cyan (Deep Space Glass)${NC}"
+    echo -e "   ${P1}[4] Cyberpunk Violet / Neon Amethyst (Vibrant Synthwave)${NC}"
     echo -ne " ${C1}➜${NC} ${WHITE}Choose Palette${NC} ${GRAY}(1-4, Default: 1):${NC} "
     local pal_choice
     read -r pal_choice || true
-    local pal_id="nebula"
-    local pal_name="Nebula Cyan"
+    local pal_id="lime"
+    local pal_name="Dribbble Lime"
     case "$pal_choice" in
-        2) pal_id="cyberpunk"; pal_name="Cyberpunk Violet" ;;
-        3) pal_id="emerald"; pal_name="Emerald Matrix" ;;
-        4) pal_id="crimson"; pal_name="Crimson Blood" ;;
-        *) pal_id="nebula"; pal_name="Nebula Cyan" ;;
+        2) pal_id="amber"; pal_name="Copper Amber" ;;
+        3) pal_id="nebula"; pal_name="Nebula Cyan" ;;
+        4) pal_id="cyberpunk"; pal_name="Cyberpunk Violet" ;;
+        *) pal_id="lime"; pal_name="Dribbble Lime" ;;
     esac
 
     echo -e "\n${GRAY}Deploying ArixByte Theme assets to /var/www/convoy/public/arixbyte-theme...${NC}"
@@ -2526,20 +2526,20 @@ switch_convoy_theme_color() {
     fi
 
     echo -e "\n ${C1}◈ Select Color Theme to Activate:${NC}"
-    echo -e "   ${CYAN}[1] Nebula Azure / Electric Cyan (Deep Space Glass)${NC}"
-    echo -e "   ${P1}[2] Cyberpunk Violet / Neon Amethyst (Vibrant Synthwave)${NC}"
-    echo -e "   ${MINT}[3] Emerald Matrix / Hyper Mint (Futuristic Tech)${NC}"
-    echo -e "   ${RED}[4] Crimson Blood / Obsidian Ruby (Stealth Dark)${NC}"
+    echo -e "   ${MINT}[1] Dribbble Lime / Neon Chartreuse (Dark Minimalist - Image 1 Style)${NC}"
+    echo -e "   ${GOLD}[2] Copper Amber / FinTech Luxury (Warm Obsidian - Image 2 Style)${NC}"
+    echo -e "   ${CYAN}[3] Nebula Azure / Electric Cyan (Deep Space Glass)${NC}"
+    echo -e "   ${P1}[4] Cyberpunk Violet / Neon Amethyst (Vibrant Synthwave)${NC}"
     echo -ne " ${C1}➜${NC} ${WHITE}Choose Theme${NC} ${GRAY}(1-4):${NC} "
     local s_choice
     read -r s_choice || true
-    local pal_id="nebula"
-    local pal_name="Nebula Cyan"
+    local pal_id="lime"
+    local pal_name="Dribbble Lime"
     case "$s_choice" in
-        2) pal_id="cyberpunk"; pal_name="Cyberpunk Violet" ;;
-        3) pal_id="emerald"; pal_name="Emerald Matrix" ;;
-        4) pal_id="crimson"; pal_name="Crimson Blood" ;;
-        *) pal_id="nebula"; pal_name="Nebula Cyan" ;;
+        2) pal_id="amber"; pal_name="Copper Amber" ;;
+        3) pal_id="nebula"; pal_name="Nebula Cyan" ;;
+        4) pal_id="cyberpunk"; pal_name="Cyberpunk Violet" ;;
+        *) pal_id="lime"; pal_name="Dribbble Lime" ;;
     esac
 
     local blade_file="/var/www/convoy/resources/views/app.blade.php"
