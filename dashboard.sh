@@ -2066,6 +2066,26 @@ manage_single_vps_panel() {
                         # Ensure host utilities
                         apt-get update -y && apt-get install -y curl tar ca-certificates openssl 2>/dev/null || true
 
+                        # Clean up any broken or previous partial installation
+                        if [[ -d "/var/www/convoy" ]]; then
+                            if [[ -f "/var/www/convoy/docker-compose.yml" ]]; then
+                                echo -e " ${GOLD}⚠ Existing Convoy files detected. Cleaning up previous containers and files...${NC}"
+                                (cd /var/www/convoy && docker compose down -v --remove-orphans 2>/dev/null || true)
+                            fi
+                            rm -rf /var/www/convoy
+                        fi
+                        docker rm -f $(docker ps -a --filter "name=convoy" -q) 2>/dev/null || true
+
+                        # Free port 80 if taken by host apache2 or nginx
+                        if systemctl is-active --quiet apache2 2>/dev/null; then
+                            echo -e " ${GOLD}Stopping Apache2 to free port 80 for Convoy...${NC}"
+                            systemctl stop apache2 2>/dev/null || true
+                        fi
+                        if systemctl is-active --quiet nginx 2>/dev/null; then
+                            echo -e " ${GOLD}Stopping Nginx to free port 80 for Convoy...${NC}"
+                            systemctl stop nginx 2>/dev/null || true
+                        fi
+
                         mkdir -p /var/www/convoy
                         cd /var/www/convoy
 
@@ -2090,17 +2110,19 @@ manage_single_vps_panel() {
                             sed -i 's/Caddyfile-production/Caddyfile-development/g' dockerfiles/caddy/Dockerfile
                         fi
 
-                        chmod -R o+w storage bootstrap/cache 2>/dev/null || true
+                        chmod -R 777 storage bootstrap/cache 2>/dev/null || true
 
+                        local db_pass="$(openssl rand -hex 16 2>/dev/null || tr -dc A-Za-z0-9 </dev/urandom | head -c 24)"
+                        local redis_pass="$(openssl rand -hex 16 2>/dev/null || tr -dc A-Za-z0-9 </dev/urandom | head -c 24)"
                         if [[ ! -f .env ]]; then
                             cp .env.example .env
-                            local db_pass="$(openssl rand -hex 16 2>/dev/null || tr -dc A-Za-z0-9 </dev/urandom | head -c 24)"
-                            local redis_pass="$(openssl rand -hex 16 2>/dev/null || tr -dc A-Za-z0-9 </dev/urandom | head -c 24)"
                             sed -i "s|APP_URL=.*|APP_URL=http://${PUB_IP}|g" .env
                             sed -i "s|APP_ENV=.*|APP_ENV=production|g" .env
                             sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|g" .env
                             sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${db_pass}|g" .env
                             sed -i "s|REDIS_PASSWORD=.*|REDIS_PASSWORD=${redis_pass}|g" .env
+                        else
+                            db_pass="$(grep -E '^DB_PASSWORD=' .env 2>/dev/null | cut -d'=' -f2-)"
                         fi
 
                         echo -e "${GRAY}Building and launching Convoy containers (this may take 2-3 minutes)...${NC}"
@@ -2125,10 +2147,17 @@ manage_single_vps_panel() {
                         echo -e "${GRAY}Installing PHP dependencies via Composer...${NC}"
                         docker compose exec -T -e COMPOSER_ALLOW_SUPERUSER=1 workspace composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
-                        echo -e "${GRAY}Configuring application key and running database migrations...${NC}"
+                        echo -e "${GRAY}Configuring application key and generating secrets...${NC}"
                         docker compose exec -T workspace php artisan key:generate --force 2>/dev/null || true
-                        docker compose exec -T workspace php artisan optimize 2>/dev/null || true
+
+                        echo -e "${GRAY}Waiting for database service and executing migrations...${NC}"
+                        local db_wait=0
+                        while ! docker compose exec -T database mysqladmin ping -uconvoy_user -p"${db_pass}" &>/dev/null && [[ $db_wait -lt 40 ]]; do
+                            sleep 2
+                            db_wait=$((db_wait + 2))
+                        done
                         docker compose exec -T workspace php artisan migrate --force 2>/dev/null || true
+                        docker compose exec -T workspace php artisan optimize 2>/dev/null || true
 
                         echo -e "\n${CYAN}✦ Provisioning Convoy Administrator Account (${ADM_MAIL})...${NC}"
                         docker compose exec -T workspace php artisan c:user:make --email="$ADM_MAIL" --name="$ADM_NAME" --password="$ADM_PASS" --admin=1 2>/dev/null || docker compose exec workspace php artisan c:user:make || true
@@ -2302,7 +2331,7 @@ manage_single_vps_panel() {
                 return
                 ;;
             *)
-                echo -e "\n ${RED}✘ Invalid option '${vp_act}'!${NC}"
+                echo -e "\n ${RED}✘ Invalid option '${act}'!${NC}"
                 sleep 1
                 ;;
         esac
