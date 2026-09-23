@@ -946,34 +946,135 @@ detect_corrupt_files() {
     echo -e "${P1}⚙ Initiating deep filesystem scan for broken & corrupt stubs...${NC}\n"
 
     local corrupt_files=()
+    local total_scanned=0
+    local spin_idx=0
+    local spinner=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 
-    # 1. Broken symlinks in /etc, /var, /tmp
-    echo -ne " ${DARK_GRAY}├─${NC} Scanning dangling symbolic links... "
-    while IFS= read -r f; do
-        [[ -n "$f" ]] && corrupt_files+=("$f|BROKEN_SYMLINK")
-    done < <(find /etc /var /tmp -xtype l 2>/dev/null || true)
-    echo -e "${MINT}Done${NC}"
+    # Single-line live animated status renderer
+    render_scan_status() {
+        local p_num="$1"
+        local p_label="$2"
+        local pct="$3"
+        local current_path="$4"
+
+        local spin="${spinner[spin_idx % 10]}"
+        spin_idx=$((spin_idx + 1))
+        local bar_len=10
+        local filled=$(( (pct * bar_len) / 100 ))
+        if (( filled > bar_len )); then filled=$bar_len; fi
+        local empty=$(( bar_len - filled ))
+
+        local bar=""
+        for ((b=0; b<filled; b++)); do bar+="█"; done
+        for ((b=0; b<empty; b++)); do bar+="░"; done
+
+        local disp_path="$current_path"
+        if [[ ${#disp_path} -gt 28 ]]; then
+            disp_path="...${disp_path: -25}"
+        fi
+
+        printf "\r ${C1}%s${NC} ${BOLD}${WHITE}[%d/4 %s]${NC} ${P1}[%s]${NC} ${MINT}%3d%%${NC} ${DARK_GRAY}│${NC} ${GRAY}Scanned:${NC} ${WHITE}%-5d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt:${NC} ${RED}%-3d${NC} ${DARK_GRAY}│${NC} ${C2}%-28s${NC}\033[K" \
+            "$spin" "$p_num" "$p_label" "$bar" "$pct" "$total_scanned" "${#corrupt_files[@]}" "$disp_path"
+    }
+
+    # 1. Broken / Dangling Symbolic Links
+    local p1_targets=("/etc" "/tmp" "/var/log" "/var/tmp" "/var/cache" "/var/run" "/var/spool" "/usr/local/bin" "/usr/local/etc")
+    for d in /var/*; do
+        [[ -d "$d" ]] || continue
+        case "$d" in
+            */docker*|*/containers*|*/pterodactyl*|*/overlay2*|*/lib) continue ;;
+        esac
+        p1_targets+=("$d")
+    done
+
+    if [[ -d "/var/lib" ]]; then
+        for d in /var/lib/*; do
+            [[ -d "$d" ]] || continue
+            case "$d" in
+                */docker*|*/containers*|*/pterodactyl*|*/overlay2*) continue ;;
+            esac
+            p1_targets+=("$d")
+        done
+    fi
+
+    local p1_unique=()
+    for d in "${p1_targets[@]}"; do
+        [[ -d "$d" ]] && p1_unique+=("$d")
+    done
+    local total_p1=${#p1_unique[@]}
+    if [[ "$total_p1" -eq 0 ]]; then total_p1=1; fi
+    local p1_idx=0
+
+    for target_dir in "${p1_unique[@]}"; do
+        p1_idx=$((p1_idx + 1))
+        local pct=$(( (p1_idx * 25) / total_p1 ))
+        render_scan_status 1 "Symlinks" "$pct" "$target_dir"
+        while IFS= read -r f; do
+            [[ -z "$f" ]] && continue
+            total_scanned=$((total_scanned + 1))
+            if [[ ! -e "$f" ]]; then
+                corrupt_files+=("$f|BROKEN_SYMLINK")
+            fi
+            if (( total_scanned % 8 == 0 )); then
+                render_scan_status 1 "Symlinks" "$pct" "$f"
+            fi
+        done < <(find "$target_dir" -maxdepth 4 -path "*/docker*" -prune -o -path "*/containers*" -prune -o -path "*/pterodactyl*" -prune -o -type l -print 2>/dev/null || true)
+    done
+    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[1/4 Symlinks]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt Found: ${RED}%d${NC}\033[K\n" "$total_scanned" "${#corrupt_files[@]}"
 
     # 2. Corrupt core dumps / crash files
-    echo -ne " ${DARK_GRAY}├─${NC} Scanning orphaned crash dumps & logs... "
-    while IFS= read -r f; do
-        [[ -n "$f" ]] && corrupt_files+=("$f|CRASH_DUMP")
-    done < <(find /var/crash /tmp -type f \( -name "core*" -o -name "*.dump" -o -name "*.crash" \) 2>/dev/null || true)
-    echo -e "${MINT}Done${NC}"
+    local p2_targets=("/var/crash" "/tmp" "/var/log" "/var/tmp")
+    local total_p2=${#p2_targets[@]}
+    local p2_idx=0
+    for target_dir in "${p2_targets[@]}"; do
+        p2_idx=$((p2_idx + 1))
+        [[ -d "$target_dir" ]] || continue
+        local pct=$(( 25 + (p2_idx * 25) / total_p2 ))
+        render_scan_status 2 "CrashDumps" "$pct" "$target_dir"
+        while IFS= read -r f; do
+            [[ -z "$f" ]] && continue
+            total_scanned=$((total_scanned + 1))
+            corrupt_files+=("$f|CRASH_DUMP")
+            render_scan_status 2 "CrashDumps" "$pct" "$f"
+        done < <(find "$target_dir" -maxdepth 3 -type f \( -name "core*" -o -name "*.dump" -o -name "*.crash" -o -name "*.dmp" \) 2>/dev/null || true)
+    done
+    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[2/4 CrashDumps]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt Found: ${RED}%d${NC}\033[K\n" "$total_scanned" "${#corrupt_files[@]}"
 
     # 3. Partial package manager archives
-    echo -ne " ${DARK_GRAY}├─${NC} Scanning corrupted package download caches... "
-    while IFS= read -r f; do
-        [[ -n "$f" ]] && corrupt_files+=("$f|PARTIAL_PKG")
-    done < <(find /var/cache/apt/archives/partial /var/cache/dnf -type f 2>/dev/null || true)
-    echo -e "${MINT}Done${NC}"
+    local p3_targets=("/var/cache/apt/archives/partial" "/var/cache/dnf" "/var/cache/yum" "/var/lib/apt/lists/partial")
+    local total_p3=${#p3_targets[@]}
+    local p3_idx=0
+    for target_dir in "${p3_targets[@]}"; do
+        p3_idx=$((p3_idx + 1))
+        [[ -d "$target_dir" ]] || continue
+        local pct=$(( 50 + (p3_idx * 25) / total_p3 ))
+        render_scan_status 3 "PkgCaches" "$pct" "$target_dir"
+        while IFS= read -r f; do
+            [[ -z "$f" ]] && continue
+            total_scanned=$((total_scanned + 1))
+            corrupt_files+=("$f|PARTIAL_PKG")
+            render_scan_status 3 "PkgCaches" "$pct" "$f"
+        done < <(find "$target_dir" -type f 2>/dev/null || true)
+    done
+    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[3/4 PkgCaches]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt Found: ${RED}%d${NC}\033[K\n" "$total_scanned" "${#corrupt_files[@]}"
 
     # 4. Zero-byte lock files / stale pid files
-    echo -ne " ${DARK_GRAY}└─${NC} Scanning abandoned lock descriptors... "
-    while IFS= read -r f; do
-        [[ -n "$f" ]] && corrupt_files+=("$f|STALE_LOCK")
-    done < <(find /tmp /var/lock -type f -size 0 -name "*.lock" 2>/dev/null || true)
-    echo -e "${MINT}Done${NC}\n"
+    local p4_targets=("/tmp" "/var/lock" "/run/lock" "/var/run")
+    local total_p4=${#p4_targets[@]}
+    local p4_idx=0
+    for target_dir in "${p4_targets[@]}"; do
+        p4_idx=$((p4_idx + 1))
+        [[ -d "$target_dir" ]] || continue
+        local pct=$(( 75 + (p4_idx * 25) / total_p4 ))
+        render_scan_status 4 "LockFiles" "$pct" "$target_dir"
+        while IFS= read -r f; do
+            [[ -z "$f" ]] && continue
+            total_scanned=$((total_scanned + 1))
+            corrupt_files+=("$f|STALE_LOCK")
+            render_scan_status 4 "LockFiles" "$pct" "$f"
+        done < <(find "$target_dir" -maxdepth 2 -type f -size 0 -name "*.lock" 2>/dev/null || true)
+    done
+    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[4/4 LockFiles]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt Found: ${RED}%d${NC}\033[K\n\n" "$total_scanned" "${#corrupt_files[@]}"
 
     local total_found="${#corrupt_files[@]}"
     if [[ "$total_found" -eq 0 ]]; then
@@ -1047,32 +1148,73 @@ detect_corrupt_plugins() {
     echo -e " ${GRAY}Target Root :${NC} ${WHITE}${active_root}${NC}\n"
 
     local threats=()
+    local total_checked=0
+    local p_spin_idx=0
+    local spinner=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 
-    echo -ne " ${DARK_GRAY}├─${NC} Inspecting ForceOP & Backdoor Signatures... "
-    while IFS= read -r match; do
-        if [[ -n "$match" ]]; then
-            local file_path="${match%%:*}"
-            threats+=("$file_path|FORCEOP_BACKDOOR")
+    render_plugin_status() {
+        local p_step="$1"
+        local p_name="$2"
+        local pct="$3"
+        local current_f="$4"
+
+        local spin="${spinner[p_spin_idx % 10]}"
+        p_spin_idx=$((p_spin_idx + 1))
+        local bar_len=10
+        local filled=$(( (pct * bar_len) / 100 ))
+        if (( filled > bar_len )); then filled=$bar_len; fi
+        local empty=$(( bar_len - filled ))
+
+        local bar=""
+        for ((b=0; b<filled; b++)); do bar+="█"; done
+        for ((b=0; b<empty; b++)); do bar+="░"; done
+
+        local disp_f="$current_f"
+        if [[ ${#disp_f} -gt 28 ]]; then
+            disp_f="...${disp_f: -25}"
         fi
-    done < <(grep -rnIl -E "ForceOP|setOp\(true\)|c0\.fun|pirate\.jar|dev\.lone\.itemsadder|qprotect|discord\.com/api/webhooks" "$active_root" 2>/dev/null || true)
-    echo -e "${MINT}Done${NC}"
 
-    echo -ne " ${DARK_GRAY}├─${NC} Scanning Known Nulled & Leaked Distributions... "
-    while IFS= read -r match; do
-        if [[ -n "$match" ]]; then
-            local file_path="${match%%:*}"
-            threats+=("$file_path|NULLED_LEAK")
+        printf "\r ${C1}%s${NC} ${BOLD}${WHITE}[%d/3 %s]${NC} ${P1}[%s]${NC} ${MINT}%3d%%${NC} ${DARK_GRAY}│${NC} ${GRAY}Files:${NC} ${WHITE}%-5d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats:${NC} ${RED}%-3d${NC} ${DARK_GRAY}│${NC} ${C2}%-28s${NC}\033[K" \
+            "$spin" "$p_step" "$p_name" "$bar" "$pct" "$total_checked" "${#threats[@]}" "$disp_f"
+    }
+
+    # 1. ForceOP & Backdoor Signatures
+    render_plugin_status 1 "Backdoors" 10 "$active_root"
+    while IFS= read -r f; do
+        [[ -z "$f" ]] && continue
+        total_checked=$((total_checked + 1))
+        if grep -qE "ForceOP|setOp\(true\)|c0\.fun|pirate\.jar|dev\.lone\.itemsadder|qprotect|discord\.com/api/webhooks" "$f" 2>/dev/null; then
+            threats+=("$f|FORCEOP_BACKDOOR")
         fi
-    done < <(grep -rnIl -E "DirectLeaks|NullCord|BlackSpigot|SpigotUncensored|leak\.rip|nulled\.to" "$active_root" 2>/dev/null || true)
-    echo -e "${MINT}Done${NC}"
+        if (( total_checked % 5 == 0 )); then
+            render_plugin_status 1 "Backdoors" 33 "$f"
+        fi
+    done < <(find "$active_root" -maxdepth 5 -type f \( -name "*.jar" -o -name "*.yml" -o -name "*.json" -o -name "*.sk" -o -name "*.lua" \) 2>/dev/null || true)
+    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[1/3 Backdoors]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Files Checked: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats: ${RED}%d${NC}\033[K\n" "$total_checked" "${#threats[@]}"
 
-    echo -ne " ${DARK_GRAY}└─${NC} Detecting Disguised Scripts Inside Plugin Folders... "
+    # 2. Known Nulled & Leaked Distributions
+    render_plugin_status 2 "NulledLeaks" 45 "$active_root"
+    while IFS= read -r f; do
+        [[ -z "$f" ]] && continue
+        total_checked=$((total_checked + 1))
+        if grep -qE "DirectLeaks|NullCord|BlackSpigot|SpigotUncensored|leak\.rip|nulled\.to" "$f" 2>/dev/null; then
+            threats+=("$f|NULLED_LEAK")
+        fi
+        if (( total_checked % 5 == 0 )); then
+            render_plugin_status 2 "NulledLeaks" 66 "$f"
+        fi
+    done < <(find "$active_root" -maxdepth 5 -type f \( -name "*.jar" -o -name "*.yml" -o -name "*.txt" -o -name "*.json" \) 2>/dev/null || true)
+    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[2/3 NulledLeaks]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Files Checked: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats: ${RED}%d${NC}\033[K\n" "$total_checked" "${#threats[@]}"
+
+    # 3. Disguised Scripts Inside Plugin Folders
+    render_plugin_status 3 "RogueScripts" 80 "$active_root"
     while IFS= read -r rogue; do
-        if [[ -n "$rogue" ]]; then
-            threats+=("$rogue|ROGUE_EXEC")
-        fi
-    done < <(find "$active_root" -type f \( -name "*.sh" -o -name "*.py" -o -name "*.elf" \) 2>/dev/null | grep -E "plugins|mods|oxide" || true)
-    echo -e "${MINT}Done${NC}\n"
+        [[ -z "$rogue" ]] && continue
+        total_checked=$((total_checked + 1))
+        threats+=("$rogue|ROGUE_EXEC")
+        render_plugin_status 3 "RogueScripts" 99 "$rogue"
+    done < <(find "$active_root" -maxdepth 5 -type f \( -name "*.sh" -o -name "*.py" -o -name "*.elf" \) 2>/dev/null | grep -E "plugins|mods|oxide" || true)
+    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[3/3 RogueScripts]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Files Checked: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats: ${RED}%d${NC}\033[K\n\n" "$total_checked" "${#threats[@]}"
 
     local total_threats="${#threats[@]}"
     if [[ "$total_threats" -eq 0 ]]; then
