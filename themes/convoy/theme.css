@@ -1,18 +1,14 @@
 /* ==============================================================================
- * ARIXBYTE STUDIOS • ENTERPRISE CLOUD PLATFORM THEME
+ * ARIXBYTE STUDIOS • CONVOY PANEL LUXURY SUITE THEME
  * Designed by Mudit @ ArixByte Studios
  * 
- * Exact 1-to-1 Synthesis of User Dribbble & FinTech Reference Dashboards
+ * Inspired by Dribbble & Modern FinTech Design Systems (Neon Lime & Copper Amber)
  * Features:
- *  - Full 3-Column Bento Cloud Platform Layout (Image 1 & Image 2)
- *  - Left Cyber Navigation Rail with User Profile, Categories & Search
- *  - Overview Row with Circular Arc Speedometer Gauge & Delta Pills
- *  - Mountain Spline Chart with Pinned Floating Tooltip Card (09 Dec, 2024 ↗)
- *  - Donut Chart (Sales/Threat 102k) with Category Breakdown
- *  - Investments Vertical Bar Chart with Highlighted $500 Green Pill
- *  - Stacked "My Cards" Hardware Module with Solid Pill Action Buttons
- *  - Customer List Table with Circular User Avatars & Deal Values
- *  - Right-Rail Notifications, Activities & Active Manager Pill (Nataniel Donowan)
+ *  - Ambient Light Mesh Backgrounds (Emerald & Copper blooms)
+ *  - FinTech Mountain Spline Chart with Pinned Tooltip Card (Image 2 style)
+ *  - Dribbble Donut Chart & Speedometer Gauge Overview (Image 1 style)
+ *  - Matte Obsidian Glass Cards with Crisp Borders
+ *  - High-Contrast Pill Buttons & Segmented Controllers
  *  - Tamper-Proof Protected Footer Watchdog
  * ============================================================================== */
 
@@ -26,15 +22,17 @@
     --ab-primary-text: #0d120a;
     --ab-secondary: #10b981;
     --ab-accent: #22c55e;
-    --ab-bg-color: #0b0f0e;
-    --ab-card: rgba(18, 22, 21, 0.94);
-    --ab-card-inner: rgba(14, 18, 17, 0.96);
+    --ab-bg-color: #0c100f;
+    --ab-mesh-1: radial-gradient(circle at 10% 10%, rgba(184, 255, 44, 0.08) 0%, transparent 45%);
+    --ab-mesh-2: radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+    --ab-card: rgba(18, 22, 21, 0.84);
+    --ab-card-hover: rgba(24, 30, 28, 0.94);
     --ab-border: rgba(255, 255, 255, 0.08);
     --ab-border-glow: rgba(184, 255, 44, 0.45);
     --ab-text-primary: #f8fafc;
-    --ab-text-secondary: #8492a6;
-    --ab-text-muted: #64748b;
-    --ab-glow: 0 0 25px rgba(184, 255, 44, 0.22);
+    --ab-text-secondary: #94a3b8;
+    --ab-glow: 0 0 25px rgba(184, 255, 44, 0.25);
+    --ab-chart-fill: rgba(184, 255, 44, 0.22);
 }
 
 [data-theme="amber"] {
@@ -44,14 +42,16 @@
     --ab-secondary: #10b981;
     --ab-accent: #f59e0b;
     --ab-bg-color: #100d0b;
-    --ab-card: rgba(24, 19, 16, 0.94);
-    --ab-card-inner: rgba(19, 15, 12, 0.96);
+    --ab-mesh-1: radial-gradient(circle at 90% 15%, rgba(255, 120, 40, 0.12) 0%, transparent 50%);
+    --ab-mesh-2: radial-gradient(circle at 15% 85%, rgba(245, 158, 11, 0.08) 0%, transparent 45%);
+    --ab-card: rgba(23, 19, 16, 0.84);
+    --ab-card-hover: rgba(30, 24, 20, 0.94);
     --ab-border: rgba(255, 255, 255, 0.08);
     --ab-border-glow: rgba(255, 120, 40, 0.45);
     --ab-text-primary: #fff8f5;
     --ab-text-secondary: #a89f91;
-    --ab-text-muted: #786d5e;
-    --ab-glow: 0 0 25px rgba(255, 120, 40, 0.22);
+    --ab-glow: 0 0 25px rgba(255, 120, 40, 0.25);
+    --ab-chart-fill: rgba(255, 120, 40, 0.22);
 }
 
 [data-theme="nebula"] {
@@ -61,14 +61,16 @@
     --ab-secondary: #3b82f6;
     --ab-accent: #60a5fa;
     --ab-bg-color: #080c14;
-    --ab-card: rgba(14, 20, 32, 0.94);
-    --ab-card-inner: rgba(10, 15, 24, 0.96);
+    --ab-mesh-1: radial-gradient(circle at 20% 15%, rgba(0, 229, 255, 0.1) 0%, transparent 45%);
+    --ab-mesh-2: radial-gradient(circle at 85% 85%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
+    --ab-card: rgba(14, 20, 32, 0.84);
+    --ab-card-hover: rgba(20, 28, 44, 0.94);
     --ab-border: rgba(255, 255, 255, 0.08);
     --ab-border-glow: rgba(0, 229, 255, 0.45);
     --ab-text-primary: #f0f8ff;
     --ab-text-secondary: #94a3b8;
-    --ab-text-muted: #64748b;
-    --ab-glow: 0 0 25px rgba(0, 229, 255, 0.22);
+    --ab-glow: 0 0 25px rgba(0, 229, 255, 0.25);
+    --ab-chart-fill: rgba(0, 229, 255, 0.22);
 }
 
 [data-theme="cyberpunk"] {
@@ -78,402 +80,552 @@
     --ab-secondary: #7209b7;
     --ab-accent: #4cc9f0;
     --ab-bg-color: #0e0716;
-    --ab-card: rgba(24, 12, 36, 0.94);
-    --ab-card-inner: rgba(18, 9, 28, 0.96);
+    --ab-mesh-1: radial-gradient(circle at 80% 15%, rgba(247, 37, 133, 0.12) 0%, transparent 45%);
+    --ab-mesh-2: radial-gradient(circle at 20% 85%, rgba(114, 9, 183, 0.14) 0%, transparent 50%);
+    --ab-card: rgba(24, 12, 36, 0.84);
+    --ab-card-hover: rgba(34, 18, 50, 0.94);
     --ab-border: rgba(255, 255, 255, 0.08);
     --ab-border-glow: rgba(247, 37, 133, 0.45);
     --ab-text-primary: #fff0f7;
     --ab-text-secondary: #b69abf;
-    --ab-text-muted: #7e6685;
-    --ab-glow: 0 0 25px rgba(247, 37, 133, 0.22);
+    --ab-glow: 0 0 25px rgba(247, 37, 133, 0.25);
+    --ab-chart-fill: rgba(247, 37, 133, 0.22);
 }
 
-/* --- 2. FIXED AMBIENT CANVAS BACKGROUND --- */
+/* --- 2. FIXED AMBIENT LIGHTING MESH LAYER --- */
 #ab-bg-layer {
     position: fixed !important;
     inset: 0 !important;
     z-index: -99999 !important;
     background-color: var(--ab-bg-color) !important;
-    background-image: 
-        radial-gradient(circle at 10% 10%, rgba(var(--ab-primary-rgb), 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.09) 0%, transparent 50%) !important;
+    background-image: var(--ab-mesh-1), var(--ab-mesh-2) !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
     pointer-events: none !important;
-    transition: background 0.5s ease !important;
+    transition: background 0.5s ease-in-out !important;
 }
 
+#ab-bg-layer::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0%, rgba(5, 7, 10, 0.7) 100%) !important;
+    pointer-events: none !important;
+}
+
+/* --- 3. TRANSPARENCY OVERRIDES FOR CONVOY CONTAINER --- */
 html,
 body {
     background-color: transparent !important;
+    background: transparent !important;
     color: var(--ab-text-primary) !important;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
     min-height: 100vh !important;
-    margin: 0 !important;
-    padding: 0 0 46px 0 !important;
+    padding-bottom: 48px !important;
     -webkit-font-smoothing: antialiased;
 }
 
 #root,
 #root > div,
-main {
+main,
+.min-h-screen,
+div[class*="min-h-"] {
+    background-color: transparent !important;
     background: transparent !important;
 }
 
-/* --- 3. MASTER CLOUD WORKSPACE CONTAINER (BENTO GRID) --- */
-#ab-cloud-workspace {
-    display: flex;
-    max-width: 1480px;
-    margin: 18px auto 40px auto;
-    gap: 22px;
-    padding: 0 20px;
-    box-sizing: border-box;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+/* --- 4. TOP NAVBAR (DRIBBLE/FINTECH MINIMALISM) --- */
+nav,
+header,
+nav[class*="bg-"],
+header[class*="bg-"] {
+    background: rgba(12, 16, 18, 0.75) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border-bottom: 1px solid var(--ab-border) !important;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* --- 4. LEFT SIDEBAR NAVIGATION (IMAGE 1 & 2 STYLE) --- */
-.ab-sidebar {
-    width: 240px;
-    min-width: 240px;
-    background: var(--ab-card);
-    border: 1px solid var(--ab-border);
-    border-radius: 24px;
-    padding: 24px 18px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: calc(100vh - 120px);
-    position: sticky;
-    top: 20px;
-    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4);
-    box-sizing: border-box;
+nav a,
+header a {
+    color: #cbd5e1 !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    transition: all 0.2s ease !important;
 }
 
-/* User Profile Header */
-.ab-side-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
+nav a:hover,
+header a:hover {
+    color: var(--ab-primary) !important;
 }
 
-.ab-side-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--ab-primary), var(--ab-secondary));
-    color: var(--ab-primary-text);
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    position: relative;
-    box-shadow: 0 0 14px rgba(var(--ab-primary-rgb), 0.35);
+nav a[class*="border-b-"],
+header a[class*="border-b-"],
+button[class*="border-b-"] {
+    border-bottom: 2px solid var(--ab-primary) !important;
+    color: var(--ab-primary) !important;
+    font-weight: 700 !important;
 }
 
-.ab-side-avatar::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    right: -1px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #10b981;
-    border: 2px solid var(--ab-bg-color);
-}
-
-.ab-side-name {
-    font-size: 14px;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.2;
-}
-
-.ab-side-role {
-    font-size: 11px;
-    color: var(--ab-text-muted);
-}
-
-/* Sidebar Search */
-.ab-side-search {
-    position: relative;
-    margin-bottom: 24px;
-}
-
-.ab-side-search input {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.05) !important;
+/* --- 5. SEARCH BARS & INPUT FIELDS --- */
+input[type="text"],
+input[type="search"],
+input,
+select,
+textarea {
+    background: rgba(18, 24, 26, 0.8) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
     border: 1px solid var(--ab-border) !important;
     border-radius: 9999px !important;
-    padding: 8px 30px 8px 14px !important;
-    font-size: 12px !important;
     color: #fff !important;
-    box-sizing: border-box;
+    padding: 10px 18px !important;
+    font-size: 13px !important;
+    transition: all 0.25s ease !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
-.ab-side-search .kbd {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 10px;
-    color: var(--ab-text-muted);
-    font-family: 'JetBrains Mono', monospace;
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--ab-primary) !important;
+    box-shadow: 0 0 16px rgba(var(--ab-primary-rgb), 0.35), inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    outline: none !important;
 }
 
-/* Sidebar Groups & Items */
-.ab-side-group-title {
-    font-size: 10px;
-    text-transform: uppercase;
-    font-weight: 800;
-    color: var(--ab-text-muted);
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-    padding-left: 10px;
+/* --- 6. DRIBBBLE/FINTECH MATTE CARDS --- */
+div[class*="bg-gray-"],
+div[class*="bg-neutral-"],
+div[class*="bg-zinc-"],
+.card,
+.bg-gray-800,
+.bg-gray-900,
+.bg-neutral-800,
+.bg-neutral-900 {
+    background: var(--ab-card) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid var(--ab-border) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.ab-side-nav {
+div[class*="bg-gray-"]:hover,
+div[class*="bg-neutral-"]:hover,
+.card:hover {
+    border-color: var(--ab-border-glow) !important;
+    box-shadow: var(--ab-glow), 0 16px 45px rgba(0, 0, 0, 0.55) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* --- 7. PILL BUTTONS (IMAGE 1 & 2 STYLE) --- */
+button,
+.btn,
+button[class*="bg-"] {
+    border-radius: 9999px !important;
+    font-weight: 700 !important;
+    font-size: 12.5px !important;
+    letter-spacing: 0.2px !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+button:hover,
+button[class*="bg-"]:hover {
+    filter: brightness(1.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Primary High-Contrast Pill (like "Get Started" / "Transfer") */
+.ab-btn-primary {
+    background: var(--ab-primary) !important;
+    color: var(--ab-primary-text) !important;
+    padding: 9px 22px !important;
+    border: none !important;
+    border-radius: 9999px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 18px rgba(var(--ab-primary-rgb), 0.4) !important;
+    cursor: pointer !important;
+}
+
+.ab-btn-primary:hover {
+    box-shadow: 0 6px 24px rgba(var(--ab-primary-rgb), 0.6) !important;
+}
+
+/* Secondary Glass Pill (like "Request" in Image 2) */
+.ab-btn-glass {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    padding: 8px 20px !important;
+    border-radius: 9999px !important;
+    cursor: pointer !important;
+}
+
+.ab-btn-glass:hover {
+    background: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* --- 8. HERO DASHBOARD COMMAND BAR (IMAGE 1 OVERVIEW ROW) --- */
+#ab-hero-banner {
+    margin: 24px auto 28px auto;
+    max-width: 1200px;
+    background: var(--ab-card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--ab-border);
+    border-radius: 24px;
+    padding: 22px 30px;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.5), var(--ab-glow);
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 22px;
-}
-
-.ab-side-item {
-    display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    padding: 9px 14px;
-    border-radius: 9999px;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--ab-text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
+    gap: 20px;
     user-select: none;
 }
 
-.ab-side-item .left {
+.ab-hero-left h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 5px 0;
+    color: #fff;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.ab-side-item:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.04);
+.ab-hero-left h2 span.highlight {
+    color: var(--ab-primary);
 }
 
-/* Active Dashboard Pill (Exact Image 1 Style!) */
-.ab-side-item.active {
-    background: var(--ab-primary) !important;
-    color: var(--ab-primary-text) !important;
-    font-weight: 800 !important;
-    box-shadow: 0 4px 20px rgba(var(--ab-primary-rgb), 0.4) !important;
-}
-
-.ab-side-item.active .icon {
-    color: var(--ab-primary-text) !important;
-}
-
-/* Bottom Sidebar Brand */
-.ab-side-brand {
-    font-size: 12px;
-    font-weight: 800;
-    color: var(--ab-text-muted);
-    padding-left: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.ab-side-brand strong {
-    color: #fff;
-}
-
-/* --- 5. MAIN BENTO WORKSPACE CONTENT --- */
-.ab-main-workspace {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    min-width: 0;
-}
-
-/* Top Breadcrumb & Controls Bar */
-.ab-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--ab-card);
-    border: 1px solid var(--ab-border);
-    border-radius: 20px;
-    padding: 12px 22px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-}
-
-.ab-breadcrumbs {
+.ab-hero-left p {
     font-size: 13px;
-    font-weight: 600;
     color: var(--ab-text-secondary);
+    margin: 0;
+}
+
+.ab-hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.ab-hstat-card {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--ab-border);
+    border-radius: 16px;
+    padding: 10px 18px;
+    min-width: 120px;
+}
+
+.ab-hstat-card .label {
+    font-size: 11px;
+    color: var(--ab-text-secondary);
+    margin-bottom: 3px;
+}
+
+.ab-hstat-card .val-row {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.ab-breadcrumbs span.active {
-    color: #fff;
+.ab-hstat-card .val {
+    font-size: 16px;
     font-weight: 800;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
 }
 
-.ab-top-actions {
+.ab-pill-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    background: rgba(184, 255, 44, 0.15);
+    color: var(--ab-primary);
+    border: 1px solid rgba(var(--ab-primary-rgb), 0.3);
+}
+
+/* --- 9. EMPTY STATE (IMAGE 2 PROMOTIONAL CARD) --- */
+#ab-empty-card {
+    max-width: 640px;
+    margin: 40px auto;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(18, 22, 21, 0.95) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--ab-border-glow);
+    border-radius: 24px;
+    padding: 42px 36px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), var(--ab-glow);
+}
+
+.ab-empty-icon {
+    font-size: 50px;
+    margin-bottom: 16px;
+    display: inline-block;
+    filter: drop-shadow(0 0 20px var(--ab-primary));
+}
+
+.ab-empty-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.ab-empty-desc {
+    font-size: 13.5px;
+    color: var(--ab-text-secondary);
+    line-height: 1.6;
+    max-width: 460px;
+    margin: 0 auto 26px auto;
+}
+
+.ab-empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* --- 10. FLOATING CONTROL BAR --- */
+#arixbyte-suite-bar {
+    position: fixed;
+    top: 14px;
+    right: 20px;
+    z-index: 999990;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(14, 18, 20, 0.9);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 6px 14px;
+    border-radius: 9999px;
+    border: 1px solid var(--ab-border);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), var(--ab-glow);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    user-select: none;
+}
+
+#arixbyte-suite-bar .ab-badge {
+    background: var(--ab-primary);
+    color: var(--ab-primary-text);
+    font-weight: 800;
+    font-size: 11px;
+    padding: 4px 11px;
+    border-radius: 9999px;
+    letter-spacing: 0.3px;
+}
+
+.ab-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.ab-btn:hover {
+    background: rgba(var(--ab-primary-rgb), 0.2);
+    border-color: var(--ab-primary);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(var(--ab-primary-rgb), 0.35);
+}
+
+#ab-palette-selector {
+    background: rgba(18, 24, 26, 0.95);
+    color: var(--ab-primary);
+    border: 1px solid var(--ab-border);
+    border-radius: 9999px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+}
+
+/* --- 11. LUXURY MODALS (IMAGE 1 & IMAGE 2 COMPLIANT) --- */
+.ab-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 7, 10, 0.86);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    z-index: 999995;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ab-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.ab-modal {
+    background: var(--ab-card);
+    border: 1px solid var(--ab-border-glow);
+    box-shadow: 0 35px 90px rgba(0, 0, 0, 0.85), var(--ab-glow);
+    border-radius: 26px;
+    width: 92%;
+    max-width: 980px;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 30px 34px;
+    position: relative;
+    transform: scale(0.96) translateY(8px);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    color: #fff;
+}
+
+.ab-modal-overlay.active .ab-modal {
+    transform: scale(1) translateY(0);
+}
+
+.ab-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--ab-border);
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+}
+
+.ab-modal-title {
+    font-size: 21px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.ab-modal-subtitle {
+    font-size: 12.5px;
+    color: var(--ab-text-secondary);
+    margin-top: 4px;
+}
+
+.ab-modal-close {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #cbd5e1;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.ab-modal-close:hover {
+    background: var(--ab-primary);
+    color: var(--ab-primary-text);
+    transform: rotate(90deg);
+}
+
+/* Overview Metric Cards (Image 1 Style) */
+.ab-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.ab-overview-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--ab-border);
+    border-radius: 18px;
+    padding: 18px 20px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ab-overview-card:hover {
+    border-color: var(--ab-border-glow);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+.ab-overview-card .card-title {
+    font-size: 12px;
+    color: var(--ab-text-secondary);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.ab-overview-card .card-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 6px;
+}
+
+.ab-overview-card .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+/* Circular Arc Gauge (Image 1 Style) */
+.ab-gauge-wrap {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.ab-theme-pill-select {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--ab-border);
-    border-radius: 9999px;
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--ab-primary);
-    cursor: pointer;
-    outline: none;
+.ab-gauge-svg {
+    width: 44px;
+    height: 44px;
 }
 
-.ab-top-icon-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--ab-border);
-    color: #cbd5e1;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 13px;
-    transition: all 0.2s ease;
-}
-
-.ab-top-icon-btn:hover {
-    background: rgba(var(--ab-primary-rgb), 0.2);
-    border-color: var(--ab-primary);
-    color: #fff;
-}
-
-/* --- 6. OVERVIEW STAT CARDS (IMAGE 1 EXACT STYLE) --- */
-.ab-overview-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-}
-
-.ab-card-overview {
-    background: var(--ab-card);
-    border: 1px solid var(--ab-border);
-    border-radius: 20px;
-    padding: 18px 20px;
-    position: relative;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.ab-card-overview:hover {
-    border-color: var(--ab-border-glow);
-    transform: translateY(-2px);
-    box-shadow: var(--ab-glow), 0 12px 35px rgba(0, 0, 0, 0.5);
-}
-
-.ab-card-overview .title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--ab-text-secondary);
-    margin-bottom: 8px;
-}
-
-.ab-card-overview .value {
-    font-size: 26px;
-    font-weight: 800;
-    color: #fff;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: -0.5px;
-    margin-bottom: 8px;
-}
-
-.ab-delta-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 9999px;
-    background: rgba(184, 255, 44, 0.14);
-    color: var(--ab-primary);
-    border: 1px solid rgba(var(--ab-primary-rgb), 0.25);
-}
-
-.ab-delta-sub {
-    font-size: 11px;
-    color: var(--ab-text-muted);
-    margin-left: 6px;
-}
-
-/* Radial Gauge in Card 3 (Image 1 Style: 71%) */
-.ab-gauge-flex {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.ab-radial-svg {
-    width: 48px;
-    height: 48px;
-    transform: rotate(-90deg);
-}
-
-/* --- 7. BENTO MIDDLE SECTION: SPLINE MOUNTAIN + DONUT + RIGHT RAIL --- */
-.ab-bento-middle {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
-}
-
-.ab-bento-left-col {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* Main Mountain Spline Card (Image 2 Replica) */
-.ab-card-spline {
-    background: var(--ab-card);
+/* --- 12. FINTECH SPLINE GRAPH (IMAGE 2 REPLICA) --- */
+.ab-chart-card {
+    background: rgba(0, 0, 0, 0.45);
     border: 1px solid var(--ab-border);
     border-radius: 22px;
     padding: 22px 24px;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+    margin-bottom: 20px;
     position: relative;
 }
 
-.ab-spline-header {
+.ab-chart-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
-.ab-spline-title {
+.ab-chart-metric-title {
     font-size: 13px;
     color: var(--ab-text-secondary);
-    font-weight: 600;
     margin-bottom: 4px;
 }
 
-.ab-spline-val {
+.ab-chart-metric-val {
     font-size: 28px;
     font-weight: 800;
     color: #fff;
@@ -483,61 +635,65 @@ main {
     gap: 10px;
 }
 
-/* Timeframe Pills in Top Right (Image 2 style: 1 year, 6 month, 3 month, 1 month) */
+/* Timeframe Pills (Image 2 Style: 1 year, 6 month, 3 month, 1 month) */
 .ab-timeframe-pills {
     display: flex;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--ab-border);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 9999px;
     padding: 3px;
-    gap: 3px;
+    gap: 4px;
 }
 
-.ab-tf-btn {
+.ab-tf-pill {
     background: transparent;
     border: none;
     color: var(--ab-text-secondary);
-    padding: 5px 12px;
+    padding: 6px 14px;
     border-radius: 9999px;
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.ab-tf-btn:hover { color: #fff; }
-.ab-tf-btn.active {
+.ab-tf-pill:hover {
+    color: #fff;
+}
+
+.ab-tf-pill.active {
     background: var(--ab-primary);
     color: var(--ab-primary-text);
-    box-shadow: 0 2px 10px rgba(var(--ab-primary-rgb), 0.35);
+    box-shadow: 0 2px 10px rgba(var(--ab-primary-rgb), 0.4);
 }
 
-/* Canvas Area & Pinned Floating Tooltip Card (Image 2 Style!) */
-.ab-canvas-container {
+/* Spline Canvas Container */
+.ab-canvas-wrap {
     position: relative;
     width: 100%;
-    height: 240px;
+    height: 250px;
 }
 
-.ab-canvas-container canvas {
+.ab-canvas-wrap canvas {
     width: 100% !important;
-    height: 240px !important;
+    height: 250px !important;
     display: block;
     cursor: crosshair;
 }
 
+/* Pinned Floating Tooltip Card (Exact replica of Image 2's "09 Dec, 2024 ↗ 9,780.90 USD") */
 .ab-pinned-tooltip {
     position: absolute;
     pointer-events: none;
     background: #ffffff;
-    color: #0d1117;
+    color: #0b0f19;
     border-radius: 12px;
-    padding: 7px 12px;
-    font-size: 11px;
-    font-weight: 800;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    padding: 8px 14px;
+    font-size: 11.5px;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
     display: none;
-    z-index: 10;
+    z-index: 20;
     transform: translate(-50%, -125%);
     white-space: nowrap;
 }
@@ -545,313 +701,86 @@ main {
 .ab-pinned-tooltip::after {
     content: '';
     position: absolute;
-    bottom: -5px;
+    bottom: -6px;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid #ffffff;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #ffffff;
 }
 
 .ab-pinned-crosshair {
     position: absolute;
     top: 10px;
-    bottom: 25px;
+    bottom: 30px;
     width: 1px;
-    border-left: 1px dashed rgba(255, 255, 255, 0.25);
+    border-left: 1px dashed rgba(255, 255, 255, 0.3);
     pointer-events: none;
     display: none;
-    z-index: 5;
+    z-index: 10;
 }
 
-.ab-spline-legend {
+/* Chart Legend Row */
+.ab-chart-legend {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
-    font-size: 11.5px;
+    margin-top: 12px;
+    font-size: 12px;
     color: var(--ab-text-secondary);
 }
 
-/* Sales / Threat Overview Donut Card (Image 1 Style) */
-.ab-card-donut-row {
+.ab-chart-legend-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.ab-chart-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+/* Secondary Row in Graph Modal (Image 2 "Investments" & "My cards" style) */
+.ab-chart-subrow {
     display: grid;
-    grid-template-columns: 1.3fr 1fr;
+    grid-template-columns: 1.1fr 1fr;
     gap: 16px;
+    margin-top: 18px;
 }
 
-.ab-card-donut {
-    background: var(--ab-card);
+.ab-subcard {
+    background: rgba(0, 0, 0, 0.35);
     border: 1px solid var(--ab-border);
-    border-radius: 22px;
-    padding: 20px 22px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    padding: 18px 20px;
 }
 
-.ab-donut-svg-box {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    min-width: 120px;
-}
-
-.ab-donut-center {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.ab-donut-center .num {
-    font-size: 18px;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1;
-}
-
-.ab-donut-center .sub {
-    font-size: 9px;
-    color: var(--ab-text-muted);
-    text-transform: uppercase;
-    margin-top: 2px;
-}
-
-.ab-donut-items {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.ab-donut-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11.5px;
-}
-
-.ab-donut-lbl {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    color: #cbd5e1;
-}
-
-.ab-donut-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-}
-
-.ab-donut-val {
+.ab-subcard-title {
+    font-size: 13px;
     font-weight: 700;
     color: #fff;
-    font-family: 'JetBrains Mono', monospace;
-}
-
-/* Stacked Profit Mini Sparkline Card (Image 1 style) */
-.ab-card-sparkline {
-    background: var(--ab-card);
-    border: 1px solid var(--ab-border);
-    border-radius: 22px;
-    padding: 20px 22px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
-}
-
-/* --- 8. RIGHT SIDEBAR TELEMETRY RAIL (IMAGE 1 EXACT STYLE) --- */
-.ab-right-rail {
-    background: var(--ab-card);
-    border: 1px solid var(--ab-border);
-    border-radius: 24px;
-    padding: 22px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.4);
-}
-
-.ab-rail-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.ab-rail-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.ab-rail-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 11.5px;
-}
-
-.ab-rail-icon {
-    width: 24px;
-    height: 24px;
-    min-width: 24px;
-    border-radius: 50%;
-    background: rgba(184, 255, 44, 0.12);
-    color: var(--ab-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-}
-
-.ab-rail-text {
-    flex: 1;
-    color: #cbd5e1;
-    line-height: 1.35;
-}
-
-.ab-rail-time {
-    font-size: 10px;
-    color: var(--ab-text-muted);
-}
-
-/* Contacts / Managers (Nataniel Donowan in glowing neon lime pill, Image 1!) */
-.ab-manager-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 12px;
-    border-radius: 9999px;
-    font-size: 12px;
-    color: #cbd5e1;
-    font-weight: 600;
-}
-
-.ab-manager-item.active {
-    background: var(--ab-primary) !important;
-    color: var(--ab-primary-text) !important;
-    font-weight: 800 !important;
-    box-shadow: 0 4px 18px rgba(var(--ab-primary-rgb), 0.45) !important;
-}
-
-.ab-manager-actions {
-    display: flex;
-    gap: 6px;
-    color: var(--ab-primary-text);
-}
-
-/* --- 9. ROW 3: CUSTOMER LIST TABLE + INVESTMENTS BAR CHART (IMAGE 1 & 2) --- */
-.ab-bento-bottom {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 20px;
-}
-
-/* Customer List Table (Image 1 style) */
-.ab-card-table {
-    background: var(--ab-card);
-    border: 1px solid var(--ab-border);
-    border-radius: 22px;
-    padding: 20px 24px;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
-}
-
-.ab-table-title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 14px;
-}
-
-.ab-table-title {
-    font-size: 15px;
-    font-weight: 800;
-    color: #fff;
-}
-
-.ab-table-search {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid var(--ab-border) !important;
-    border-radius: 9999px !important;
-    padding: 6px 16px !important;
-    font-size: 12px !important;
-    color: #fff !important;
-    width: 180px !important;
-}
-
-.ab-bento-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-}
-
-.ab-bento-table th {
-    text-align: left;
-    padding: 10px 12px;
-    color: var(--ab-text-muted);
-    font-size: 11px;
-    font-weight: 600;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.ab-bento-table td {
-    padding: 11px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    color: #cbd5e1;
-    vertical-align: middle;
-}
-
-.ab-user-cell {
     display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.ab-user-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-/* Investments Bar Chart Widget (Image 2 style with $500 green pill!) */
-.ab-card-investments {
-    background: var(--ab-card);
-    border: 1px solid var(--ab-border);
-    border-radius: 22px;
-    padding: 20px 22px;
-    display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+    align-items: center;
 }
 
-.ab-bar-chart-row {
+/* Bar chart spikes (Image 2 style) */
+.ab-bar-chart {
     display: flex;
     align-items: flex-end;
     gap: 10px;
-    height: 120px;
-    padding: 10px 0 4px 0;
+    height: 110px;
+    padding-top: 10px;
 }
 
-.ab-bar-pillar {
+.ab-bar-col {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -861,26 +790,26 @@ main {
     justify-content: flex-end;
 }
 
+.ab-bar-pill {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--ab-text-secondary);
+}
+
 .ab-bar-stick {
     width: 100%;
     max-width: 32px;
     border-radius: 8px 8px 0 0;
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.08);
     transition: height 0.4s ease;
 }
 
-.ab-bar-pillar.peak .ab-bar-stick {
-    background: linear-gradient(180deg, var(--ab-primary) 0%, rgba(var(--ab-primary-rgb), 0.35) 100%);
-    box-shadow: 0 0 16px rgba(var(--ab-primary-rgb), 0.4);
+.ab-bar-col.peak .ab-bar-stick {
+    background: linear-gradient(180deg, var(--ab-primary) 0%, rgba(var(--ab-primary-rgb), 0.3) 100%);
+    box-shadow: 0 0 14px rgba(var(--ab-primary-rgb), 0.4);
 }
 
-.ab-bar-val-pill {
-    font-size: 10px;
-    color: var(--ab-text-muted);
-    font-weight: 700;
-}
-
-.ab-bar-pillar.peak .ab-bar-val-pill {
+.ab-bar-col.peak .ab-bar-pill {
     background: var(--ab-primary);
     color: var(--ab-primary-text);
     padding: 2px 7px;
@@ -888,40 +817,195 @@ main {
     font-weight: 800;
 }
 
-/* Pill Action Buttons (Image 1 & 2 Style) */
-.ab-btn-pill-primary {
-    background: var(--ab-primary) !important;
-    color: var(--ab-primary-text) !important;
-    border: none !important;
-    padding: 9px 20px !important;
-    border-radius: 9999px !important;
-    font-weight: 800 !important;
-    cursor: pointer !important;
-    box-shadow: 0 4px 16px rgba(var(--ab-primary-rgb), 0.35) !important;
-    transition: all 0.2s ease !important;
+/* --- 13. DRIBBBLE DONUT & TABLE (IMAGE 1 REPLICA) --- */
+.ab-donut-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 22px;
 }
 
-.ab-btn-pill-primary:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 6px 22px rgba(var(--ab-primary-rgb), 0.55) !important;
+.ab-donut-card {
+    background: rgba(0, 0, 0, 0.42);
+    border: 1px solid var(--ab-border);
+    border-radius: 22px;
+    padding: 22px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 
-.ab-btn-pill-glass {
-    background: rgba(255, 255, 255, 0.07) !important;
+.ab-donut-svg-wrap {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    min-width: 120px;
+}
+
+.ab-donut-center-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.ab-donut-center-text .num {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.ab-donut-center-text .sub {
+    font-size: 9.5px;
+    color: var(--ab-text-secondary);
+    text-transform: uppercase;
+}
+
+.ab-donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.ab-donut-legend-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+}
+
+.ab-donut-legend-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #cbd5e1;
+}
+
+.ab-donut-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.ab-donut-legend-val {
+    font-weight: 700;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Dribbble Customer List Table (Image 1 Style) */
+.ab-table-card {
+    background: rgba(0, 0, 0, 0.42);
+    border: 1px solid var(--ab-border);
+    border-radius: 22px;
+    padding: 20px 24px;
+}
+
+.ab-table-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.ab-table-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.ab-table-search-input {
+    background: rgba(255, 255, 255, 0.06) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: #fff !important;
-    padding: 8px 18px !important;
     border-radius: 9999px !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
+    padding: 7px 16px !important;
+    font-size: 12px !important;
+    color: #fff !important;
+    width: 220px !important;
 }
 
-.ab-btn-pill-glass:hover {
-    background: rgba(255, 255, 255, 0.14) !important;
+.ab-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
 }
 
-/* --- 10. TAMPER-PROOF PROTECTED FOOTER --- */
+.ab-table th {
+    text-align: left;
+    padding: 10px 14px;
+    color: var(--ab-text-secondary);
+    font-weight: 600;
+    font-size: 11px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ab-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+    vertical-align: middle;
+}
+
+.ab-table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
+}
+
+/* Circular Avatar for Threat Origin (Image 1 style) */
+.ab-avatar-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ab-avatar-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.ab-status-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    border-radius: 9999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.ab-cap-blocked {
+    background: rgba(255, 0, 85, 0.18);
+    color: #ff4d6d;
+    border: 1px solid rgba(255, 0, 85, 0.4);
+}
+
+.ab-cap-mitigated {
+    background: rgba(184, 255, 44, 0.18);
+    color: var(--ab-primary);
+    border: 1px solid rgba(var(--ab-primary-rgb), 0.4);
+}
+
+.ab-cap-dropped {
+    background: rgba(255, 170, 0, 0.18);
+    color: #ffaa00;
+    border: 1px solid rgba(255, 170, 0, 0.4);
+}
+
+/* --- 14. TAMPER-PROOF PROTECTED FOOTER --- */
 #arixbyte-protected-footer {
     position: fixed !important;
     bottom: 0 !important;
@@ -929,7 +1013,7 @@ main {
     right: 0 !important;
     width: 100vw !important;
     height: 38px !important;
-    background: rgba(10, 14, 15, 0.96) !important;
+    background: rgba(10, 14, 15, 0.95) !important;
     backdrop-filter: blur(24px) !important;
     -webkit-backdrop-filter: blur(24px) !important;
     border-top: 1px solid var(--ab-border) !important;

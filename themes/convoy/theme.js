@@ -1,18 +1,14 @@
 /**
  * ==============================================================================
- * ARIXBYTE STUDIOS • ENTERPRISE CLOUD PLATFORM ENGINE
+ * ARIXBYTE STUDIOS • CONVOY PANEL LUXURY SUITE ENGINE
  * Designed by Mudit @ ArixByte Studios
  * 
- * Exact 1-to-1 Synthesis of User Dribbble & FinTech Reference Dashboards
+ * Inspired by Dribbble & Modern FinTech Design Systems (Neon Lime & Copper Amber)
  * Features:
- *  - Master 3-Column Bento Cloud Workspace (Image 1 & Image 2)
- *  - Left Cyber Navigation Rail with User Profile, Categories & Search
- *  - Overview Row with Circular Arc Speedometer Gauge & Delta Pills
- *  - Mountain Spline Chart with Pinned Floating Tooltip Card (09 Dec, 2024 ↗)
- *  - Donut Chart (Sales/Threat 102k) with Category Breakdown
- *  - Investments Vertical Bar Chart with Highlighted $500 Green Pill
- *  - Customer List Table with Circular User Avatars & Deal Values
- *  - Right-Rail Notifications, Activities & Active Manager Pill (Nataniel Donowan)
+ *  - 4 Curated Themes: Dribbble Lime, Copper Amber, Electric Cyan, Cyberpunk
+ *  - FinTech Mountain Spline Chart with Pinned Tooltip Card (Image 2 style)
+ *  - Dribbble Donut Chart & Speedometer Gauge Overview (Image 1 style)
+ *  - Hero Command Center Bar & Empty State Beautifier
  *  - Tamper-Proof Protected Footer Watchdog
  * ==============================================================================
  */
@@ -38,12 +34,9 @@
     const applyTheme = (themeId) => {
         document.documentElement.setAttribute('data-theme', themeId);
         localStorage.setItem('arixbyte_convoy_theme', themeId);
-        const selector = document.getElementById('ab-theme-selector');
+        const selector = document.getElementById('ab-palette-selector');
         if (selector && selector.value !== themeId) {
             selector.value = themeId;
-        }
-        if (typeof window.reRenderSpline === 'function') {
-            window.reRenderSpline();
         }
     };
 
@@ -54,7 +47,7 @@
         document.body.prepend(bgLayer);
     };
 
-    // Apply immediately to prevent flash
+    // Apply immediately to prevent theme flashing
     applyTheme(getSavedTheme());
 
     // ==========================================================================
@@ -81,6 +74,7 @@
             document.body.appendChild(footer);
         }
 
+        // Force critical inline styles to override external tampering
         footer.style.setProperty('display', 'flex', 'important');
         footer.style.setProperty('visibility', 'visible', 'important');
         footer.style.setProperty('opacity', '1', 'important');
@@ -96,27 +90,128 @@
 
     const setupFooterProtection = () => {
         createProtectedFooter();
-        const observer = new MutationObserver(() => {
-            if (!document.getElementById('arixbyte-protected-footer')) {
-                createProtectedFooter();
+
+        const observer = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.type === 'childList') {
+                    if (!document.getElementById('arixbyte-protected-footer')) {
+                        createProtectedFooter();
+                    }
+                } else if (mutation.type === 'attributes' && mutation.target.id === 'arixbyte-protected-footer') {
+                    createProtectedFooter();
+                }
             }
         });
-        observer.observe(document.body, { childList: true, subtree: true });
+
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
         setInterval(createProtectedFooter, 800);
     };
 
     // ==========================================================================
-    // 3. FINTECH MOUNTAIN SPLINE ENGINE (IMAGE 2 EXACT REPLICA)
+    // 3. HERO COMMAND BAR & DASHBOARD ENHANCER (IMAGE 1 OVERVIEW ROW)
     // ==========================================================================
-    let splineInterval = null;
+    const injectHeroBanner = () => {
+        if (document.getElementById('ab-hero-banner')) return;
+
+        const searchInput = document.querySelector('input[type="text"], input[type="search"]');
+        const targetContainer = searchInput ? (searchInput.closest('div.max-w-7xl, div.container, main, div') || document.querySelector('main')) : document.querySelector('main, #root > div');
+
+        if (!targetContainer) return;
+
+        const banner = document.createElement('div');
+        banner.id = 'ab-hero-banner';
+        banner.innerHTML = `
+            <div class="ab-hero-left">
+                <h2>⚡ ArixByte <span class="highlight">Cloud Hypervisor</span></h2>
+                <p>Enterprise Virtual Instance Management & Proxmox VE Clustering Node</p>
+            </div>
+            <div class="ab-hero-stats">
+                <div class="ab-hstat-card">
+                    <div class="label">Virtual Nodes</div>
+                    <div class="val-row">
+                        <span class="val" id="ab-hstat-vm">Active</span>
+                        <span class="ab-pill-delta">▲ 100%</span>
+                    </div>
+                </div>
+                <div class="ab-hstat-card">
+                    <div class="label">Hypervisor</div>
+                    <div class="val-row">
+                        <span class="val">KVM / QEMU</span>
+                    </div>
+                </div>
+                <div class="ab-hstat-card">
+                    <div class="label">DDoS Shield</div>
+                    <div class="val-row">
+                        <span class="val" style="color:var(--ab-primary,#b8ff2c)">ARMED</span>
+                        <span class="ab-pill-delta">▲ 0.00% Leak</span>
+                    </div>
+                </div>
+                <div class="ab-hstat-card">
+                    <div class="label">Uplink WAN</div>
+                    <div class="val-row">
+                        <span class="val">10 Gbps</span>
+                        <span class="ab-pill-delta">● Online</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (searchInput && searchInput.parentElement) {
+            const parentBlock = searchInput.parentElement.parentElement;
+            if (parentBlock && parentBlock.parentElement) {
+                parentBlock.parentElement.insertBefore(banner, parentBlock);
+            } else {
+                targetContainer.prepend(banner);
+            }
+        } else {
+            targetContainer.prepend(banner);
+        }
+    };
+
+    // Replace plain "You have no servers" with Image 2 Promotional Card style
+    const enhanceEmptyState = () => {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while ((node = walker.nextNode())) {
+            if (node.nodeValue && node.nodeValue.trim() === "You have no servers.") {
+                const parent = node.parentElement;
+                if (parent && !parent.classList.contains('ab-processed-empty')) {
+                    parent.classList.add('ab-processed-empty');
+                    parent.innerHTML = `
+                        <div id="ab-empty-card">
+                            <div class="ab-empty-icon">🌐</div>
+                            <div class="ab-empty-title">Virtual Infrastructure Standby</div>
+                            <div class="ab-empty-desc">
+                                Secure, reliable, and trusted hypervisor clustering. Deploy a virtual node to begin real-time hardware telemetry and network analytics.
+                            </div>
+                            <div class="ab-empty-actions">
+                                <button class="ab-btn-primary" onclick="document.getElementById('ab-btn-traffic').click()">
+                                    <span>📈 Network Bandwidth</span>
+                                </button>
+                                <button class="ab-btn-glass" onclick="document.getElementById('ab-btn-attacks').click()">
+                                    <span>🛡️ Security Telemetry</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                break;
+            }
+        }
+    };
+
+    // ==========================================================================
+    // 4. FINTECH MOUNTAIN SPLINE GRAPH (IMAGE 2 EXACT REPLICA)
+    // ==========================================================================
+    let trafficInterval = null;
     let activeTimeframe = 'live';
 
-    let rxHistory = [120, 132, 145, 162, 158, 175, 192, 215, 200, 185, 172, 180, 210, 240, 275, 260, 245, 228, 212, 202, 220, 250, 290, 325, 310, 295, 270, 255, 240, 225, 210, 222, 245, 270, 252, 242];
+    let rxHistory = [120, 130, 142, 160, 155, 172, 190, 210, 195, 182, 170, 178, 205, 235, 270, 255, 240, 222, 208, 198, 215, 245, 285, 320, 305, 290, 265, 250, 235, 220, 205, 218, 240, 265, 248, 238];
     let txHistory = [60, 68, 65, 78, 75, 82, 95, 102, 98, 90, 84, 88, 100, 115, 132, 125, 118, 110, 102, 98, 105, 122, 142, 158, 150, 144, 132, 124, 116, 108, 100, 106, 118, 130, 122, 116];
 
     const TIMEFRAME_PRESETS = {
         'live': () => ({
-            rx: [120, 132, 145, 162, 158, 175, 192, 215, 200, 185, 172, 180, 210, 240, 275, 260, 245, 228, 212, 202, 220, 250, 290, 325, 310, 295, 270, 255, 240, 225, 210, 222, 245, 270, 252, 242],
+            rx: [120, 130, 142, 160, 155, 172, 190, 210, 195, 182, 170, 178, 205, 235, 270, 255, 240, 222, 208, 198, 215, 245, 285, 320, 305, 290, 265, 250, 235, 220, 205, 218, 240, 265, 248, 238],
             tx: [60, 68, 65, 78, 75, 82, 95, 102, 98, 90, 84, 88, 100, 115, 132, 125, 118, 110, 102, 98, 105, 122, 142, 158, 150, 144, 132, 124, 116, 108, 100, 106, 118, 130, 122, 116]
         }),
         '15m': () => ({
@@ -133,8 +228,8 @@
         })
     };
 
-    const initSplineGraph = () => {
-        const canvas = document.getElementById('ab-spline-canvas');
+    const initTrafficGraph = () => {
+        const canvas = document.getElementById('ab-traffic-canvas');
         if (!canvas) return;
         const box = canvas.parentElement;
         const ctx = canvas.getContext('2d');
@@ -145,7 +240,7 @@
         const resizeCanvas = () => {
             const rect = box.getBoundingClientRect();
             canvas.width = rect.width * dpr;
-            canvas.height = 240 * dpr;
+            canvas.height = 250 * dpr;
             ctx.scale(dpr, dpr);
         };
         resizeCanvas();
@@ -154,10 +249,10 @@
 
         const drawSpline = (points, strokeColor, fillColor) => {
             const width = box.clientWidth;
-            const height = 240;
-            const padLeft = 16;
-            const padRight = 50;
-            const padBottom = 28;
+            const height = 250;
+            const padLeft = 20;
+            const padRight = 55; // room for right Y labels like in Image 2
+            const padBottom = 30;
             const padTop = 15;
             const graphWidth = width - padLeft - padRight;
             const graphHeight = height - padBottom - padTop;
@@ -217,17 +312,17 @@
 
         const renderFrame = () => {
             const width = box.clientWidth;
-            const height = 240;
-            const padLeft = 16;
-            const padRight = 50;
-            const padBottom = 28;
+            const height = 250;
+            const padLeft = 20;
+            const padRight = 55;
+            const padBottom = 30;
             const padTop = 15;
             const graphWidth = width - padLeft - padRight;
             const graphHeight = height - padBottom - padTop;
 
             ctx.clearRect(0, 0, width, height);
 
-            // Horizontal Grid Lines & Right-aligned Y-labels ($20k, $15k, $10k, $5k, $1k style)
+            // Horizontal Grid Lines & Right-aligned Y-labels (Image 2 style: $20k, $15k, $10k, $5k, $1k)
             ctx.save();
             ctx.font = "10.5px 'JetBrains Mono', monospace";
             ctx.textAlign = "left";
@@ -238,8 +333,8 @@
                 const val = (MAX_MBPS / ySteps) * (ySteps - i);
                 const y = padTop + (graphHeight / ySteps) * i;
 
-                ctx.fillStyle = "rgba(148, 163, 184, 0.4)";
-                ctx.fillText(`$${val}k`, width - padRight + 12, y);
+                ctx.fillStyle = "rgba(148, 163, 184, 0.45)";
+                ctx.fillText(`$${val}M`, width - padRight + 12, y);
 
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
                 ctx.setLineDash([4, 4]);
@@ -250,18 +345,25 @@
                 ctx.stroke();
             }
 
-            // Bottom Axis Labels (Sep, Oct, Nov, Dec, Jan, Feb style)
+            // Bottom Axis Labels (Image 2 style: Sep, Oct, Nov, Dec, Jan, Feb)
             ctx.setLineDash([]);
             ctx.fillStyle = "rgba(148, 163, 184, 0.55)";
             ctx.textAlign = "center";
-            const timeLabels = ["Sep", "Oct", "Nov", "Dec", "Jan", "Feb"];
+            const timeLabels = activeTimeframe === 'live' 
+                ? ["-60s", "-45s", "-30s", "-15s", "NOW"]
+                : activeTimeframe === '15m'
+                ? ["-15m", "-11m", "-7m", "-3m", "NOW"]
+                : activeTimeframe === '1h'
+                ? ["-60m", "-45m", "-30m", "-15m", "NOW"]
+                : ["-24h", "-18h", "-12h", "-6h", "NOW"];
 
             for (let t = 0; t < timeLabels.length; t++) {
                 const x = padLeft + (graphWidth / (timeLabels.length - 1)) * t;
-                ctx.fillText(timeLabels[t], x, height - 8);
+                ctx.fillText(timeLabels[t], x, height - 10);
             }
             ctx.restore();
 
+            // Gradient Fills (Mountain Spline)
             const rootStyle = getComputedStyle(document.documentElement);
             const primaryColor = rootStyle.getPropertyValue('--ab-primary').trim() || '#b8ff2c';
 
@@ -273,32 +375,34 @@
             gradTx.addColorStop(0, "rgba(16, 185, 129, 0.2)");
             gradTx.addColorStop(1, "rgba(16, 185, 129, 0.0)");
 
+            // Ingress (RX) & Egress (TX)
             drawSpline(rxHistory, primaryColor, gradRx);
             drawSpline(txHistory, "#10b981", gradTx);
         };
-
-        window.reRenderSpline = renderFrame;
 
         const tickLive = () => {
             if (activeTimeframe !== 'live') return;
 
             const prevRx = rxHistory[rxHistory.length - 1];
             const prevTx = txHistory[txHistory.length - 1];
-            const newRx = Math.max(40, Math.min(480, prevRx + (Math.random() * 45 - 22)));
-            const newTx = Math.max(25, Math.min(310, prevTx + (Math.random() * 30 - 14)));
+            const newRx = Math.max(40, Math.min(480, prevRx + (Math.random() * 50 - 24)));
+            const newTx = Math.max(25, Math.min(310, prevTx + (Math.random() * 32 - 15)));
 
             rxHistory.shift(); rxHistory.push(newRx);
             txHistory.shift(); txHistory.push(newTx);
 
+            const rxElem = document.getElementById('ab-chart-metric-rx');
+            if (rxElem) rxElem.innerHTML = `${newRx.toFixed(1)} Mbps`;
+
             renderFrame();
         };
 
-        // Interactive Pinned Tooltip Card (Exact replica of Image 2: "09 Dec, 2024 ↗ 9,780.90 USD")
+        // Interactive Pinned Tooltip Card (Image 2 Replica)
         canvas.onmousemove = (e) => {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
-            const padLeft = 16;
-            const padRight = 50;
+            const padLeft = 20;
+            const padRight = 55;
             const graphWidth = rect.width - padLeft - padRight;
 
             if (mouseX < padLeft || mouseX > rect.width - padRight) {
@@ -309,9 +413,10 @@
 
             const step = graphWidth / (rxHistory.length - 1);
             const idx = Math.min(rxHistory.length - 1, Math.max(0, Math.round((mouseX - padLeft) / step)));
-            const rxVal = rxHistory[idx].toFixed(2);
+            const rxVal = rxHistory[idx].toFixed(1);
+            const txVal = txHistory[idx].toFixed(1);
             const snapX = padLeft + idx * step;
-            const snapY = 15 + (240 - 43) - (rxHistory[idx] / MAX_MBPS) * (240 - 43);
+            const snapY = 15 + (250 - 45) - (rxHistory[idx] / MAX_MBPS) * (250 - 45);
 
             if (crosshair) {
                 crosshair.style.display = 'block';
@@ -322,9 +427,11 @@
                 tooltip.style.display = 'block';
                 tooltip.style.left = `${snapX}px`;
                 tooltip.style.top = `${snapY}px`;
+                const timeAgo = activeTimeframe === 'live' ? `-${((rxHistory.length - 1 - idx) * 1.2).toFixed(0)}s ago` : `Slice #${idx + 1}`;
                 tooltip.innerHTML = `
-                    <div style="color:#64748b; font-size:10px; font-weight:700; margin-bottom:1px;">09 Dec, 2024 ↗</div>
-                    <div style="font-size:13px; font-weight:800; color:#0b0f19; font-family:'JetBrains Mono',monospace;">${rxVal} USD</div>
+                    <div style="color:#64748b; font-size:10px; font-weight:700; margin-bottom:2px;">${timeAgo} ↗</div>
+                    <div style="font-size:13.5px; font-weight:800; color:#0b0f19; font-family:'JetBrains Mono',monospace;">${rxVal} Mbps (RX)</div>
+                    <div style="font-size:10px; color:#10b981; font-weight:700; margin-top:2px;">TX: ${txVal} Mbps</div>
                 `;
             }
         };
@@ -334,561 +441,475 @@
             if (crosshair) crosshair.style.display = 'none';
         };
 
-        if (splineInterval) clearInterval(splineInterval);
+        if (trafficInterval) clearInterval(trafficInterval);
         renderFrame();
-        splineInterval = setInterval(tickLive, 1400);
+        trafficInterval = setInterval(tickLive, 1200);
     };
 
     // ==========================================================================
-    // 4. MASTER BENTO CLOUD WORKSPACE INJECTION (IMAGE 1 & 2)
+    // 5. ATTACK LOGS & DRIBBBLE DONUT ENGINE (IMAGE 1 EXACT REPLICA)
     // ==========================================================================
-    const injectCloudWorkspace = () => {
-        if (document.getElementById('ab-cloud-workspace')) return;
+    let attackCounter = 1842;
+    const ATTACK_LOGS_DATA = [
+        { id: 1, name: "Danny Liu", flag: "🇷🇺", ip: "185.220.101.0/24", vector: "SYN Flood (L4)", port: "Port 80 • HTTP", rate: "1.4 Gbps", pps: "340 kpps", action: "BLOCKED", val: "$37,431" },
+        { id: 2, name: "Bella Deviant", flag: "🇺🇸", ip: "45.154.255.0/24", vector: "UDP Amplification", port: "Port 443 • HTTPS", rate: "4.8 Gbps", pps: "1.1 Mpps", action: "MITIGATED", val: "$30,423" },
+        { id: 3, name: "Darrell Steward", flag: "🇩🇪", ip: "193.106.191.0/24", vector: "HTTP Slowloris", port: "Port 80 • Web API", rate: "650 Req/s", pps: "45 kpps", action: "DROPPED", val: "$28,549" },
+        { id: 4, name: "Lucas Bennett", flag: "🇨🇳", ip: "103.149.28.0/24", vector: "SSH Brute Botnet", port: "Port 22 • OpenSSH", rate: "120 Conn/s", pps: "18 kpps", action: "BLOCKED", val: "$19,210" },
+        { id: 5, name: "Kate Morrison", flag: "🇳🇱", ip: "91.240.118.0/24", vector: "ICMP Ping of Death", port: "WAN • Direct", rate: "850 Mbps", pps: "190 kpps", action: "MITIGATED", val: "$14,800" }
+    ];
 
-        const mainContainer = document.querySelector('main, #root > div, div[class*="min-h-screen"]');
-        if (!mainContainer) return;
+    let currentSearch = '';
+    let currentFilter = 'ALL';
 
-        // Hide default empty server container so our Bento Cloud Workspace takes full glory
-        const emptyNode = Array.from(document.querySelectorAll('div, p, span')).find(el => el.textContent && el.textContent.trim() === 'You have no servers.');
-        if (emptyNode) {
-            const emptyCard = emptyNode.closest('div[class*="bg-"], div[class*="card"], div');
-            if (emptyCard) emptyCard.style.display = 'none';
+    const renderAttackTable = () => {
+        const tbody = document.getElementById('ab-attack-tbody');
+        if (!tbody) return;
+
+        const filtered = ATTACK_LOGS_DATA.filter(row => {
+            const matchFilter = currentFilter === 'ALL' ||
+                (currentFilter === 'BLOCKED' && row.action === 'BLOCKED') ||
+                (currentFilter === 'MITIGATED' && row.action === 'MITIGATED');
+
+            const query = currentSearch.toLowerCase();
+            const matchQuery = !query ||
+                row.name.toLowerCase().includes(query) ||
+                row.ip.toLowerCase().includes(query) ||
+                row.vector.toLowerCase().includes(query) ||
+                row.port.toLowerCase().includes(query);
+
+            return matchFilter && matchQuery;
+        });
+
+        tbody.innerHTML = filtered.map(row => {
+            const capClass = row.action === 'BLOCKED' ? 'ab-cap-blocked' : 'ab-cap-mitigated';
+            return `
+                <tr>
+                    <td>
+                        <div class="ab-avatar-cell">
+                            <div class="ab-avatar-circle">${row.flag}</div>
+                            <div>
+                                <div style="font-weight:700; color:#fff;">${row.name}</div>
+                                <div style="font-size:11px; color:#64748b; font-family:'JetBrains Mono',monospace;">${row.ip}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <strong style="color:#e2e8f0">${row.vector}</strong>
+                        <div style="font-size:10.5px; color:#64748b;">${row.port}</div>
+                    </td>
+                    <td>
+                        <span style="font-family:'JetBrains Mono',monospace; font-weight:700; color:#fff;">${row.rate}</span>
+                        <div style="font-size:10.5px; color:#64748b;">${row.pps}</div>
+                    </td>
+                    <td>
+                        <span class="ab-status-capsule ${capClass}">
+                            ● ${row.action}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    };
+
+    // Live Threat Simulation
+    const startThreatSimulation = () => {
+        const simTemplates = [
+            { name: "Daniel Craig", flag: "🇷🇺", vector: "TCP RST Flood", port: "Port 80", rate: "2.1 Gbps", pps: "520 kpps", action: "BLOCKED" },
+            { name: "Elisabeth Wayne", flag: "🇫🇷", vector: "WordPress XML-RPC", port: "Port 443", rate: "920 Req/s", pps: "82 kpps", action: "MITIGATED" },
+            { name: "Felicia Raspet", flag: "🇧🇷", vector: "Memcached UDP", port: "Port 11211", rate: "3.4 Gbps", pps: "780 kpps", action: "BLOCKED" }
+        ];
+
+        setInterval(() => {
+            const tmpl = simTemplates[Math.floor(Math.random() * simTemplates.length)];
+            const randomIp = `${Math.floor(Math.random()*150)+40}.${Math.floor(Math.random()*200)}.${Math.floor(Math.random()*250)}.0/24`;
+
+            attackCounter++;
+            const counterElem = document.getElementById('ab-stat-threats-count');
+            if (counterElem) counterElem.innerText = attackCounter.toLocaleString();
+
+            const newThreat = {
+                id: Date.now(),
+                name: tmpl.name,
+                flag: tmpl.flag,
+                ip: randomIp,
+                vector: tmpl.vector,
+                port: tmpl.port,
+                rate: tmpl.rate,
+                pps: tmpl.pps,
+                action: tmpl.action,
+                val: "$31,000"
+            };
+
+            ATTACK_LOGS_DATA.unshift(newThreat);
+            if (ATTACK_LOGS_DATA.length > 15) ATTACK_LOGS_DATA.pop();
+
+            renderAttackTable();
+        }, 12000);
+    };
+
+    // ==========================================================================
+    // 6. FLOATING CONTROL BAR & MODALS INJECTION
+    // ==========================================================================
+    const injectSuiteUI = () => {
+        if (document.getElementById('arixbyte-suite-bar')) return;
+
+        // Floating Control Bar
+        const bar = document.createElement('div');
+        bar.id = 'arixbyte-suite-bar';
+        bar.innerHTML = `
+            <span class="ab-badge">DWISON Suite</span>
+            <select id="ab-palette-selector" title="Switch Theme Palette">
+                ${THEMES.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+            </select>
+            <button class="ab-btn" id="ab-btn-traffic" title="Live Traffic & Bandwidth Graph">
+                <span>📈 Traffic Graph</span>
+            </button>
+            <button class="ab-btn" id="ab-btn-attacks" title="Live DDoS & Attack Logs">
+                <span>🛡️ Attack Logs</span>
+            </button>
+        `;
+        document.body.appendChild(bar);
+
+        const selector = document.getElementById('ab-palette-selector');
+        if (selector) {
+            selector.value = getSavedTheme();
+            selector.addEventListener('change', (e) => {
+                applyTheme(e.target.value);
+            });
         }
 
-        const workspace = document.createElement('div');
-        workspace.id = 'ab-cloud-workspace';
-        workspace.innerHTML = `
-            <!-- LEFT SIDEBAR RAIL (IMAGE 1 & 2) -->
-            <aside class="ab-sidebar">
-                <div>
-                    <!-- User Profile Header -->
-                    <div class="ab-side-profile">
-                        <div class="ab-side-avatar">GH</div>
+        // Modals Container
+        const modalsContainer = document.createElement('div');
+        modalsContainer.id = 'arixbyte-modals';
+        modalsContainer.innerHTML = `
+            <!-- Traffic Graph Modal (Image 2 Replica) -->
+            <div class="ab-modal-overlay" id="ab-modal-traffic">
+                <div class="ab-modal">
+                    <div class="ab-modal-header">
                         <div>
-                            <div class="ab-side-name">Guy Hawkins</div>
-                            <div class="ab-side-role">Cloud Administrator</div>
+                            <h3 class="ab-modal-title">📈 Total Bandwidth & Uplink Operations</h3>
+                            <div class="ab-modal-subtitle">Sub-second hardware packet telemetry & BGP transit monitoring</div>
                         </div>
+                        <button class="ab-modal-close" onclick="document.getElementById('ab-modal-traffic').classList.remove('active')">✕</button>
                     </div>
 
-                    <!-- Search Input -->
-                    <div class="ab-side-search">
-                        <input type="text" placeholder="Search..." autocomplete="off">
-                        <span class="kbd">⌘ K</span>
-                    </div>
-
-                    <!-- Group 1: Dashboards -->
-                    <div class="ab-side-group-title">Dashboards</div>
-                    <div class="ab-side-nav">
-                        <div class="ab-side-item active">
-                            <span class="left">
-                                <span class="icon">⊞</span>
-                                <span>Overview</span>
-                            </span>
-                        </div>
-                        <div class="ab-side-item">
-                            <span class="left">
-                                <span class="icon">🛒</span>
-                                <span>eCommerce</span>
-                            </span>
-                            <span style="font-size:10px; color:var(--ab-text-muted);">›</span>
-                        </div>
-                        <div class="ab-side-item">
-                            <span class="left">
-                                <span class="icon">📊</span>
-                                <span>Analytics</span>
-                            </span>
-                            <span style="font-size:10px; color:var(--ab-text-muted);">›</span>
-                        </div>
-                        <div class="ab-side-item">
-                            <span class="left">
-                                <span class="icon">👥</span>
-                                <span>Customers</span>
-                            </span>
-                            <span style="font-size:10px; color:var(--ab-text-muted);">›</span>
-                        </div>
-                    </div>
-
-                    <!-- Group 2: Settings -->
-                    <div class="ab-side-group-title">Settings</div>
-                    <div class="ab-side-nav">
-                        <div class="ab-side-item">
-                            <span class="left">
-                                <span class="icon">✉</span>
-                                <span>Messages</span>
-                            </span>
-                        </div>
-                        <div class="ab-side-item">
-                            <span class="left">
-                                <span class="icon">★</span>
-                                <span>Customer Reviews</span>
-                            </span>
-                        </div>
-                        <div class="ab-side-item">
-                            <span class="left">
-                                <span class="icon">⚙</span>
-                                <span>Settings</span>
-                            </span>
-                        </div>
-                        <div class="ab-side-item">
-                            <span class="left">
-                                <span class="icon">?</span>
-                                <span>Help Centre</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bottom Brand -->
-                <div class="ab-side-brand">
-                    <span>⚡</span>
-                    <span><strong>DWISON</strong> CLOUD</span>
-                </div>
-            </aside>
-
-            <!-- MAIN BENTO WORKSPACE CONTENT -->
-            <div class="ab-main-workspace">
-                <!-- Top Breadcrumbs & Controls Bar -->
-                <div class="ab-top-bar">
-                    <div class="ab-breadcrumbs">
-                        <span>Dashboards</span>
-                        <span>/</span>
-                        <span class="active">Overview</span>
-                    </div>
-
-                    <div class="ab-top-actions">
-                        <select class="ab-theme-pill-select" id="ab-theme-selector" title="Switch Theme Palette">
-                            ${THEMES.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
-                        </select>
-                        <button class="ab-top-icon-btn" title="Dark Mode Toggle">🌙</button>
-                        <button class="ab-top-icon-btn" title="Refresh Telemetry" onclick="window.location.reload()">↻</button>
-                        <button class="ab-top-icon-btn" title="Notifications" style="position:relative;">
-                            🔔
-                            <span style="position:absolute; top:2px; right:2px; width:7px; height:7px; background:var(--ab-primary); border-radius:50%;"></span>
-                        </button>
-                        <button class="ab-top-icon-btn" title="Global BGP Network">🌐</button>
-                    </div>
-                </div>
-
-                <!-- ROW 1: TOP 4 OVERVIEW METRICS (EXACT IMAGE 1 REPLICA) -->
-                <div class="ab-overview-grid">
-                    <div class="ab-card-overview">
-                        <div class="title">Net revenue</div>
-                        <div class="value">$3,131,021</div>
-                        <div>
-                            <span class="ab-delta-pill">↑ 0.4%</span>
-                            <span class="ab-delta-sub">vs last month</span>
-                        </div>
-                    </div>
-
-                    <div class="ab-card-overview">
-                        <div class="title">ARR</div>
-                        <div class="value">$1,511,121</div>
-                        <div>
-                            <span class="ab-delta-pill">↑ 32%</span>
-                            <span class="ab-delta-sub">vs last quarter</span>
-                        </div>
-                    </div>
-
-                    <div class="ab-card-overview">
-                        <div class="title">Quarterly revenue goal</div>
-                        <div class="ab-gauge-flex">
+                    <!-- Main Spline Mountain Card (Image 2 style) -->
+                    <div class="ab-chart-card">
+                        <div class="ab-chart-header">
                             <div>
-                                <div class="value" style="margin:0;">71%</div>
-                                <div style="font-size:10.5px; color:var(--ab-text-muted); margin-top:2px;">Goal: $1.1M</div>
+                                <div class="ab-chart-metric-title">Total Inbound Throughput</div>
+                                <div class="ab-chart-metric-val">
+                                    <span id="ab-chart-metric-rx">142.8 Mbps</span>
+                                    <span class="ab-pill-delta">↑ 2.92%</span>
+                                </div>
                             </div>
-                            <svg class="ab-radial-svg" viewBox="0 0 36 36">
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4" />
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--ab-primary)" stroke-dasharray="71, 100" stroke-width="4" />
-                            </svg>
+                            <div class="ab-timeframe-pills">
+                                <button class="ab-tf-pill" data-tf="24h">24h</button>
+                                <button class="ab-tf-pill" data-tf="1h">1h</button>
+                                <button class="ab-tf-pill" data-tf="15m">15m</button>
+                                <button class="ab-tf-pill active" data-tf="live">Live (5s)</button>
+                            </div>
+                        </div>
+
+                        <!-- Canvas with Pinned Tooltip Card -->
+                        <div class="ab-canvas-wrap">
+                            <canvas id="ab-traffic-canvas"></canvas>
+                            <div class="ab-pinned-crosshair" id="ab-pinned-crosshair"></div>
+                            <div class="ab-pinned-tooltip" id="ab-pinned-tooltip"></div>
+                        </div>
+
+                        <!-- Chart Legend -->
+                        <div class="ab-chart-legend">
+                            <div class="ab-chart-legend-left">
+                                <span><span class="ab-chart-dot" style="background:var(--ab-primary)"></span> Ingress (RX)</span>
+                                <span><span class="ab-chart-dot" style="background:#10b981"></span> Egress (TX)</span>
+                            </div>
+                            <div>Average annual throughput: <strong>$84,000 • 168 Mbps</strong></div>
                         </div>
                     </div>
 
-                    <div class="ab-card-overview">
-                        <div class="title">New orders</div>
-                        <div class="value">18,221</div>
-                        <div>
-                            <span class="ab-delta-pill">↑ 11%</span>
-                            <span class="ab-delta-sub">vs last quarter</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ROW 2: BENTO MIDDLE SECTION (IMAGE 2 MOUNTAIN SPLINE + IMAGE 1 DONUT + RIGHT RAIL) -->
-                <div class="ab-bento-middle">
-                    <div class="ab-bento-left-col">
-                        <!-- Main Mountain Spline Card (Image 2 Replica) -->
-                        <div class="ab-card-spline">
-                            <div class="ab-spline-header">
-                                <div>
-                                    <div class="ab-spline-title">Total Balance</div>
-                                    <div class="ab-spline-val">
-                                        <span>$10,120.50</span>
-                                        <span class="ab-delta-pill">↑ 2.92%</span>
-                                    </div>
-                                </div>
-                                <div class="ab-timeframe-pills">
-                                    <button class="ab-tf-btn" data-tf="24h">1 year</button>
-                                    <button class="ab-tf-btn" data-tf="1h">6 month</button>
-                                    <button class="ab-tf-btn" data-tf="15m">3 month</button>
-                                    <button class="ab-tf-btn active" data-tf="live">1 month</button>
-                                </div>
+                    <!-- Secondary Row: Bar Spikes & Uplink Cards (Image 2 style) -->
+                    <div class="ab-chart-subrow">
+                        <!-- Left: Bar Chart Spikes ("Investments" style) -->
+                        <div class="ab-subcard">
+                            <div class="ab-subcard-title">
+                                <span>Throughput Spikes (Last 6 Hours)</span>
+                                <span class="ab-pill-delta">↑ 1.52%</span>
                             </div>
-
-                            <!-- Canvas Container with Pinned Tooltip Card -->
-                            <div class="ab-canvas-container">
-                                <canvas id="ab-spline-canvas"></canvas>
-                                <div class="ab-pinned-crosshair" id="ab-pinned-crosshair"></div>
-                                <div class="ab-pinned-tooltip" id="ab-pinned-tooltip"></div>
-                            </div>
-
-                            <!-- Bottom Legend -->
-                            <div class="ab-spline-legend">
-                                <div style="display:flex; gap:16px;">
-                                    <span><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--ab-primary); margin-right:5px;"></span> Actual balance</span>
-                                    <span><span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981; margin-right:5px;"></span> Total monthly balance</span>
+                            <div class="ab-bar-chart">
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$200</span>
+                                    <div class="ab-bar-stick" style="height:35px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">15:00</span>
                                 </div>
-                                <div>Average annual rate: <strong>$84,000</strong></div>
-                            </div>
-                        </div>
-
-                        <!-- Donut Chart & Stacked Profit Row (Image 1 Style) -->
-                        <div class="ab-card-donut-row">
-                            <!-- Sales Overview Donut Card -->
-                            <div class="ab-card-donut">
-                                <div class="ab-donut-svg-box">
-                                    <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform:rotate(-90deg);">
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"></circle>
-                                        <!-- Lime Arc (Electronic) -->
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="var(--ab-primary)" stroke-width="5" stroke-dasharray="45 88" stroke-dashoffset="0"></circle>
-                                        <!-- Emerald Arc (Furniture) -->
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="22 88" stroke-dashoffset="-45"></circle>
-                                        <!-- Gray/Dark Arc -->
-                                        <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="5" stroke-dasharray="14 88" stroke-dashoffset="-67"></circle>
-                                    </svg>
-                                    <div class="ab-donut-center">
-                                        <span class="num">102k</span>
-                                        <span class="sub">Weekly Visits</span>
-                                    </div>
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$300</span>
+                                    <div class="ab-bar-stick" style="height:55px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">16:00</span>
                                 </div>
-                                <div class="ab-donut-items">
-                                    <div style="font-size:12px; font-weight:700; color:#fff; margin-bottom:4px;">
-                                        Number of Sales: <span style="color:var(--ab-primary);">$71,020</span>
-                                    </div>
-                                    <div class="ab-donut-row">
-                                        <span class="ab-donut-lbl"><span class="ab-donut-dot" style="background:var(--ab-primary)"></span> Electronic</span>
-                                        <span class="ab-donut-val">$55,640</span>
-                                    </div>
-                                    <div class="ab-donut-row">
-                                        <span class="ab-donut-lbl"><span class="ab-donut-dot" style="background:#10b981"></span> Furniture</span>
-                                        <span class="ab-donut-val">$11,420</span>
-                                    </div>
-                                    <div class="ab-donut-row">
-                                        <span class="ab-donut-lbl"><span class="ab-donut-dot" style="background:rgba(255,255,255,0.4)"></span> Clothes</span>
-                                        <span class="ab-donut-val">$1,840</span>
-                                    </div>
-                                    <div class="ab-donut-row">
-                                        <span class="ab-donut-lbl"><span class="ab-donut-dot" style="background:rgba(255,255,255,0.2)"></span> Shoes</span>
-                                        <span class="ab-donut-val">$2,120</span>
-                                    </div>
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$400</span>
+                                    <div class="ab-bar-stick" style="height:70px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">17:00</span>
                                 </div>
-                            </div>
-
-                            <!-- Stacked Profit Mini Sparkline Card -->
-                            <div class="ab-card-sparkline">
-                                <div>
-                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                        <span style="font-size:12px; color:var(--ab-text-secondary); font-weight:600;">Total Profit</span>
-                                        <span class="ab-delta-pill">↑ 24%</span>
-                                    </div>
-                                    <div style="font-size:24px; font-weight:800; font-family:'JetBrains Mono',monospace; color:#fff;">
-                                        $136,755.77
-                                    </div>
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$400</span>
+                                    <div class="ab-bar-stick" style="height:70px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">18:00</span>
                                 </div>
-                                <svg viewBox="0 0 200 60" style="width:100%; height:65px;">
-                                    <path d="M0,45 Q30,55 60,35 T120,40 T160,15 T200,30 L200,60 L0,60 Z" fill="rgba(184,255,44,0.15)"></path>
-                                    <path d="M0,45 Q30,55 60,35 T120,40 T160,15 T200,30" fill="none" stroke="var(--ab-primary)" stroke-width="2.5"></path>
-                                    <circle cx="200" cy="30" r="4" fill="#fff" stroke="var(--ab-primary)" stroke-width="2"></circle>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT SIDEBAR TELEMETRY RAIL (EXACT IMAGE 1 REPLICA) -->
-                    <div class="ab-right-rail">
-                        <!-- Notifications -->
-                        <div>
-                            <div class="ab-rail-title">
-                                <span>Notifications</span>
-                                <span style="font-size:11px; color:var(--ab-text-muted);">4 New</span>
-                            </div>
-                            <div class="ab-rail-list">
-                                <div class="ab-rail-item">
-                                    <span class="ab-rail-icon">👤</span>
-                                    <div class="ab-rail-text">
-                                        <div><strong>56 New users registered.</strong></div>
-                                        <div class="ab-rail-time">Just now</div>
-                                    </div>
+                                <div class="ab-bar-col peak">
+                                    <span class="ab-bar-pill">$500</span>
+                                    <div class="ab-bar-stick" style="height:95px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">19:00</span>
                                 </div>
-                                <div class="ab-rail-item">
-                                    <span class="ab-rail-icon">🛒</span>
-                                    <div class="ab-rail-text">
-                                        <div><strong>132 Orders placed.</strong></div>
-                                        <div class="ab-rail-time">59 Minutes ago</div>
-                                    </div>
-                                </div>
-                                <div class="ab-rail-item">
-                                    <span class="ab-rail-icon">💵</span>
-                                    <div class="ab-rail-text">
-                                        <div><strong>Funds have been withdrawn.</strong></div>
-                                        <div class="ab-rail-time">12 Hours ago</div>
-                                    </div>
-                                </div>
-                                <div class="ab-rail-item">
-                                    <span class="ab-rail-icon">✉</span>
-                                    <div class="ab-rail-text">
-                                        <div><strong>5 Unread messages.</strong></div>
-                                        <div class="ab-rail-time">Today, 11:59 PM</div>
-                                    </div>
+                                <div class="ab-bar-col">
+                                    <span class="ab-bar-pill">$400</span>
+                                    <div class="ab-bar-stick" style="height:70px;"></div>
+                                    <span style="font-size:10px; color:#64748b;">20:00</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Activities -->
-                        <div>
-                            <div class="ab-rail-title">
-                                <span>Activities</span>
+                        <!-- Right: Uplink Interface Cards ("My cards" style) -->
+                        <div class="ab-subcard">
+                            <div class="ab-subcard-title">
+                                <span>Network Uplink Hardware</span>
+                                <span style="font-size:11px; color:var(--ab-primary); cursor:pointer;">+ Add Link</span>
                             </div>
-                            <div class="ab-rail-list">
-                                <div class="ab-rail-item">
-                                    <span style="width:8px; height:8px; border-radius:50%; background:var(--ab-primary); margin-top:5px;"></span>
-                                    <div class="ab-rail-text">
-                                        <div>Changed the style.</div>
-                                        <div class="ab-rail-time">Just now</div>
-                                    </div>
+                            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:14px 18px; margin-bottom:14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <span style="font-size:12px; font-weight:700; color:#fff;">eth0 (SFP+ Direct)</span>
+                                    <span style="font-size:10px; color:#10b981; font-weight:700;">● 10 Gbps UP</span>
                                 </div>
-                                <div class="ab-rail-item">
-                                    <span style="width:8px; height:8px; border-radius:50%; background:#ff7828; margin-top:5px;"></span>
-                                    <div class="ab-rail-text">
-                                        <div>177 New products added.</div>
-                                        <div class="ab-rail-time">47 Minutes ago</div>
-                                    </div>
-                                </div>
-                                <div class="ab-rail-item">
-                                    <span style="width:8px; height:8px; border-radius:50%; background:#10b981; margin-top:5px;"></span>
-                                    <div class="ab-rail-text">
-                                        <div>11 Products archived.</div>
-                                        <div class="ab-rail-time">1 Days ago</div>
-                                    </div>
+                                <div style="font-size:20px; font-weight:800; font-family:'JetBrains Mono',monospace; color:#fff;">
+                                    $12,850.00 <span class="ab-pill-delta">↑ 3.52%</span>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Contacts of your managers (Nataniel Donowan Active Pill, Image 1!) -->
-                        <div>
-                            <div class="ab-rail-title">
-                                <span>Contacts of your managers</span>
+                            <div style="display:flex; gap:10px;">
+                                <button class="ab-btn-glass" style="flex:1;">↘ Request Ping</button>
+                                <button class="ab-btn-primary" style="flex:1;">↗ Transfer Link</button>
                             </div>
-                            <div style="display:flex; flex-direction:column; gap:6px;">
-                                <div class="ab-manager-item">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span style="width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:10px;">DC</span>
-                                        <span>Daniel Craig</span>
-                                    </div>
-                                </div>
-                                <div class="ab-manager-item">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span style="width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:10px;">KM</span>
-                                        <span>Kate Morrison</span>
-                                    </div>
-                                </div>
-                                <!-- Active Pill for Nataniel Donowan (Image 1 Style) -->
-                                <div class="ab-manager-item active">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span style="width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; font-size:10px;">ND</span>
-                                        <span>Nataniel Donowan</span>
-                                    </div>
-                                    <div class="ab-manager-actions">
-                                        <span>✉</span>
-                                        <span>📞</span>
-                                    </div>
-                                </div>
-                                <div class="ab-manager-item">
-                                    <div style="display:flex; align-items:center; gap:8px;">
-                                        <span style="width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; font-size:10px;">EW</span>
-                                        <span>Elisabeth Wayne</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ROW 3: CUSTOMER LIST TABLE + INVESTMENTS BAR CHART (IMAGE 1 & 2) -->
-                <div class="ab-bento-bottom">
-                    <!-- Customer List Table (Image 1 Style) -->
-                    <div class="ab-card-table">
-                        <div class="ab-table-title-row">
-                            <span class="ab-table-title">Customer list</span>
-                            <input type="text" class="ab-table-search" placeholder="Search customer...">
-                        </div>
-                        <table class="ab-bento-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Deals</th>
-                                    <th>Total Deal Value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="ab-user-cell">
-                                            <div class="ab-user-avatar" style="background:#f72585;">DL</div>
-                                            <div>
-                                                <div style="font-weight:700; color:#fff;">Danny Liu</div>
-                                                <div style="font-size:10.5px; color:var(--ab-text-muted);">danny@gmail.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style="font-family:'JetBrains Mono',monospace;">1,023</td>
-                                    <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:#fff;">$37,431</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="ab-user-cell">
-                                            <div class="ab-user-avatar" style="background:#ff7828;">BD</div>
-                                            <div>
-                                                <div style="font-weight:700; color:#fff;">Bella Deviant</div>
-                                                <div style="font-size:10.5px; color:var(--ab-text-muted);">bella@gmail.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style="font-family:'JetBrains Mono',monospace;">963</td>
-                                    <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:#fff;">$30,423</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="ab-user-cell">
-                                            <div class="ab-user-avatar" style="background:#10b981;">DS</div>
-                                            <div>
-                                                <div style="font-weight:700; color:#fff;">Darrell Steward</div>
-                                                <div style="font-size:10.5px; color:var(--ab-text-muted);">darrell@gmail.com</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style="font-family:'JetBrains Mono',monospace;">843</td>
-                                    <td style="font-family:'JetBrains Mono',monospace; font-weight:700; color:#fff;">$28,549</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Investments Bar Chart Widget (Image 2 style with $500 green pill!) -->
-                    <div class="ab-card-investments">
-                        <div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                <span style="font-size:14px; font-weight:800; color:#fff;">Investments</span>
-                                <div style="display:flex; gap:8px;">
-                                    <button class="ab-btn-pill-glass" style="padding:4px 10px; font-size:10.5px;">Sort ↑↓</button>
-                                    <button class="ab-btn-pill-glass" style="padding:4px 10px; font-size:10.5px;">Month ⌄</button>
-                                </div>
-                            </div>
-                            <div style="font-size:22px; font-weight:800; font-family:'JetBrains Mono',monospace; color:#fff;">
-                                $3,200.00 <span class="ab-delta-pill">↑ 1.52%</span>
-                            </div>
-                        </div>
-
-                        <!-- Bar Chart Pillars -->
-                        <div class="ab-bar-chart-row">
-                            <div class="ab-bar-pillar">
-                                <span class="ab-bar-val-pill">$200</span>
-                                <div class="ab-bar-stick" style="height:35px;"></div>
-                                <span style="font-size:10px; color:var(--ab-text-muted);">Sep</span>
-                            </div>
-                            <div class="ab-bar-pillar">
-                                <span class="ab-bar-val-pill">$300</span>
-                                <div class="ab-bar-stick" style="height:55px;"></div>
-                                <span style="font-size:10px; color:var(--ab-text-muted);">Oct</span>
-                            </div>
-                            <div class="ab-bar-pillar">
-                                <span class="ab-bar-val-pill">$400</span>
-                                <div class="ab-bar-stick" style="height:70px;"></div>
-                                <span style="font-size:10px; color:var(--ab-text-muted);">Nov</span>
-                            </div>
-                            <div class="ab-bar-pillar">
-                                <span class="ab-bar-val-pill">$400</span>
-                                <div class="ab-bar-stick" style="height:70px;"></div>
-                                <span style="font-size:10px; color:var(--ab-text-muted);">Dec</span>
-                            </div>
-                            <!-- Peak Pillar with solid pill (Image 2 style) -->
-                            <div class="ab-bar-pillar peak">
-                                <span class="ab-bar-val-pill">$500</span>
-                                <div class="ab-bar-stick" style="height:95px;"></div>
-                                <span style="font-size:10px; color:var(--ab-text-muted);">Jan</span>
-                            </div>
-                            <div class="ab-bar-pillar">
-                                <span class="ab-bar-val-pill">$400</span>
-                                <div class="ab-bar-stick" style="height:70px;"></div>
-                                <span style="font-size:10px; color:var(--ab-text-muted);">Feb</span>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons Row -->
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06);">
-                            <span style="font-size:12px; color:var(--ab-text-muted);">Balance: <strong>$12,850.00</strong></span>
-                            <button class="ab-btn-pill-primary">Get Started ★</button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Attack Logs Modal (Image 1 Replica) -->
+            <div class="ab-modal-overlay" id="ab-modal-attacks">
+                <div class="ab-modal">
+                    <div class="ab-modal-header">
+                        <div>
+                            <h3 class="ab-modal-title">🛡️ Security & Threat Defense Matrix</h3>
+                            <div class="ab-modal-subtitle">Autonomous BGP Anycast Scrubbing & Deep Packet Inspection (DPI)</div>
+                        </div>
+                        <button class="ab-modal-close" onclick="document.getElementById('ab-modal-attacks').classList.remove('active')">✕</button>
+                    </div>
+
+                    <!-- Top 4 Overview Metric Cards (Image 1 Overview row) -->
+                    <div class="ab-overview-grid">
+                        <div class="ab-overview-card">
+                            <div class="card-title">Scrubbed Bandwidth</div>
+                            <div class="card-value">$3,131,021</div>
+                            <div class="card-footer">
+                                <span class="ab-pill-delta">↑ 0.4% vs last month</span>
+                            </div>
+                        </div>
+                        <div class="ab-overview-card">
+                            <div class="card-title">Threats Neutralized</div>
+                            <div class="card-value" id="ab-stat-threats-count">1,842</div>
+                            <div class="card-footer">
+                                <span class="ab-pill-delta">↑ 32% vs last quarter</span>
+                            </div>
+                        </div>
+                        <div class="ab-overview-card">
+                            <div class="card-title">Quarterly Mitigation Goal</div>
+                            <div class="ab-gauge-wrap">
+                                <div class="card-value" style="margin:0;">71%</div>
+                                <svg class="ab-gauge-svg" viewBox="0 0 36 36">
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3.5" />
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="var(--ab-primary)" stroke-dasharray="71, 100" stroke-width="3.5" />
+                                </svg>
+                            </div>
+                            <div class="card-footer" style="margin-top:6px;">
+                                <span style="color:#64748b;">Goal: $1.1M Filtered</span>
+                            </div>
+                        </div>
+                        <div class="ab-overview-card">
+                            <div class="card-title">Shield Status</div>
+                            <div class="card-value" style="color:var(--ab-primary)">ARMED</div>
+                            <div class="card-footer">
+                                <span class="ab-pill-delta">● L3/L4/L7 Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donut Chart & Category Row (Image 1 "Sales Overview 102k" style) -->
+                    <div class="ab-donut-grid">
+                        <!-- Donut Chart Card -->
+                        <div class="ab-donut-card">
+                            <div class="ab-donut-svg-wrap">
+                                <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform:rotate(-90deg);">
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"></circle>
+                                    <!-- SYN Flood 44% (Lime) -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="var(--ab-primary)" stroke-width="5" stroke-dasharray="38.7 88" stroke-dashoffset="0"></circle>
+                                    <!-- UDP Amp 28% (Emerald) -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#10b981" stroke-width="5" stroke-dasharray="24.6 88" stroke-dashoffset="-38.7"></circle>
+                                    <!-- HTTP L7 16% (Orange) -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#ff7828" stroke-width="5" stroke-dasharray="14.1 88" stroke-dashoffset="-63.3"></circle>
+                                    <!-- SSH 8% (Purple) -->
+                                    <circle cx="18" cy="18" r="14" fill="none" stroke="#7209b7" stroke-width="5" stroke-dasharray="7 88" stroke-dashoffset="-77.4"></circle>
+                                </svg>
+                                <div class="ab-donut-center-text">
+                                    <span class="num">102k</span>
+                                    <span class="sub">Threat Events</span>
+                                </div>
+                            </div>
+                            <div class="ab-donut-legend">
+                                <div class="ab-donut-legend-row">
+                                    <span class="ab-donut-legend-label">
+                                        <span class="ab-donut-legend-dot" style="background:var(--ab-primary)"></span>
+                                        SYN Flood (L4)
+                                    </span>
+                                    <span class="ab-donut-legend-val">$55,640</span>
+                                </div>
+                                <div class="ab-donut-legend-row">
+                                    <span class="ab-donut-legend-label">
+                                        <span class="ab-donut-legend-dot" style="background:#10b981"></span>
+                                        UDP Amplification
+                                    </span>
+                                    <span class="ab-donut-legend-val">$11,420</span>
+                                </div>
+                                <div class="ab-donut-legend-row">
+                                    <span class="ab-donut-legend-label">
+                                        <span class="ab-donut-legend-dot" style="background:#ff7828"></span>
+                                        HTTP Slowloris
+                                    </span>
+                                    <span class="ab-donut-legend-val">$1,840</span>
+                                </div>
+                                <div class="ab-donut-legend-row">
+                                    <span class="ab-donut-legend-label">
+                                        <span class="ab-donut-legend-dot" style="background:#7209b7"></span>
+                                        SSH Brute Botnet
+                                    </span>
+                                    <span class="ab-donut-legend-val">$2,120</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Profit Mountain Mini Card (Image 1 style) -->
+                        <div class="ab-subcard" style="display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div class="ab-subcard-title">
+                                    <span>Total Scrubbed Traffic</span>
+                                    <span class="ab-pill-delta">↑ 24% Efficiency</span>
+                                </div>
+                                <div style="font-size:24px; font-weight:800; font-family:'JetBrains Mono',monospace; color:#fff; margin-bottom:8px;">
+                                    $136,755.77
+                                </div>
+                            </div>
+                            <svg viewBox="0 0 200 60" style="width:100%; height:75px;">
+                                <path d="M0,45 Q30,55 60,35 T120,40 T160,15 T200,30 L200,60 L0,60 Z" fill="rgba(184,255,44,0.15)"></path>
+                                <path d="M0,45 Q30,55 60,35 T120,40 T160,15 T200,30" fill="none" stroke="var(--ab-primary)" stroke-width="2.5"></path>
+                                <circle cx="200" cy="30" r="4" fill="#fff" stroke="var(--ab-primary)" stroke-width="2"></circle>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Customer List / Threat Logs Table (Image 1 style) -->
+                    <div class="ab-table-card">
+                        <div class="ab-table-header-row">
+                            <span class="ab-table-title">Customer List (Threat Origin)</span>
+                            <input type="text" id="ab-attack-search" class="ab-table-search-input" placeholder="Search... ⌘ K" autocomplete="off">
+                        </div>
+                        <table class="ab-table">
+                            <thead>
+                                <tr>
+                                    <th>Name & Origin IP</th>
+                                    <th>Attack Vector</th>
+                                    <th>Intensity Throughput</th>
+                                    <th>Status Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ab-attack-tbody">
+                                <!-- Populated dynamically by renderAttackTable() -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         `;
+        document.body.appendChild(modalsContainer);
 
-        if (mainContainer) {
-            mainContainer.prepend(workspace);
-            initSplineGraph();
+        // Open Traffic Modal
+        document.getElementById('ab-btn-traffic').addEventListener('click', () => {
+            const modal = document.getElementById('ab-modal-traffic');
+            modal.classList.add('active');
+            initTrafficGraph();
+        });
 
-            // Connect Theme Switcher
-            const sel = document.getElementById('ab-theme-selector');
-            if (sel) {
-                sel.value = getSavedTheme();
-                sel.addEventListener('change', (e) => {
-                    applyTheme(e.target.value);
-                });
-            }
+        // Open Attack Logs Modal
+        document.getElementById('ab-btn-attacks').addEventListener('click', () => {
+            const modal = document.getElementById('ab-modal-attacks');
+            modal.classList.add('active');
+            renderAttackTable();
+        });
 
-            // Connect timeframe pills
-            document.querySelectorAll('.ab-tf-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    document.querySelectorAll('.ab-tf-btn').forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    const tf = e.target.getAttribute('data-tf');
-                    activeTimeframe = tf;
-                    if (TIMEFRAME_PRESETS[tf]) {
-                        const preset = TIMEFRAME_PRESETS[tf]();
-                        rxHistory = [...preset.rx];
-                        txHistory = [...preset.tx];
-                        initSplineGraph();
-                    }
-                });
+        // Timeframe selector buttons
+        document.querySelectorAll('.ab-tf-pill').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.ab-tf-pill').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                const tf = e.target.getAttribute('data-tf');
+                activeTimeframe = tf;
+                if (TIMEFRAME_PRESETS[tf]) {
+                    const preset = TIMEFRAME_PRESETS[tf]();
+                    rxHistory = [...preset.rx];
+                    txHistory = [...preset.tx];
+                    initTrafficGraph();
+                }
+            });
+        });
+
+        // Search Input Filter
+        const searchInput = document.getElementById('ab-attack-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                currentSearch = e.target.value.trim();
+                renderAttackTable();
             });
         }
+
+        // Close on Backdrop Click
+        document.querySelectorAll('.ab-modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                    if (trafficInterval) clearInterval(trafficInterval);
+                }
+            });
+        });
+
+        startThreatSimulation();
     };
 
     // ==========================================================================
-    // 5. BOOTSTRAPPER & WATCHDOG
+    // 7. BOOTSTRAPPER & CONTINUOUS DOM WATCHDOG
     // ==========================================================================
     const initArixByteSuite = () => {
         injectBackgroundLayer();
         applyTheme(getSavedTheme());
-        injectCloudWorkspace();
+        injectSuiteUI();
+        injectHeroBanner();
+        enhanceEmptyState();
         setupFooterProtection();
 
-        const observer = new MutationObserver(() => {
+        const reactObserver = new MutationObserver(() => {
             injectBackgroundLayer();
-            injectCloudWorkspace();
+            injectHeroBanner();
+            enhanceEmptyState();
             createProtectedFooter();
         });
-        observer.observe(document.body, { childList: true, subtree: true });
+        reactObserver.observe(document.body, { childList: true, subtree: true });
     };
 
     if (document.readyState === 'loading') {
