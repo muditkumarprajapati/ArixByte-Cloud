@@ -4,9 +4,10 @@
  * Designed by Mudit @ ArixByte Studios
  * 
  * Features:
- *  - 4 Dynamic Color Themes: Nebula, Cyberpunk, Emerald, Crimson
- *  - Live In-Panel Theme Switcher (Persistent localStorage)
- *  - Virtualizor-Style Live Traffic & Bandwidth Graph
+ *  - 4 Ultra-HD Cyber Wallpapers with Instant Background Layer Injection
+ *  - Real-Time Hero Command Center & Hypervisor Telemetry Cards
+ *  - Empty State Beautifier (turns "You have no servers" into luxury cyber card)
+ *  - Virtualizor-Style Live Traffic & Bandwidth Canvas Graph
  *  - Real-Time DDoS & Threat Attack Logs Inspector
  *  - Tamper-Proof Protected Footer Watchdog
  * ==============================================================================
@@ -24,7 +25,7 @@
     ];
 
     // ==========================================================================
-    // 1. THEME SWITCHER ENGINE
+    // 1. THEME SWITCHER & WALLPAPER LAYER ENGINE
     // ==========================================================================
     const getSavedTheme = () => {
         return localStorage.getItem('arixbyte_convoy_theme') || 'nebula';
@@ -37,6 +38,13 @@
         if (selector && selector.value !== themeId) {
             selector.value = themeId;
         }
+    };
+
+    const injectBackgroundLayer = () => {
+        if (document.getElementById('ab-bg-layer')) return;
+        const bgLayer = document.createElement('div');
+        bgLayer.id = 'ab-bg-layer';
+        document.body.prepend(bgLayer);
     };
 
     // Apply immediately to prevent theme flashing
@@ -52,8 +60,16 @@
             footer = document.createElement('div');
             footer.id = 'arixbyte-protected-footer';
             footer.innerHTML = `
-                <span class="ab-footer-badge">VERIFIED THEME</span>
-                <span>Convoy Theme Designed by <strong>Mudit</strong> @ <strong>ArixByte Studios</strong></span>
+                <div class="ab-footer-left">
+                    <span class="ab-footer-badge">ENTERPRISE</span>
+                    <span>ArixByte Hypervisor OS</span>
+                </div>
+                <div class="ab-footer-center">
+                    Convoy Theme Designed by <strong>Mudit</strong> @ <strong>ArixByte Studios</strong>
+                </div>
+                <div class="ab-footer-right">
+                    <span>Telemetry: <strong style="color:var(--ab-primary,#00d2ff)">● ONLINE</strong></span>
+                </div>
             `;
             document.body.appendChild(footer);
         }
@@ -67,7 +83,7 @@
         footer.style.setProperty('left', '0px', 'important');
         footer.style.setProperty('right', '0px', 'important');
         footer.style.setProperty('width', '100vw', 'important');
-        footer.style.setProperty('height', '34px', 'important');
+        footer.style.setProperty('height', '38px', 'important');
         footer.style.setProperty('z-index', '9999999', 'important');
         footer.style.setProperty('pointer-events', 'auto', 'important');
     };
@@ -95,7 +111,103 @@
     };
 
     // ==========================================================================
-    // 3. VIRTUALIZOR-STYLE LIVE TRAFFIC GRAPH (HTML5 Canvas)
+    // 3. HERO COMMAND BAR & DASHBOARD ENHANCER
+    // ==========================================================================
+    const injectHeroBanner = () => {
+        if (document.getElementById('ab-hero-banner')) return;
+
+        // Find main container or insert before search/content
+        const searchInput = document.querySelector('input[type="text"], input[type="search"]');
+        const targetContainer = searchInput ? (searchInput.closest('div.max-w-7xl, div.container, main, div') || document.querySelector('main')) : document.querySelector('main, #root > div');
+
+        if (!targetContainer) return;
+
+        const banner = document.createElement('div');
+        banner.id = 'ab-hero-banner';
+        banner.innerHTML = `
+            <div class="ab-hero-left">
+                <h2>⚡ ArixByte Cloud Hypervisor</h2>
+                <p>Enterprise Virtual Instance Management & Proxmox VE Clustering Node</p>
+            </div>
+            <div class="ab-hero-stats">
+                <div class="ab-hstat-pill">
+                    <span class="icon">🖥️</span>
+                    <div class="info">
+                        <div class="label">Virtual Nodes</div>
+                        <div class="value" id="ab-hstat-vm">Active</div>
+                    </div>
+                </div>
+                <div class="ab-hstat-pill">
+                    <span class="icon">⚡</span>
+                    <div class="info">
+                        <div class="label">Hypervisor</div>
+                        <div class="value">Proxmox / KVM</div>
+                    </div>
+                </div>
+                <div class="ab-hstat-pill">
+                    <span class="icon">🛡️</span>
+                    <div class="info">
+                        <div class="label">DDoS Defense</div>
+                        <div class="value" style="color:var(--ab-primary,#00d2ff)">ARMED</div>
+                    </div>
+                </div>
+                <div class="ab-hstat-pill">
+                    <span class="icon">🌐</span>
+                    <div class="info">
+                        <div class="label">Uplink WAN</div>
+                        <div class="value">10 Gbps Active</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        if (searchInput && searchInput.parentElement) {
+            const parentBlock = searchInput.parentElement.parentElement;
+            if (parentBlock && parentBlock.parentElement) {
+                parentBlock.parentElement.insertBefore(banner, parentBlock);
+            } else {
+                targetContainer.prepend(banner);
+            }
+        } else {
+            targetContainer.prepend(banner);
+        }
+    };
+
+    // Replace plain "You have no servers" with futuristic cyber empty state card
+    const enhanceEmptyState = () => {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while ((node = walker.nextNode())) {
+            if (node.nodeValue && node.nodeValue.trim() === "You have no servers.") {
+                const parent = node.parentElement;
+                if (parent && !parent.classList.contains('ab-processed-empty')) {
+                    parent.classList.add('ab-processed-empty');
+                    parent.innerHTML = `
+                        <div id="ab-empty-card">
+                            <div class="ab-empty-icon">🌐</div>
+                            <div class="ab-empty-title">Virtual Infrastructure Standby</div>
+                            <div class="ab-empty-desc">
+                                No virtual machine instances are currently allocated to your account.
+                                Connect your Proxmox VE cluster or deploy a virtual node to monitor real-time hypervisor telemetry.
+                            </div>
+                            <div class="ab-empty-actions">
+                                <button class="ab-btn" onclick="document.getElementById('ab-btn-traffic').click()">
+                                    <span>📈 View Network Traffic</span>
+                                </button>
+                                <button class="ab-btn" onclick="document.getElementById('ab-btn-attacks').click()">
+                                    <span>🛡️ Inspect Security Logs</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                break;
+            }
+        }
+    };
+
+    // ==========================================================================
+    // 4. VIRTUALIZOR-STYLE LIVE TRAFFIC GRAPH (HTML5 Canvas)
     // ==========================================================================
     let trafficInterval = null;
     const rxHistory = new Array(30).fill(120);
@@ -114,13 +226,12 @@
             const width = canvas.parentElement.clientWidth;
             const height = 220;
 
-            // Generate realistic network jitter
+            // Realistic network fluctuations
             const newRx = Math.max(30, Math.min(480, rxHistory[rxHistory.length - 1] + (Math.random() * 60 - 28)));
             const newTx = Math.max(20, Math.min(320, txHistory[txHistory.length - 1] + (Math.random() * 40 - 19)));
             rxHistory.shift(); rxHistory.push(newRx);
             txHistory.shift(); txHistory.push(newTx);
 
-            // Update live numbers
             const rxElem = document.getElementById('ab-stat-rx');
             const txElem = document.getElementById('ab-stat-tx');
             const ppsElem = document.getElementById('ab-stat-pps');
@@ -130,8 +241,7 @@
 
             ctx.clearRect(0, 0, width, height);
 
-            // Grid lines
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
             ctx.lineWidth = 1;
             for (let y = 30; y < height; y += 40) {
                 ctx.beginPath();
@@ -142,7 +252,7 @@
 
             const step = width / (rxHistory.length - 1);
 
-            // Draw RX (Ingress - Cyan)
+            // Ingress (RX)
             ctx.beginPath();
             ctx.moveTo(0, height - (rxHistory[0] / 500) * height);
             for (let i = 1; i < rxHistory.length; i++) {
@@ -152,17 +262,16 @@
             ctx.lineWidth = 2.5;
             ctx.stroke();
 
-            // Fill area for RX
             ctx.lineTo(width, height);
             ctx.lineTo(0, height);
             ctx.closePath();
             const gradRx = ctx.createLinearGradient(0, 0, 0, height);
-            gradRx.addColorStop(0, "rgba(0, 210, 255, 0.25)");
+            gradRx.addColorStop(0, "rgba(0, 210, 255, 0.28)");
             gradRx.addColorStop(1, "rgba(0, 210, 255, 0.0)");
             ctx.fillStyle = gradRx;
             ctx.fill();
 
-            // Draw TX (Egress - Violet)
+            // Egress (TX)
             ctx.beginPath();
             ctx.moveTo(0, height - (txHistory[0] / 500) * height);
             for (let i = 1; i < txHistory.length; i++) {
@@ -172,12 +281,11 @@
             ctx.lineWidth = 2.5;
             ctx.stroke();
 
-            // Fill area for TX
             ctx.lineTo(width, height);
             ctx.lineTo(0, height);
             ctx.closePath();
             const gradTx = ctx.createLinearGradient(0, 0, 0, height);
-            gradTx.addColorStop(0, "rgba(247, 37, 133, 0.2)");
+            gradTx.addColorStop(0, "rgba(247, 37, 133, 0.22)");
             gradTx.addColorStop(1, "rgba(247, 37, 133, 0.0)");
             ctx.fillStyle = gradTx;
             ctx.fill();
@@ -189,7 +297,7 @@
     };
 
     // ==========================================================================
-    // 4. FLOATING CONTROL BAR & MODALS INJECTION
+    // 5. FLOATING CONTROL BAR & MODALS INJECTION
     // ==========================================================================
     const injectSuiteUI = () => {
         if (document.getElementById('arixbyte-suite-bar')) return;
@@ -199,7 +307,7 @@
         bar.id = 'arixbyte-suite-bar';
         bar.innerHTML = `
             <span class="ab-badge">ArixByte Suite</span>
-            <select id="ab-palette-selector" title="Select Color Theme">
+            <select id="ab-palette-selector" title="Switch Theme Wallpaper & Accents">
                 ${THEMES.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
             </select>
             <button class="ab-btn" id="ab-btn-traffic" title="Live Traffic & Bandwidth Graph">
@@ -211,7 +319,6 @@
         `;
         document.body.appendChild(bar);
 
-        // Bind Theme Selector
         const selector = document.getElementById('ab-palette-selector');
         if (selector) {
             selector.value = getSavedTheme();
@@ -354,7 +461,6 @@
         `;
         document.body.appendChild(modalsContainer);
 
-        // Event listeners for opening modals
         document.getElementById('ab-btn-traffic').addEventListener('click', () => {
             const modal = document.getElementById('ab-modal-traffic');
             modal.classList.add('active');
@@ -366,7 +472,6 @@
             modal.classList.add('active');
         });
 
-        // Close on background click
         document.querySelectorAll('.ab-modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) {
@@ -378,12 +483,24 @@
     };
 
     // ==========================================================================
-    // 5. BOOTSTRAPPER
+    // 6. BOOTSTRAPPER & CONTINUOUS DOM WATCHDOG
     // ==========================================================================
     const initArixByteSuite = () => {
+        injectBackgroundLayer();
         applyTheme(getSavedTheme());
         injectSuiteUI();
+        injectHeroBanner();
+        enhanceEmptyState();
         setupFooterProtection();
+
+        // Watch for React re-renders or page navigation
+        const reactObserver = new MutationObserver(() => {
+            injectBackgroundLayer();
+            injectHeroBanner();
+            enhanceEmptyState();
+            createProtectedFooter();
+        });
+        reactObserver.observe(document.body, { childList: true, subtree: true });
     };
 
     if (document.readyState === 'loading') {

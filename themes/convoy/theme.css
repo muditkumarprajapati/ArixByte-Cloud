@@ -1,29 +1,32 @@
 /* ==============================================================================
- * ARIXBYTE STUDIOS • CONVOY PANEL ULTIMATE SUITE THEME
+ * ARIXBYTE STUDIOS • CONVOY PANEL HYPERVISOR SUITE THEME
  * Designed by Mudit @ ArixByte Studios
- * 4 Dynamic Themes: Nebula Cyan, Cyberpunk Violet, Emerald Matrix, Crimson Blood
- * Features: Glassmorphism, Live Bandwidth Graph, DDoS Attack Logs, Tamper-Proof Footer
+ * 
+ * 4 High-Definition Cyber Wallpapers:
+ *  - Nebula Cyan: Cosmic cyber clouds with glowing isometric circuits
+ *  - Cyberpunk Violet: Neon magenta datacenter racks & data streams
+ *  - Emerald Matrix: Hyper-mint quantum circuit boards & holographic arrays
+ *  - Crimson Blood: Obsidian ruby cyber defense security command center
  * ============================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
+/* --- 1. THEME PALETTES & WALLPAPERS --- */
 :root,
 [data-theme="nebula"] {
     --ab-primary: #00d2ff;
     --ab-primary-rgb: 0, 210, 255;
     --ab-secondary: #3a7bd5;
     --ab-accent: #00f2fe;
-    --ab-bg: #070d19;
-    --ab-bg-gradient: radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.08) 0%, transparent 40%),
-                      radial-gradient(circle at 85% 85%, rgba(58, 123, 213, 0.06) 0%, transparent 40%),
-                      #070d19;
-    --ab-card: rgba(13, 22, 38, 0.78);
-    --ab-card-hover: rgba(18, 30, 52, 0.88);
-    --ab-border: rgba(0, 210, 255, 0.22);
-    --ab-border-glow: rgba(0, 210, 255, 0.45);
+    --ab-bg-img: url('/arixbyte-theme/assets/bg-nebula.jpg');
+    --ab-overlay: radial-gradient(circle at 50% 25%, rgba(0, 210, 255, 0.08) 0%, rgba(4, 9, 20, 0.82) 80%);
+    --ab-card: rgba(10, 20, 38, 0.72);
+    --ab-card-hover: rgba(15, 28, 54, 0.85);
+    --ab-border: rgba(0, 210, 255, 0.28);
+    --ab-border-glow: rgba(0, 210, 255, 0.65);
     --ab-text-primary: #f0f6fc;
-    --ab-text-secondary: #8b9bb4;
-    --ab-glow: 0 0 25px rgba(0, 210, 255, 0.25);
+    --ab-text-secondary: #94a3b8;
+    --ab-glow: 0 0 25px rgba(0, 210, 255, 0.35);
 }
 
 [data-theme="cyberpunk"] {
@@ -31,17 +34,15 @@
     --ab-primary-rgb: 247, 37, 133;
     --ab-secondary: #7209b7;
     --ab-accent: #4cc9f0;
-    --ab-bg: #0d021a;
-    --ab-bg-gradient: radial-gradient(circle at 20% 20%, rgba(247, 37, 133, 0.1) 0%, transparent 40%),
-                      radial-gradient(circle at 80% 80%, rgba(114, 9, 183, 0.1) 0%, transparent 40%),
-                      #0d021a;
-    --ab-card: rgba(25, 7, 44, 0.8);
-    --ab-card-hover: rgba(35, 12, 60, 0.9);
-    --ab-border: rgba(247, 37, 133, 0.25);
-    --ab-border-glow: rgba(247, 37, 133, 0.55);
+    --ab-bg-img: url('/arixbyte-theme/assets/bg-cyberpunk.jpg');
+    --ab-overlay: radial-gradient(circle at 50% 25%, rgba(247, 37, 133, 0.1) 0%, rgba(13, 3, 26, 0.84) 80%);
+    --ab-card: rgba(26, 8, 45, 0.74);
+    --ab-card-hover: rgba(38, 12, 65, 0.88);
+    --ab-border: rgba(247, 37, 133, 0.32);
+    --ab-border-glow: rgba(247, 37, 133, 0.7);
     --ab-text-primary: #fff0f7;
     --ab-text-secondary: #b69abf;
-    --ab-glow: 0 0 25px rgba(247, 37, 133, 0.3);
+    --ab-glow: 0 0 25px rgba(247, 37, 133, 0.4);
 }
 
 [data-theme="emerald"] {
@@ -49,17 +50,15 @@
     --ab-primary-rgb: 0, 245, 212;
     --ab-secondary: #00bbf9;
     --ab-accent: #05ffa1;
-    --ab-bg: #031410;
-    --ab-bg-gradient: radial-gradient(circle at 15% 15%, rgba(0, 245, 212, 0.09) 0%, transparent 40%),
-                      radial-gradient(circle at 85% 85%, rgba(0, 187, 249, 0.07) 0%, transparent 40%),
-                      #031410;
-    --ab-card: rgba(6, 28, 23, 0.8);
-    --ab-card-hover: rgba(10, 40, 33, 0.9);
-    --ab-border: rgba(0, 245, 212, 0.22);
-    --ab-border-glow: rgba(0, 245, 212, 0.5);
+    --ab-bg-img: url('/arixbyte-theme/assets/bg-emerald.jpg');
+    --ab-overlay: radial-gradient(circle at 50% 25%, rgba(0, 245, 212, 0.09) 0%, rgba(3, 18, 15, 0.84) 80%);
+    --ab-card: rgba(6, 30, 25, 0.74);
+    --ab-card-hover: rgba(10, 44, 37, 0.88);
+    --ab-border: rgba(0, 245, 212, 0.28);
+    --ab-border-glow: rgba(0, 245, 212, 0.65);
     --ab-text-primary: #f0fdfa;
     --ab-text-secondary: #7fa49a;
-    --ab-glow: 0 0 25px rgba(0, 245, 212, 0.25);
+    --ab-glow: 0 0 25px rgba(0, 245, 212, 0.35);
 }
 
 [data-theme="crimson"] {
@@ -67,156 +66,300 @@
     --ab-primary-rgb: 255, 0, 85;
     --ab-secondary: #ff5400;
     --ab-accent: #ff758c;
-    --ab-bg: #120307;
-    --ab-bg-gradient: radial-gradient(circle at 20% 20%, rgba(255, 0, 85, 0.1) 0%, transparent 40%),
-                      radial-gradient(circle at 80% 80%, rgba(255, 84, 0, 0.08) 0%, transparent 40%),
-                      #120307;
-    --ab-card: rgba(30, 8, 14, 0.82);
-    --ab-card-hover: rgba(45, 12, 22, 0.9);
-    --ab-border: rgba(255, 0, 85, 0.25);
-    --ab-border-glow: rgba(255, 0, 85, 0.55);
+    --ab-bg-img: url('/arixbyte-theme/assets/bg-crimson.jpg');
+    --ab-overlay: radial-gradient(circle at 50% 25%, rgba(255, 0, 85, 0.1) 0%, rgba(18, 4, 9, 0.86) 80%);
+    --ab-card: rgba(32, 8, 16, 0.76);
+    --ab-card-hover: rgba(48, 12, 24, 0.9);
+    --ab-border: rgba(255, 0, 85, 0.32);
+    --ab-border-glow: rgba(255, 0, 85, 0.7);
     --ab-text-primary: #fff1f2;
     --ab-text-secondary: #b58992;
-    --ab-glow: 0 0 25px rgba(255, 0, 85, 0.3);
+    --ab-glow: 0 0 25px rgba(255, 0, 85, 0.4);
 }
 
-/* Base Body Enhancements */
-body {
-    background-color: var(--ab-bg) !important;
-    background-image: var(--ab-bg-gradient) !important;
+/* --- 2. FIXED ULTRA-HD BACKGROUND LAYER --- */
+#ab-bg-layer {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: -99999 !important;
+    background-image: var(--ab-bg-img) !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
     background-attachment: fixed !important;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    transition: background-image 0.6s ease-in-out !important;
+    pointer-events: none !important;
+}
+
+#ab-bg-layer::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: var(--ab-overlay) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* --- 3. TRANSPARENCY OVERRIDES FOR TAILWIND CONTAINER --- */
+html,
+body {
+    background-color: transparent !important;
+    background: transparent !important;
     color: var(--ab-text-primary) !important;
-    padding-bottom: 45px !important;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
     min-height: 100vh !important;
+    padding-bottom: 46px !important;
 }
 
-/* Sleek Scrollbars */
-::-webkit-scrollbar {
-    width: 7px;
-    height: 7px;
-}
-::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.4);
-}
-::-webkit-scrollbar-thumb {
-    background: var(--ab-primary);
-    border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--ab-accent);
+#root,
+#root > div,
+main,
+.min-h-screen,
+div[class*="min-h-"] {
+    background-color: transparent !important;
+    background: transparent !important;
 }
 
-/* Glassmorphism Containers & Cards */
-.bg-gray-800,
-.bg-gray-900,
-.bg-neutral-800,
-.bg-neutral-900,
-.bg-zinc-800,
-.bg-zinc-900,
-div[class*="bg-gray-"],
-div[class*="bg-neutral-"],
-div[class*="bg-zinc-"] {
-    background-color: var(--ab-card) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    border: 1px solid var(--ab-border) !important;
-    border-radius: 12px !important;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-/* Card Hover Elevation */
-div[class*="bg-gray-"]:hover,
-div[class*="bg-neutral-"]:hover {
-    border-color: var(--ab-border-glow) !important;
-    box-shadow: var(--ab-glow) !important;
-}
-
-/* Navigation & Header Bar */
+/* --- 4. TOP NAVBAR & HEADER --- */
 nav,
 header,
 nav[class*="bg-"],
 header[class*="bg-"] {
-    background-color: rgba(10, 16, 28, 0.85) !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
+    background: rgba(6, 12, 24, 0.8) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
     border-bottom: 1px solid var(--ab-border) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Buttons Styling */
-button,
-.btn,
-a[class*="btn-"],
-button[class*="bg-"] {
-    border-radius: 8px !important;
-    transition: all 0.2s ease !important;
+/* Logo & Navigation Links */
+nav a,
+header a {
+    color: #fff !important;
+    font-weight: 600 !important;
+    transition: color 0.2s ease, text-shadow 0.2s ease !important;
 }
 
-button:hover,
-button[class*="bg-"]:hover {
-    filter: brightness(1.15) !important;
-    box-shadow: 0 0 15px rgba(var(--ab-primary-rgb), 0.4) !important;
-    transform: translateY(-1px) !important;
+nav a:hover,
+header a:hover {
+    color: var(--ab-primary) !important;
+    text-shadow: 0 0 10px rgba(var(--ab-primary-rgb), 0.5) !important;
 }
 
-/* Input Fields */
+/* Active Tab Indicator */
+nav a[class*="border-b-"],
+header a[class*="border-b-"],
+button[class*="border-b-"] {
+    border-bottom: 2px solid var(--ab-primary) !important;
+    color: var(--ab-primary) !important;
+    text-shadow: 0 0 8px rgba(var(--ab-primary-rgb), 0.6) !important;
+}
+
+/* --- 5. SEARCH BAR & INPUT FIELDS --- */
+input[type="text"],
+input[type="search"],
 input,
 select,
 textarea {
-    background-color: rgba(6, 12, 22, 0.75) !important;
+    background: rgba(8, 16, 32, 0.72) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
     border: 1px solid var(--ab-border) !important;
+    border-radius: 12px !important;
     color: #fff !important;
-    border-radius: 8px !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    padding: 10px 16px !important;
+    transition: all 0.25s ease !important;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4) !important;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
     border-color: var(--ab-primary) !important;
-    box-shadow: 0 0 12px rgba(var(--ab-primary-rgb), 0.35) !important;
+    box-shadow: 0 0 16px rgba(var(--ab-primary-rgb), 0.45), inset 0 2px 6px rgba(0, 0, 0, 0.3) !important;
     outline: none !important;
 }
 
-/* Table Enhancements */
-table {
-    border-collapse: separate !important;
-    border-spacing: 0 4px !important;
+/* --- 6. GLASSMORPHIC CARDS & PANELS --- */
+div[class*="bg-gray-"],
+div[class*="bg-neutral-"],
+div[class*="bg-zinc-"],
+.card,
+.bg-gray-800,
+.bg-gray-900,
+.bg-neutral-800,
+.bg-neutral-900 {
+    background: var(--ab-card) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border: 1px solid var(--ab-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5) !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-table tr {
-    background-color: rgba(15, 23, 42, 0.6) !important;
-    transition: background-color 0.2s ease !important;
+div[class*="bg-gray-"]:hover,
+div[class*="bg-neutral-"]:hover,
+.card:hover {
+    border-color: var(--ab-border-glow) !important;
+    box-shadow: var(--ab-glow), 0 14px 45px rgba(0, 0, 0, 0.6) !important;
+    transform: translateY(-2px) !important;
 }
 
-table tr:hover {
-    background-color: rgba(var(--ab-primary-rgb), 0.08) !important;
+/* --- 7. BUTTONS & TOGGLES --- */
+button,
+.btn,
+button[class*="bg-"] {
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    transition: all 0.25s ease !important;
 }
 
-/* ==============================================================================
- * ARIXBYTE FLOATING CONTROL BAR (Virtualizor Suite)
- * ============================================================================== */
+button:hover,
+button[class*="bg-"]:hover {
+    filter: brightness(1.2) !important;
+    box-shadow: 0 0 18px rgba(var(--ab-primary-rgb), 0.45) !important;
+}
+
+/* --- 8. HERO DASHBOARD COMMAND BAR --- */
+#ab-hero-banner {
+    margin: 22px auto 26px auto;
+    max-width: 1200px;
+    background: rgba(8, 16, 32, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--ab-border);
+    border-radius: 18px;
+    padding: 20px 28px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), var(--ab-glow);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    user-select: none;
+}
+
+.ab-hero-left h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    background: linear-gradient(135deg, #ffffff 40%, var(--ab-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ab-hero-left p {
+    font-size: 13px;
+    color: var(--ab-text-secondary);
+    margin: 0;
+}
+
+.ab-hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.ab-hstat-pill {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--ab-border);
+    border-radius: 12px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ab-hstat-pill .icon {
+    font-size: 16px;
+    color: var(--ab-primary);
+}
+
+.ab-hstat-pill .info .label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    color: var(--ab-text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.ab-hstat-pill .info .value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* --- 9. EMPTY STATE ENHANCEMENT --- */
+#ab-empty-card {
+    max-width: 680px;
+    margin: 40px auto;
+    background: var(--ab-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--ab-border-glow);
+    border-radius: 20px;
+    padding: 38px 30px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), var(--ab-glow);
+}
+
+.ab-empty-icon {
+    font-size: 54px;
+    margin-bottom: 16px;
+    display: inline-block;
+    filter: drop-shadow(0 0 18px var(--ab-primary));
+    animation: ab-float 3s ease-in-out infinite;
+}
+
+@keyframes ab-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.ab-empty-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.ab-empty-desc {
+    font-size: 13.5px;
+    color: var(--ab-text-secondary);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto 24px auto;
+}
+
+.ab-empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* --- 10. FLOATING ARIXBYTE CONTROL BAR --- */
 #arixbyte-suite-bar {
     position: fixed;
-    top: 14px;
-    right: 20px;
+    top: 12px;
+    right: 18px;
     z-index: 999990;
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(10, 16, 28, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    gap: 10px;
+    background: rgba(6, 12, 24, 0.88);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     padding: 6px 14px;
     border-radius: 50px;
     border: 1px solid var(--ab-border);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), var(--ab-glow);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), var(--ab-glow);
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 13px;
-    color: #fff;
     user-select: none;
-    transition: all 0.3s ease;
 }
 
 #arixbyte-suite-bar .ab-badge {
@@ -224,17 +367,17 @@ table tr:hover {
     color: #000;
     font-weight: 800;
     font-size: 10.5px;
-    padding: 3px 9px;
+    padding: 4px 10px;
     border-radius: 20px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
 .ab-btn {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
     color: #e2e8f0;
-    padding: 5px 12px;
+    padding: 6px 13px;
     border-radius: 20px;
     cursor: pointer;
     font-size: 12px;
@@ -246,35 +389,32 @@ table tr:hover {
 }
 
 .ab-btn:hover {
-    background: rgba(var(--ab-primary-rgb), 0.2);
+    background: rgba(var(--ab-primary-rgb), 0.25);
     border-color: var(--ab-primary);
     color: #fff;
     transform: translateY(-1px);
-    box-shadow: 0 0 12px rgba(var(--ab-primary-rgb), 0.3);
+    box-shadow: 0 0 14px rgba(var(--ab-primary-rgb), 0.4);
 }
 
-/* Palette Dropdown */
 #ab-palette-selector {
-    background: rgba(10, 16, 28, 0.95);
+    background: rgba(10, 18, 32, 0.95);
     color: var(--ab-primary);
     border: 1px solid var(--ab-border);
     border-radius: 20px;
-    padding: 4px 10px;
+    padding: 5px 12px;
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
     outline: none;
 }
 
-/* ==============================================================================
- * MODAL WINDOWS (Traffic Graph & Attack Logs)
- * ============================================================================== */
+/* --- 11. MODAL WINDOWS (Traffic Graph & Attack Logs) --- */
 .ab-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(2, 6, 15, 0.78);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(2, 6, 15, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     z-index: 999995;
     display: flex;
     align-items: center;
@@ -293,17 +433,16 @@ table tr:hover {
     background: var(--ab-card);
     border: 1px solid var(--ab-border-glow);
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), var(--ab-glow);
-    border-radius: 18px;
+    border-radius: 20px;
     width: 90%;
-    max-width: 780px;
+    max-width: 820px;
     max-height: 85vh;
     overflow-y: auto;
-    padding: 24px 28px;
+    padding: 26px 30px;
     position: relative;
-    transform: scale(0.95);
+    transform: scale(0.96);
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     color: #fff;
-    font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .ab-modal-overlay.active .ab-modal {
@@ -350,7 +489,6 @@ table tr:hover {
     color: #000;
 }
 
-/* Stat Grid Inside Modal */
 .ab-stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -359,7 +497,7 @@ table tr:hover {
 }
 
 .ab-stat-card {
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--ab-border);
     border-radius: 12px;
     padding: 14px;
@@ -381,9 +519,8 @@ table tr:hover {
     margin-top: 4px;
 }
 
-/* Real-time Canvas Graph */
 .ab-canvas-box {
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.55);
     border: 1px solid var(--ab-border);
     border-radius: 14px;
     padding: 16px;
@@ -397,7 +534,6 @@ table tr:hover {
     display: block;
 }
 
-/* Security Attack Log Table */
 .ab-table {
     width: 100%;
     border-collapse: collapse;
@@ -442,26 +578,23 @@ table tr:hover {
     border: 1px solid rgba(0, 245, 212, 0.4);
 }
 
-/* ==============================================================================
- * PERMANENT TAMPER-PROOF FOOTER
- * "Convoy Theme Designed by Mudit @ ArixByte Studios"
- * ============================================================================== */
+/* --- 12. TAMPER-PROOF PROTECTED FOOTER --- */
 #arixbyte-protected-footer {
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
     width: 100vw !important;
-    height: 34px !important;
-    background: rgba(6, 11, 20, 0.94) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
+    height: 38px !important;
+    background: rgba(6, 12, 24, 0.94) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
     border-top: 1px solid var(--ab-border) !important;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.6) !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
-    gap: 10px !important;
+    justify-content: space-between !important;
+    padding: 0 24px !important;
     z-index: 9999999 !important;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
     font-size: 12px !important;
@@ -471,26 +604,35 @@ table tr:hover {
     pointer-events: auto !important;
     visibility: visible !important;
     opacity: 1 !important;
-    transform: none !important;
+}
+
+#arixbyte-protected-footer .ab-footer-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 
 #arixbyte-protected-footer .ab-footer-badge {
     background: linear-gradient(135deg, var(--ab-primary), var(--ab-secondary)) !important;
     color: #000 !important;
     font-weight: 800 !important;
-    font-size: 10px !important;
+    font-size: 9.5px !important;
     padding: 2px 7px !important;
     border-radius: 4px !important;
     letter-spacing: 0.5px !important;
 }
 
-#arixbyte-protected-footer strong {
-    color: var(--ab-primary) !important;
-    font-weight: 700 !important;
+#arixbyte-protected-footer .ab-footer-center {
+    font-weight: 600 !important;
+    color: #cbd5e1 !important;
 }
 
-#arixbyte-protected-footer a {
-    color: var(--ab-accent) !important;
-    text-decoration: none !important;
-    font-weight: 700 !important;
+#arixbyte-protected-footer .ab-footer-center strong {
+    color: var(--ab-primary) !important;
+    font-weight: 800 !important;
+}
+
+#arixbyte-protected-footer .ab-footer-right {
+    font-size: 11px !important;
+    color: #64748b !important;
 }

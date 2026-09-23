@@ -2464,16 +2464,22 @@ install_convoy_theme() {
     esac
 
     echo -e "\n${GRAY}Deploying ArixByte Theme assets to /var/www/convoy/public/arixbyte-theme...${NC}"
-    mkdir -p /var/www/convoy/public/arixbyte-theme
+    mkdir -p /var/www/convoy/public/arixbyte-theme/assets
 
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
     if [[ -f "${script_dir}/themes/convoy/theme.css" && -f "${script_dir}/themes/convoy/theme.js" ]]; then
         cp "${script_dir}/themes/convoy/theme.css" /var/www/convoy/public/arixbyte-theme/theme.css
         cp "${script_dir}/themes/convoy/theme.js" /var/www/convoy/public/arixbyte-theme/theme.js
+        if [[ -d "${script_dir}/themes/convoy/assets" ]]; then
+            cp -r "${script_dir}/themes/convoy/assets/"* /var/www/convoy/public/arixbyte-theme/assets/ 2>/dev/null || true
+        fi
     else
-        echo -e "${GRAY}Downloading latest theme assets from GitHub repository...${NC}"
+        echo -e "${GRAY}Downloading latest theme assets and wallpapers from GitHub...${NC}"
         curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/theme.css" -o /var/www/convoy/public/arixbyte-theme/theme.css 2>/dev/null || true
         curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/theme.js" -o /var/www/convoy/public/arixbyte-theme/theme.js 2>/dev/null || true
+        for bg in bg-nebula.jpg bg-cyberpunk.jpg bg-emerald.jpg bg-crimson.jpg; do
+            curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/assets/${bg}" -o "/var/www/convoy/public/arixbyte-theme/assets/${bg}" 2>/dev/null || true
+        done
     fi
 
     # Backup original app.blade.php if not backed up
@@ -2563,15 +2569,21 @@ update_convoy_theme() {
         return
     fi
 
-    mkdir -p /var/www/convoy/public/arixbyte-theme
+    mkdir -p /var/www/convoy/public/arixbyte-theme/assets
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
     if [[ -f "${script_dir}/themes/convoy/theme.css" && -f "${script_dir}/themes/convoy/theme.js" ]]; then
         cp "${script_dir}/themes/convoy/theme.css" /var/www/convoy/public/arixbyte-theme/theme.css
         cp "${script_dir}/themes/convoy/theme.js" /var/www/convoy/public/arixbyte-theme/theme.js
+        if [[ -d "${script_dir}/themes/convoy/assets" ]]; then
+            cp -r "${script_dir}/themes/convoy/assets/"* /var/www/convoy/public/arixbyte-theme/assets/ 2>/dev/null || true
+        fi
     else
-        echo -e "${GRAY}Downloading latest theme assets from GitHub repository...${NC}"
+        echo -e "${GRAY}Downloading latest theme assets and wallpapers from GitHub...${NC}"
         curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/theme.css" -o /var/www/convoy/public/arixbyte-theme/theme.css 2>/dev/null || true
         curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/theme.js" -o /var/www/convoy/public/arixbyte-theme/theme.js 2>/dev/null || true
+        for bg in bg-nebula.jpg bg-cyberpunk.jpg bg-emerald.jpg bg-crimson.jpg; do
+            curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/assets/${bg}" -o "/var/www/convoy/public/arixbyte-theme/assets/${bg}" 2>/dev/null || true
+        done
     fi
 
     local blade_file="/var/www/convoy/resources/views/app.blade.php"
