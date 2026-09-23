@@ -385,8 +385,8 @@ render_ui() {
     echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}1${NC}${BORDER}]${NC}  Pterodactyl Panel               ${BORDER}[${NC}${WHITE}6${NC}${BORDER}]${NC}  phpMyAdmin & MariaDB Stuff       ${DARK_GRAY}│${NC}"
     echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}2${NC}${BORDER}]${NC}  Pterodactyl Wings               ${BORDER}[${NC}${WHITE}7${NC}${BORDER}]${NC}  VPS Optimizer                    ${DARK_GRAY}│${NC}"
     echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}3${NC}${BORDER}]${NC}  Pterodactyl Themes              ${BORDER}[${NC}${WHITE}8${NC}${BORDER}]${NC}  System & DB Backup               ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}4${NC}${BORDER}]${NC}  Pterodactyl Blueprints          ${BORDER}[${NC}${WHITE}9${NC}${BORDER}]${NC}  Corrupt File Detector            ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}5${NC}${BORDER}]${NC}  SSL Certbot & Nginx Proxy       ${BORDER}[${NC}${WHITE}10${NC}${BORDER}]${NC} Corrupt Plugin Usage             ${DARK_GRAY}│${NC}"
+    echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}4${NC}${BORDER}]${NC}  Pterodactyl Blueprints          ${BORDER}[${NC}${WHITE}9${NC}${BORDER}]${NC}  Corrupt File & Plugin Scan       ${DARK_GRAY}│${NC}"
+    echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}5${NC}${BORDER}]${NC}  SSL Certbot & Nginx Proxy       ${BORDER}[${NC}${WHITE}10${NC}${BORDER}]${NC} Pterodactyl Server Usage         ${DARK_GRAY}│${NC}"
     echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}"
 
     echo -e ""
@@ -937,10 +937,11 @@ manage_blueprints_menu() {
 }
 
 # ==============================================================================
-# [9] CORRUPT FILE DETECTOR (HOST VPS)
 # ==============================================================================
-detect_corrupt_files() {
-    render_page_header "CORRUPT FILE DETECTOR & SYSTEM PURGE"
+# [9] CORRUPT FILE & PLUGIN DETECTOR
+# ==============================================================================
+scan_host_vps_corrupt_files() {
+    render_page_header "HOST VPS FILESYSTEM INTEGRITY SCANNER"
     require_root || return
 
     echo -e "${P1}⚙ Initiating deep filesystem scan for broken & corrupt stubs...${NC}\n"
@@ -1179,8 +1180,50 @@ detect_corrupt_files() {
     read -rp "Press [Enter] to return..."
 }
 
+# Unified Option 9 Menu (Host VPS + Pterodactyl Game Server Plugin Scanner)
+detect_corrupt_files() {
+    while true; do
+        render_page_header "CORRUPT FILE & SECURITY SCANNER"
+        require_root || return
+
+        echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
+        echo -e " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}SELECT SCAN SCOPE${NC}                                                          ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+        echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}1${NC}${BORDER}]${NC}  ${C1}Host VPS Deep Integrity Scan${NC}                                         ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}│${NC}       ${GRAY}Scans broken symlinks, crash dumps, package caches & stale locks${NC}       ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}2${NC}${BORDER}]${NC}  ${P1}Pterodactyl Game Server Plugin & Threat Scanner${NC}                      ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}│${NC}       ${GRAY}Scans server volumes for backdoors, nulled leaks & rogue scripts${NC}       ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}3${NC}${BORDER}]${NC}  ${MINT}All-in-One Full System Audit${NC}                                         ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}│${NC}       ${GRAY}Executes both Host VPS & Pterodactyl volume integrity scans${NC}            ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${CORAL}0${NC}${BORDER}]${NC}  ${GRAY}Return to Main Dashboard${NC}                                             ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+
+        read -rp " Select Scan Option [Default 1]: " scan_scope
+        case "${scan_scope:-1}" in
+            1)
+                scan_host_vps_corrupt_files
+                ;;
+            2)
+                detect_corrupt_plugins
+                ;;
+            3)
+                scan_host_vps_corrupt_files
+                echo -e "\n ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}\n"
+                detect_corrupt_plugins
+                ;;
+            0|q|Q)
+                return
+                ;;
+            *)
+                echo -e " ${RED}✘ Invalid selection.${NC}"
+                sleep 1
+                ;;
+        esac
+    done
+}
+
 # ==============================================================================
-# [10] CORRUPT PLUGIN & GAME SERVER SECURITY SCANNER
+# PTERODACTYL CORRUPT PLUGIN & GAME SERVER SECURITY SCANNER (WITH ELAPSED & ETA)
 # ==============================================================================
 detect_corrupt_plugins() {
     render_page_header "PTERODACTYL GAME SERVER SECURITY SCANNER"
@@ -1211,19 +1254,84 @@ detect_corrupt_plugins() {
     echo -e " ${GRAY}Target Root :${NC} ${WHITE}${active_root}${NC}\n"
 
     local threats=()
-    local total_checked=0
     local p_spin_idx=0
     local spinner=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 
+    echo -e " ${GRAY}⚙ Pre-indexing volume files for accurate progress & ETA calculation...${NC}"
+    local p1_files=()
+    local p2_files=()
+    local p3_files=()
+
+    while IFS= read -r f; do
+        [[ -z "$f" ]] && continue
+        case "$f" in
+            *.jar|*.yml|*.json|*.sk|*.lua)
+                p1_files+=("$f")
+                p2_files+=("$f")
+                ;;
+            *.txt)
+                p2_files+=("$f")
+                ;;
+            *.sh|*.py|*.elf)
+                if [[ "$f" =~ /(plugins|mods|oxide)/ ]]; then
+                    p3_files+=("$f")
+                fi
+                ;;
+        esac
+    done < <(find "$active_root" -maxdepth 5 -type f \( -name "*.jar" -o -name "*.yml" -o -name "*.json" -o -name "*.sk" -o -name "*.lua" \) 2>/dev/null || true)
+
+    local total_all_files=$(( ${#p1_files[@]} + ${#p2_files[@]} + ${#p3_files[@]} ))
+    if (( total_all_files == 0 )); then
+        echo -e "\n ${MINT}✔ Zero game server files or plugins found in ${active_root}.${NC}\n"
+        read -rp "Press [Enter] to return..."
+        return
+    fi
+
+    local scan_start
+    scan_start=$(date +%s)
+    local total_checked=0
+
+    # Single-line status renderer with Elapsed: (Time Took) and Remaining: (Approx Time to Check All)
     render_plugin_status() {
         local p_step="$1"
         local p_name="$2"
-        local pct="$3"
-        local current_f="$4"
+        local cur_step_idx="$3"
+        local tot_step_idx="$4"
+        local current_f="$5"
+
+        local now
+        now=$(date +%s)
+        local elapsed=$(( now - scan_start ))
+        local el_str=""
+        if (( elapsed < 60 )); then
+            el_str="${elapsed}s"
+        else
+            el_str="$((elapsed / 60))m$((elapsed % 60))s"
+        fi
+
+        local rem_str="--:--"
+        if (( total_checked > 15 && elapsed > 0 && total_checked < total_all_files )); then
+            local rem_sec=$(( ((total_all_files - total_checked) * elapsed) / total_checked ))
+            if (( rem_sec < 60 )); then
+                rem_str="${rem_sec}s"
+            elif (( rem_sec < 3600 )); then
+                rem_str="$((rem_sec / 60))m$((rem_sec % 60))s"
+            else
+                rem_str="$((rem_sec / 3600))h$(( (rem_sec % 3600) / 60 ))m"
+            fi
+        elif (( total_checked >= total_all_files )); then
+            rem_str="0s"
+        fi
+
+        local pct=0
+        if (( tot_step_idx > 0 )); then
+            pct=$(( (cur_step_idx * 100) / tot_step_idx ))
+            if (( pct > 100 )); then pct=100; fi
+        fi
 
         local spin="${spinner[p_spin_idx % 10]}"
         p_spin_idx=$((p_spin_idx + 1))
-        local bar_len=10
+        local bar_len=8
         local filled=$(( (pct * bar_len) / 100 ))
         if (( filled > bar_len )); then filled=$bar_len; fi
         local empty=$(( bar_len - filled ))
@@ -1233,51 +1341,84 @@ detect_corrupt_plugins() {
         for ((b=0; b<empty; b++)); do bar+="░"; done
 
         local disp_f="$current_f"
-        if [[ ${#disp_f} -gt 28 ]]; then
-            disp_f="...${disp_f: -25}"
+        if [[ ${#disp_f} -gt 18 ]]; then
+            disp_f="...${disp_f: -15}"
         fi
 
-        printf "\r ${C1}%s${NC} ${BOLD}${WHITE}[%d/3 %s]${NC} ${P1}[%s]${NC} ${MINT}%3d%%${NC} ${DARK_GRAY}│${NC} ${GRAY}Files:${NC} ${WHITE}%-5d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats:${NC} ${RED}%-3d${NC} ${DARK_GRAY}│${NC} ${C2}%-28s${NC}\033[K" \
-            "$spin" "$p_step" "$p_name" "$bar" "$pct" "$total_checked" "${#threats[@]}" "$disp_f"
+        printf "\r ${C1}%s${NC} ${BOLD}${WHITE}[%d/3 %-11s]${NC} ${P1}[%s]${NC} ${MINT}%3d%%${NC} ${DARK_GRAY}│${NC} ${GRAY}Files:${NC} ${WHITE}%d/%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats:${NC} ${RED}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Elapsed:${NC} ${WHITE}%-4s${NC} ${DARK_GRAY}│${NC} ${GRAY}Remaining:${NC} ${WHITE}%-5s${NC} ${DARK_GRAY}│${NC} ${C2}%-18s${NC}\033[K" \
+            "$spin" "$p_step" "$p_name" "$bar" "$pct" "$cur_step_idx" "$tot_step_idx" "${#threats[@]}" "$el_str" "$rem_str" "$disp_f"
     }
 
-    # 1. ForceOP & Backdoor Signatures
-    render_plugin_status 1 "Backdoors" 10 "$active_root"
-    while IFS= read -r f; do
-        [[ -z "$f" ]] && continue
+    # -------------------------------------------------------------------------
+    # PASS 1: ForceOP & Backdoor Signatures
+    # -------------------------------------------------------------------------
+    local p1_tot=${#p1_files[@]}
+    local p1_cur=0
+    local p1_threats=0
+    if (( p1_tot == 0 )); then p1_tot=1; fi
+
+    for f in "${p1_files[@]}"; do
+        p1_cur=$((p1_cur + 1))
         total_checked=$((total_checked + 1))
         if grep -qE "ForceOP|setOp\(true\)|c0\.fun|pirate\.jar|dev\.lone\.itemsadder|qprotect|discord\.com/api/webhooks" "$f" 2>/dev/null; then
             threats+=("$f|FORCEOP_BACKDOOR")
+            p1_threats=$((p1_threats + 1))
         fi
-        if (( total_checked % 5 == 0 )); then
-            render_plugin_status 1 "Backdoors" 33 "$f"
+        if (( p1_cur % 15 == 0 || p1_cur == p1_tot )); then
+            render_plugin_status 1 "Backdoors" "$p1_cur" "$p1_tot" "$f"
         fi
-    done < <(find "$active_root" -maxdepth 5 -type f \( -name "*.jar" -o -name "*.yml" -o -name "*.json" -o -name "*.sk" -o -name "*.lua" \) 2>/dev/null || true)
-    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[1/3 Backdoors]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Files Checked: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats: ${RED}%d${NC}\033[K\n" "$total_checked" "${#threats[@]}"
+    done
+    printf "\r\033[K ${MINT}✔${NC} ${BOLD}${WHITE}[1/3 Backdoors]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Files Checked: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats: ${RED}%d${NC}\n" "$p1_cur" "$p1_threats"
 
-    # 2. Known Nulled & Leaked Distributions
-    render_plugin_status 2 "NulledLeaks" 45 "$active_root"
-    while IFS= read -r f; do
-        [[ -z "$f" ]] && continue
+    # -------------------------------------------------------------------------
+    # PASS 2: Known Nulled & Leaked Distributions
+    # -------------------------------------------------------------------------
+    local p2_tot=${#p2_files[@]}
+    local p2_cur=0
+    local p2_threats=0
+    if (( p2_tot == 0 )); then p2_tot=1; fi
+
+    for f in "${p2_files[@]}"; do
+        p2_cur=$((p2_cur + 1))
         total_checked=$((total_checked + 1))
         if grep -qE "DirectLeaks|NullCord|BlackSpigot|SpigotUncensored|leak\.rip|nulled\.to" "$f" 2>/dev/null; then
             threats+=("$f|NULLED_LEAK")
+            p2_threats=$((p2_threats + 1))
         fi
-        if (( total_checked % 5 == 0 )); then
-            render_plugin_status 2 "NulledLeaks" 66 "$f"
+        if (( p2_cur % 15 == 0 || p2_cur == p2_tot )); then
+            render_plugin_status 2 "NulledLeaks" "$p2_cur" "$p2_tot" "$f"
         fi
-    done < <(find "$active_root" -maxdepth 5 -type f \( -name "*.jar" -o -name "*.yml" -o -name "*.txt" -o -name "*.json" \) 2>/dev/null || true)
-    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[2/3 NulledLeaks]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Files Checked: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats: ${RED}%d${NC}\033[K\n" "$total_checked" "${#threats[@]}"
+    done
+    printf "\r\033[K ${MINT}✔${NC} ${BOLD}${WHITE}[2/3 NulledLeaks]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Files Checked: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats: ${RED}%d${NC}\n" "$p2_cur" "$p2_threats"
 
-    # 3. Disguised Scripts Inside Plugin Folders
-    render_plugin_status 3 "RogueScripts" 80 "$active_root"
-    while IFS= read -r rogue; do
-        [[ -z "$rogue" ]] && continue
+    # -------------------------------------------------------------------------
+    # PASS 3: Disguised Rogue Scripts
+    # -------------------------------------------------------------------------
+    local p3_tot=${#p3_files[@]}
+    local p3_cur=0
+    local p3_threats=0
+    if (( p3_tot == 0 )); then p3_tot=1; fi
+
+    for rogue in "${p3_files[@]}"; do
+        p3_cur=$((p3_cur + 1))
         total_checked=$((total_checked + 1))
         threats+=("$rogue|ROGUE_EXEC")
-        render_plugin_status 3 "RogueScripts" 99 "$rogue"
-    done < <(find "$active_root" -maxdepth 5 -type f \( -name "*.sh" -o -name "*.py" -o -name "*.elf" \) 2>/dev/null | grep -E "plugins|mods|oxide" || true)
-    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[3/3 RogueScripts]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Files Checked: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats: ${RED}%d${NC}\033[K\n\n" "$total_checked" "${#threats[@]}"
+        p3_threats=$((p3_threats + 1))
+        if (( p3_cur % 5 == 0 || p3_cur == p3_tot )); then
+            render_plugin_status 3 "RogueScripts" "$p3_cur" "$p3_tot" "$rogue"
+        fi
+    done
+    printf "\r\033[K ${MINT}✔${NC} ${BOLD}${WHITE}[3/3 RogueScripts]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Files Checked: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Threats: ${RED}%d${NC}\n\n" "$p3_cur" "$p3_threats"
+
+    local total_time=$(( $(date +%s) - scan_start ))
+    local total_time_str=""
+    if (( total_time < 60 )); then
+        total_time_str="${total_time}s"
+    else
+        total_time_str="$((total_time / 60))m $((total_time % 60))s"
+    fi
+
+    echo -e " ${MINT}✔ SCAN SUMMARY:${NC} Checked ${WHITE}${total_checked}${NC} files in ${WHITE}${total_time_str}${NC} ${GRAY}(Time Took: ${total_time_str})${NC}\n"
 
     local total_threats="${#threats[@]}"
     if [[ "$total_threats" -eq 0 ]]; then
@@ -1336,6 +1477,280 @@ detect_corrupt_plugins() {
             ;;
     esac
     read -rp "Press [Enter] to return..."
+}
+
+# ==============================================================================
+# [10] PTERODACTYL SERVER RESOURCE USAGE & LOAD MONITOR
+# ==============================================================================
+render_host_top_processes() {
+    echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
+    printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}%-8s${NC} ${GRAY}%-12s${NC} ${WHITE}%-8s${NC} ${P1}%-8s${NC} ${C1}%-31s${NC}${DARK_GRAY}│${NC}\n" "PID" "USER" "CPU %" "MEM %" "PROCESS COMMAND"
+    echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+    local proc_found=0
+    while read -r p u c m cmd; do
+        [[ -z "$p" ]] && continue
+        proc_found=$((proc_found + 1))
+        printf " ${DARK_GRAY}│${NC}  ${WHITE}%-8s${NC} ${GRAY}%-12s${NC} ${RED}%-8s${NC} ${P1}%-8s${NC} ${C2}%-31s${NC}${DARK_GRAY}│${NC}\n" "$p" "${u:0:12}" "$c%" "$m%" "${cmd:0:31}"
+    done < <(ps -eo pid,user,%cpu,%mem,comm --sort=-%cpu 2>/dev/null | tail -n +2 | head -n 8 || ps aux 2>/dev/null | awk 'NR>1 {print $2, $1, $3, $4, $11}' | sort -k3,3nr | head -n 8)
+    
+    if (( proc_found == 0 )); then
+        echo -e " ${DARK_GRAY}│${NC}  ${GRAY}No process metrics available from standard ps.${NC}                             ${DARK_GRAY}│${NC}"
+    fi
+    echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+}
+
+monitor_pterodactyl_usage() {
+    require_root || return
+
+    while true; do
+        render_page_header "PTERODACTYL SERVER RESOURCE USAGE & LOAD MONITOR"
+
+        # Check Docker availability
+        if ! command -v docker &>/dev/null || ! docker info >/dev/null 2>&1; then
+            echo -e " ${GOLD}● Docker daemon is not active on this host.${NC}\n"
+            echo -e " ${GRAY}Inspecting host system for high-load server processes...${NC}\n"
+            render_host_top_processes
+            read -rp "Press [Enter] to return..."
+            return
+        fi
+
+        # Gather active containers
+        local active_cids
+        active_cids=$(docker ps -q 2>/dev/null)
+        if [[ -z "$active_cids" ]]; then
+            echo -e " ${GOLD}● No active Docker containers currently running on this node.${NC}\n"
+            echo -e " ${GRAY}Inspecting host system for high-load server processes...${NC}\n"
+            render_host_top_processes
+            read -rp "Press [Enter] to return..."
+            return
+        fi
+
+        echo -e " ${P1}⚙ Sampling real-time resource telemetry across active game servers...${NC}\n"
+
+        # Query stats from Docker
+        local stats_raw
+        stats_raw=$(docker stats --no-stream --format "{{.ID}}\t{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.NetIO}}\t{{.PIDs}}" 2>/dev/null)
+
+        if [[ -z "$stats_raw" ]]; then
+            echo -e " ${RED}✘ Failed to retrieve container telemetry from Docker.${NC}\n"
+            read -rp "Press [Enter] to return..."
+            return
+        fi
+
+        # Arrays to hold container records
+        local container_list=()
+        local highest_cid=""
+        local highest_cname=""
+        local highest_cpu_raw=0
+        local highest_cpu_str="0.00%"
+        local highest_mem_str="0.00%"
+        local highest_mem_usage="0B / 0B"
+        local highest_server_name=""
+
+        while IFS=$'\t' read -r c_id c_name c_cpu c_mem_usage c_mem_pct c_net c_pids; do
+            [[ -z "$c_id" ]] && continue
+
+            # Clean CPU percentage to an integer for sorting (e.g., 145.20% -> 14520)
+            local cpu_num="${c_cpu//%/}"
+            local cpu_whole="${cpu_num%%.*}"
+            local cpu_frac="${cpu_num##*.}"
+            if [[ "$cpu_whole" == "$cpu_num" ]]; then
+                cpu_frac="00"
+            fi
+            cpu_frac="${cpu_frac:0:2}"
+            if [[ ${#cpu_frac} -eq 1 ]]; then cpu_frac="${cpu_frac}0"; fi
+            local cpu_int=$(( 10#${cpu_whole:-0} * 100 + 10#${cpu_frac:-0} ))
+
+            # Detect friendly server game/name from volume if Pterodactyl server
+            local s_label=""
+            local vol_dir="/var/lib/pterodactyl/volumes/$c_name"
+            if [[ ! -d "$vol_dir" ]]; then
+                vol_dir="/srv/daemon-data/$c_name"
+            fi
+            if [[ -d "$vol_dir" ]]; then
+                if [[ -f "$vol_dir/server.properties" ]]; then
+                    local motd
+                    motd=$(grep -E "^motd=" "$vol_dir/server.properties" 2>/dev/null | cut -d'=' -f2- | tr -cd '[:alnum:] _-')
+                    s_label="[MC: ${motd:0:14}]"
+                elif [[ -f "$vol_dir/package.json" ]]; then
+                    local bname
+                    bname=$(grep -E '"name":' "$vol_dir/package.json" 2>/dev/null | head -n1 | cut -d'"' -f4)
+                    s_label="[Node: ${bname:0:12}]"
+                elif [[ -f "$vol_dir/RustDedicated" || -f "$vol_dir/RustDedicated.exe" ]]; then
+                    s_label="[Rust]"
+                elif [[ -f "$vol_dir/srcds_run" ]]; then
+                    s_label="[SRCDS]"
+                elif [[ -f "$vol_dir/bedrock_server" ]]; then
+                    s_label="[Bedrock]"
+                else
+                    s_label="[GameServer]"
+                fi
+            fi
+
+            container_list+=("$cpu_int|$c_id|$c_name|$c_cpu|$c_mem_usage|$c_mem_pct|$c_net|$c_pids|$s_label")
+
+            if (( cpu_int > highest_cpu_raw )); then
+                highest_cpu_raw=$cpu_int
+                highest_cid="$c_id"
+                highest_cname="$c_name"
+                highest_cpu_str="$c_cpu"
+                highest_mem_str="$c_mem_pct"
+                highest_mem_usage="$c_mem_usage"
+                highest_server_name="$s_label"
+            fi
+        done <<< "$stats_raw"
+
+        # If highest_cid is empty, default to first container
+        if [[ -z "$highest_cid" && ${#container_list[@]} -gt 0 ]]; then
+            IFS='|' read -r _ highest_cid highest_cname highest_cpu_str highest_mem_usage highest_mem_str _ _ highest_server_name <<< "${container_list[0]}"
+        fi
+
+        # Render Table of All Pterodactyl Containers
+        echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
+        printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}%-12s${NC} ${C2}%-22s${NC} ${WHITE}%-11s${NC} ${P1}%-24s${NC}${DARK_GRAY}│${NC}\n" "CONTAINER ID" "SERVER UUID / TYPE" "CPU LOAD" "RAM USAGE (MEM %)"
+        echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+
+        # Sort containers by CPU descending
+        local sorted_containers=()
+        while IFS= read -r line; do
+            [[ -n "$line" ]] && sorted_containers+=("$line")
+        done < <(printf '%s\n' "${container_list[@]}" | sort -t'|' -k1,1nr)
+
+        local row_idx=0
+        for entry in "${sorted_containers[@]}"; do
+            row_idx=$((row_idx + 1))
+            IFS='|' read -r c_val c_id c_name c_cpu c_mem_usage c_mem_pct c_net c_pids s_label <<< "$entry"
+            
+            local disp_uuid="${c_name:0:16}..."
+            local disp_name="${disp_uuid}"
+            if [[ -n "$s_label" ]]; then
+                disp_name="${c_name:0:8} ${s_label}"
+            fi
+
+            # Color code CPU
+            local cpu_col="${MINT}"
+            local fire_badge=""
+            if [[ "$c_id" == "$highest_cid" ]]; then
+                cpu_col="${RED}${BOLD}"
+                fire_badge=" 🔥"
+            elif (( c_val >= 8000 )); then
+                cpu_col="${RED}"
+            elif (( c_val >= 4000 )); then
+                cpu_col="${GOLD}"
+            fi
+
+            printf " ${DARK_GRAY}│${NC}  ${WHITE}%-12s${NC} ${C2}%-22s${NC} ${cpu_col}%-8s${NC}%-3s ${GRAY}%-24s${NC}${DARK_GRAY}│${NC}\n" \
+                "$c_id" "${disp_name:0:22}" "$c_cpu" "$fire_badge" "${c_mem_usage} (${c_mem_pct})"
+        done
+        echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+
+        # Prominent Highlight Card for the Highest Load Server
+        echo -e " ${GOLD}🔥 HIGHEST LOAD SERVER IDENTIFIED:${NC}"
+        echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
+        printf " ${DARK_GRAY}│${NC}  ${WHITE}Server UUID   :${NC} ${C1}%-56s${NC}${DARK_GRAY}│${NC}\n" "$highest_cname"
+        printf " ${DARK_GRAY}│${NC}  ${WHITE}Container ID  :${NC} ${WHITE}%-16s${NC} ${WHITE}Game/Tag:${NC} ${C2}%-30s${NC}${DARK_GRAY}│${NC}\n" "$highest_cid" "${highest_server_name:-[Pterodactyl Server]}"
+        printf " ${DARK_GRAY}│${NC}  ${WHITE}Current CPU   :${NC} ${RED}${BOLD}%-16s${NC} ${WHITE}RAM Usage:${NC} ${P1}%-30s${NC}${DARK_GRAY}│${NC}\n" "$highest_cpu_str" "$highest_mem_usage ($highest_mem_str)"
+        echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+        echo -e " ${DARK_GRAY}│${NC}  ${BOLD}${GOLD}WHAT IS CONSUMING THE HIGHEST LOAD ON THIS SERVER:${NC}                        ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+
+        # Deep Process & Thread Inspection inside the Highest Load Container
+        local top_processes
+        top_processes=$(docker top "$highest_cid" -o pid,%cpu,%mem,time,comm 2>/dev/null | tail -n +2 | sort -k2,2nr | head -n 5)
+
+        if [[ -n "$top_processes" ]]; then
+            printf " ${DARK_GRAY}│${NC}  ${GRAY}%-8s${NC} ${WHITE}%-8s${NC} ${WHITE}%-8s${NC} ${GRAY}%-10s${NC} ${C1}%-33s${NC}${DARK_GRAY}│${NC}\n" "PID" "CPU %" "MEM %" "TIME" "PROCESS / THREAD"
+            echo -e " ${DARK_GRAY}│${NC}  ${DARK_GRAY}───────────────────────────────────────────────────────────────────────────${NC}${DARK_GRAY}│${NC}"
+            while read -r p_pid p_cpu p_mem p_time p_cmd; do
+                [[ -z "$p_pid" ]] && continue
+                printf " ${DARK_GRAY}│${NC}  ${GRAY}%-8s${NC} ${RED}%-8s${NC} ${P1}%-8s${NC} ${GRAY}%-10s${NC} ${WHITE}%-33s${NC}${DARK_GRAY}│${NC}\n" \
+                    "$p_pid" "$p_cpu%" "$p_mem%" "$p_time" "${p_cmd:0:33}"
+            done <<< "$top_processes"
+        else
+            # Fallback to inspecting host namespace PID
+            local h_pid
+            h_pid=$(docker inspect --format '{{.State.Pid}}' "$highest_cid" 2>/dev/null)
+            if [[ -n "$h_pid" && "$h_pid" -gt 0 ]]; then
+                local full_cmd
+                full_cmd=$(ps -p "$h_pid" -o args= 2>/dev/null)
+                printf " ${DARK_GRAY}│${NC}  ${GRAY}Host PID:${NC} ${WHITE}%-8s${NC} ${GRAY}Main Process:${NC} ${WHITE}%-46s${NC}${DARK_GRAY}│${NC}\n" "$h_pid" "${full_cmd:0:46}"
+            else
+                echo -e " ${DARK_GRAY}│${NC}  ${GRAY}No individual sub-processes could be queried.${NC}                             ${DARK_GRAY}│${NC}"
+            fi
+        fi
+
+        # Java-specific deep diagnosis if jar is running
+        local java_args
+        java_args=$(docker exec "$highest_cid" ps -eo args 2>/dev/null | grep -E "java.*\.jar" | head -n1 || true)
+        if [[ -z "$java_args" ]]; then
+            local h_pid
+            h_pid=$(docker inspect --format '{{.State.Pid}}' "$highest_cid" 2>/dev/null)
+            [[ -n "$h_pid" ]] && java_args=$(ps -p "$h_pid" -o args= 2>/dev/null | grep -E "java.*\.jar" || true)
+        fi
+
+        if [[ -n "$java_args" ]]; then
+            echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+            echo -e " ${DARK_GRAY}│${NC}  ${MINT}⚡ JAVA / MINECRAFT DIAGNOSTICS:${NC}                                           ${DARK_GRAY}│${NC}"
+            local jar_name
+            jar_name=$(echo "$java_args" | grep -oE "[-a-zA-Z0-9_\.]+\.jar" | tail -n1 || echo "server.jar")
+            local max_heap
+            max_heap=$(echo "$java_args" | grep -oE -- "-Xmx[0-9]+[MGmg]" || echo "N/A")
+            local init_heap
+            init_heap=$(echo "$java_args" | grep -oE -- "-Xms[0-9]+[MGmg]" || echo "N/A")
+            printf " ${DARK_GRAY}│${NC}  ${GRAY}Server Jar:${NC} ${WHITE}%-16s${NC} ${GRAY}Max Memory (Xmx):${NC} ${P1}%-8s${NC} ${GRAY}Init Heap (Xms):${NC} ${WHITE}%-6s${NC}${DARK_GRAY}│${NC}\n" \
+                "${jar_name:0:16}" "$max_heap" "$init_heap"
+            printf " ${DARK_GRAY}│${NC}  ${GRAY}Load Cause:${NC} ${GOLD}%-60s${NC}${DARK_GRAY}│${NC}\n" "High tick load on entity physics, plugins or world chunk generation"
+        fi
+        echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+
+        # Interactive Actions
+        echo -e " Actions:"
+        echo -e "   ${BOLD}${WHITE}[1]${NC}  ${C1}Refresh Telemetry & Live Loads${NC}"
+        echo -e "   ${BOLD}${WHITE}[2]${NC}  ${P1}Inspect Real-Time Logs of Highest Load Server${NC} ${GRAY}(docker logs)${NC}"
+        echo -e "   ${BOLD}${WHITE}[3]${NC}  ${GOLD}Inspect Specific Server by Container ID / Number${NC}"
+        echo -e "   ${BOLD}${WHITE}[4]${NC}  ${CORAL}Restart Highest Load Server Container${NC}"
+        echo -e "   ${DARK_GRAY}[0]  Return to Main Menu${NC}\n"
+
+        read -rp " Select Action [Default 1]: " u_action
+        case "${u_action:-1}" in
+            1)
+                clear
+                continue
+                ;;
+            2)
+                echo -e "\n${P1}=== STREAMING RECENT CONSOLE LOGS FOR ${highest_cid} (Press Ctrl+C to stop) ===${NC}\n"
+                timeout 15 docker logs --tail 50 -f "$highest_cid" 2>&1 || true
+                echo -e "\n${GRAY}Log stream closed.${NC}"
+                read -rp "Press [Enter] to return to usage monitor..."
+                clear
+                ;;
+            3)
+                read -rp "Enter Container ID to inspect: " custom_cid
+                if [[ -n "$custom_cid" ]]; then
+                    echo -e "\n${C1}Top processes for $custom_cid:${NC}"
+                    docker top "$custom_cid" -o pid,%cpu,%mem,time,comm 2>/dev/null || docker exec "$custom_cid" ps aux 2>/dev/null || echo "Unable to inspect container."
+                    read -rp "Press [Enter] to continue..."
+                fi
+                clear
+                ;;
+            4)
+                echo -e "\n${GOLD}⚠ Are you sure you want to restart container ${highest_cid}?${NC}"
+                read -rp "Restart container? [y/N]: " confirm_restart
+                if [[ "$confirm_restart" =~ ^[Yy]$ ]]; then
+                    docker restart "$highest_cid"
+                    echo -e "${MINT}✔ Container ${highest_cid} restarted successfully!${NC}\n"
+                    sleep 2
+                fi
+                clear
+                ;;
+            0|q|Q)
+                return
+                ;;
+            *)
+                clear
+                ;;
+        esac
+    done
 }
 
 # ==============================================================================
@@ -2180,7 +2595,7 @@ while true; do
         7)  optimize_vps; clear ;;
         8)  backup_panel; clear ;;
         9)  detect_corrupt_files; clear ;;
-        10) detect_corrupt_plugins; clear ;;
+        10) monitor_pterodactyl_usage; clear ;;
         11) manage_vps_panels; clear ;;
         12) coming_soon_surprise; clear ;;
         13) setup_firewall; clear ;;
