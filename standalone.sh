@@ -392,7 +392,7 @@ render_ui() {
     echo -e ""
     # Section 2: VPS CONTROL
     echo -e " ${DARK_GRAY}╭──${NC} ${P1} VPS CONTROL${NC} ${DARK_GRAY}────────────────────────────────────────────────────────────╮${NC}"
-    echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}11${NC}${BORDER}]${NC} VPS Management Panel            ${BORDER}[${NC}${WHITE}12${NC}${BORDER}]${NC} Coming Soon (Surprise)           ${DARK_GRAY}│${NC}"
+    echo -e " ${DARK_GRAY}│${NC}  ${BORDER}[${NC}${WHITE}11${NC}${BORDER}]${NC} VPS Management Panel            ${BORDER}[${NC}${WHITE}12${NC}${BORDER}]${NC} VPS Panel Themes                 ${DARK_GRAY}│${NC}"
     echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}"
 
     echo -e ""
@@ -2339,26 +2339,277 @@ manage_single_vps_panel() {
 }
 
 # ==============================================================================
-# [12] COMING SOON (SURPRISE)
+# [12] VPS PANEL THEMES & UI EXTENSIONS
 # ==============================================================================
-coming_soon_surprise() {
-    render_page_header "ARIXBYTE CLOUD LABS • SURPRISE FEATURE"
-    echo -e " ${DARK_GRAY}╭────────────────────────────────────────────────────────────────────────────╮${NC}"
-    echo -e " ${DARK_GRAY}│${NC}   ${GOLD}⚡ ARIXBYTE AUTONOMOUS CLUSTER MESH & AI HEALING COPILOT${NC}                 ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────┤${NC}"
-    echo -e " ${DARK_GRAY}│${NC}                                                                            ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}   ${C1}◆ Multi-Region Anycast Mesh Routing${NC}                                     ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}     Deploy distributed multi-cloud nodes with automatic BGP sync.          ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}                                                                            ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}   ${P1}◆ AI Self-Healing Diagnostic Engine${NC}                                     ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}     Automated anomaly detection, RAM leak sealing, and zero-downtime heal. ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}                                                                            ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}   ${MINT}◆ Zero-Knowledge Encrypted Multi-Cloud Backup to S3 & R2${NC}                 ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}     Cross-hypervisor instant snapshot sync with AES-256 GCM.               ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}                                                                            ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}│${NC}   ${WHITE}STATUS :${NC} ${GOLD}● IN ACTIVE DEVELOPMENT • COMING IN NEXT DROP${NC}                  ${DARK_GRAY}│${NC}"
-    echo -e " ${DARK_GRAY}╰────────────────────────────────────────────────────────────────────────────╯${NC}\n"
-    read -rp "Press [Enter] to return..."
+menu_vps_panel_themes() {
+    while true; do
+        render_page_header "VPS PANEL THEMES & UI EXTENSIONS"
+
+        echo -e " ${DARK_GRAY}╭──${NC} ${C1}◈ THEME STORE & INTERFACE SUITES${NC} ${DARK_GRAY}─────────────────────────────────────────╮${NC}"
+        echo -e " ${DARK_GRAY}│${NC}  ${WHITE}Select a hypervisor or VPS panel to install premium ArixByte themes:${NC}    ${DARK_GRAY}│${NC}"
+        echo -e " ${DARK_GRAY}╰────────────────────────────────────────────────────────────────────────────╯${NC}"
+        echo -e ""
+        echo -e "   ${C1}[1]${NC} ${WHITE}Convoy Panel Theme${NC}            ${GRAY}ArixByte Nebula Glass & Virtualizor Suite${NC}"
+        echo -e "   ${DARK_GRAY}[2]${NC} ${GRAY}Virtualizor Theme${NC}             ${DARK_GRAY}ArixByte Obsidian (Coming Soon)${NC}"
+        echo -e "   ${DARK_GRAY}[3]${NC} ${GRAY}VirtFusion Theme${NC}              ${DARK_GRAY}ArixByte Cyberpunk (Coming Soon)${NC}"
+        echo -e "   ${DARK_GRAY}[4]${NC} ${GRAY}Proxmox VE Theme${NC}              ${DARK_GRAY}ArixByte Matrix (Coming Soon)${NC}"
+        echo -e "   ${DARK_GRAY}[0]${NC} ${GRAY}Back to Themes Menu${NC}"
+        echo -e ""
+        echo -e " ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
+        echo -ne " ${C1}➜${NC} ${WHITE}Select Panel for Theme Customization${NC} ${GRAY}(0-4):${NC} "
+
+        local t_act
+        read -r t_act || true
+        case "$t_act" in
+            1) manage_convoy_theme ;;
+            2|3|4)
+                echo -e "\n ${GOLD}⚡ This panel theme is currently in development for the next update.${NC}"
+                read -rp "Press [Enter] to continue..."
+                ;;
+            0|[bB]|[qQ]|[bB][aA][cC][kK]) return ;;
+            *)
+                echo -e "\n ${RED}✘ Invalid option '${t_act}'!${NC}"
+                sleep 1
+                ;;
+        esac
+    done
+}
+
+manage_convoy_theme() {
+    while true; do
+        render_page_header "CONVOY PANEL THEME MANAGEMENT"
+
+        local is_theme_inst="false"
+        local theme_status="${RED}○ NOT INSTALLED${NC}"
+        local theme_inst_date="N/A"
+        local active_color="Nebula Cyan (Default)"
+
+        if [[ -f "/var/www/convoy/public/arixbyte-theme/theme.css" ]] && [[ -f "/var/www/convoy/resources/views/app.blade.php" ]] && grep -q "arixbyte-theme" "/var/www/convoy/resources/views/app.blade.php" 2>/dev/null; then
+            is_theme_inst="true"
+            theme_status="${MINT}● INSTALLED${NC}"
+            if [[ -f "/var/www/convoy/public/arixbyte-theme/theme.info" ]]; then
+                local t_date="$(grep -E '^INSTALLED_AT=' /var/www/convoy/public/arixbyte-theme/theme.info 2>/dev/null | cut -d'"' -f2)"
+                local t_color="$(grep -E '^ACTIVE_THEME=' /var/www/convoy/public/arixbyte-theme/theme.info 2>/dev/null | cut -d'"' -f2)"
+                theme_inst_date="${t_date:-Active}"
+                active_color="${t_color:-Nebula Cyan}"
+            else
+                theme_inst_date="$(stat -c %y /var/www/convoy/public/arixbyte-theme/theme.css 2>/dev/null | cut -d'.' -f1 || echo "Active")"
+            fi
+        fi
+
+        echo -e " ${DARK_GRAY}╭──${NC} ${C1}◈ LIVE THEME TELEMETRY${NC} ${DARK_GRAY}──────────────────────────────────────────────────╮${NC}"
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}Theme Suite  :${NC} ${WHITE}%-59s${NC}${DARK_GRAY}│${NC}\n" "ArixByte Nebula Glass Theme for Convoy"
+        if [[ "$is_theme_inst" == "true" ]]; then
+            printf " ${DARK_GRAY}│${NC}  ${GRAY}Status       :${NC} ${MINT}● INSTALLED${NC}%*s${DARK_GRAY}│${NC}\n" 48 ""
+        else
+            printf " ${DARK_GRAY}│${NC}  ${GRAY}Status       :${NC} ${RED}○ NOT INSTALLED${NC}%*s${DARK_GRAY}│${NC}\n" 44 ""
+        fi
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}Installed on :${NC} ${WHITE}%-59s${NC}${DARK_GRAY}│${NC}\n" "${theme_inst_date:0:59}"
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}Active Theme :${NC} ${GOLD}%-59s${NC}${DARK_GRAY}│${NC}\n" "${active_color:0:59}"
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}Features     :${NC} ${CYAN}%-59s${NC}${DARK_GRAY}│${NC}\n" "4 Palettes, Traffic Graph, Attack Logs, Tamper Footer"
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}Web Link     :${NC} ${C1}%-59s${NC}${DARK_GRAY}│${NC}\n" "http://${PUB_IP}"
+        echo -e " ${DARK_GRAY}╰────────────────────────────────────────────────────────────────────────────╯${NC}"
+        echo -e ""
+        echo -e "   ${C1}[1]${NC} ${WHITE}Install Convoy Theme${NC}          ${GRAY}(Download & inject ArixByte theme)${NC}"
+        echo -e "   ${C1}[2]${NC} ${WHITE}Switch Color Theme${NC}            ${GRAY}(Nebula / Cyberpunk / Emerald / Crimson)${NC}"
+        echo -e "   ${C1}[3]${NC} ${WHITE}Update Convoy Theme${NC}           ${GRAY}(Fetch latest CSS & JS improvements)${NC}"
+        echo -e "   ${CORAL}[4]${NC} ${CORAL}Uninstall Convoy Theme${NC}        ${GRAY}(Restore original Convoy interface)${NC}"
+        echo -e "   ${DARK_GRAY}[0]${NC} ${GRAY}Back to Themes Menu${NC}"
+        echo -e ""
+        echo -e " ${BORDER}─────────────────────────────────────────────────────────────────────────────${NC}"
+        echo -ne " ${C1}➜${NC} ${WHITE}Select Theme Action${NC} ${GRAY}(0-4):${NC} "
+
+        local c_act
+        read -r c_act || true
+        case "$c_act" in
+            1) install_convoy_theme ;;
+            2) switch_convoy_theme_color ;;
+            3) update_convoy_theme ;;
+            4) uninstall_convoy_theme ;;
+            0|[bB]|[qQ]|[bB][aA][cC][kK]) return ;;
+            *)
+                echo -e "\n ${RED}✘ Invalid option '${c_act}'!${NC}"
+                sleep 1
+                ;;
+        esac
+    done
+}
+
+install_convoy_theme() {
+    require_root || return
+    echo -e "\n${P1}⚙ Initializing Convoy Theme Installation...${NC}"
+
+    if [[ ! -d "/var/www/convoy" ]] || [[ ! -f "/var/www/convoy/resources/views/app.blade.php" ]]; then
+        echo -e "\n ${RED}✘ Convoy Panel is not installed at /var/www/convoy.${NC}"
+        echo -e " ${GRAY}Please install Convoy Panel first via Option 11 (VPS Management Panel).${NC}\n"
+        read -rp "Press [Enter] to return..."
+        return
+    fi
+
+    echo -e "\n ${C1}◈ Select Initial Default Color Palette:${NC}"
+    echo -e "   ${CYAN}[1] Nebula Azure / Electric Cyan (Deep Space Glass)${NC}"
+    echo -e "   ${P1}[2] Cyberpunk Violet / Neon Amethyst (Vibrant Synthwave)${NC}"
+    echo -e "   ${MINT}[3] Emerald Matrix / Hyper Mint (Futuristic Tech)${NC}"
+    echo -e "   ${RED}[4] Crimson Blood / Obsidian Ruby (Stealth Dark)${NC}"
+    echo -ne " ${C1}➜${NC} ${WHITE}Choose Palette${NC} ${GRAY}(1-4, Default: 1):${NC} "
+    local pal_choice
+    read -r pal_choice || true
+    local pal_id="nebula"
+    local pal_name="Nebula Cyan"
+    case "$pal_choice" in
+        2) pal_id="cyberpunk"; pal_name="Cyberpunk Violet" ;;
+        3) pal_id="emerald"; pal_name="Emerald Matrix" ;;
+        4) pal_id="crimson"; pal_name="Crimson Blood" ;;
+        *) pal_id="nebula"; pal_name="Nebula Cyan" ;;
+    esac
+
+    echo -e "\n${GRAY}Deploying ArixByte Theme assets to /var/www/convoy/public/arixbyte-theme...${NC}"
+    mkdir -p /var/www/convoy/public/arixbyte-theme
+
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+    if [[ -f "${script_dir}/themes/convoy/theme.css" && -f "${script_dir}/themes/convoy/theme.js" ]]; then
+        cp "${script_dir}/themes/convoy/theme.css" /var/www/convoy/public/arixbyte-theme/theme.css
+        cp "${script_dir}/themes/convoy/theme.js" /var/www/convoy/public/arixbyte-theme/theme.js
+    else
+        echo -e "${GRAY}Downloading latest theme assets from GitHub repository...${NC}"
+        curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/theme.css" -o /var/www/convoy/public/arixbyte-theme/theme.css 2>/dev/null || true
+        curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/theme.js" -o /var/www/convoy/public/arixbyte-theme/theme.js 2>/dev/null || true
+    fi
+
+    # Backup original app.blade.php if not backed up
+    local blade_file="/var/www/convoy/resources/views/app.blade.php"
+    if [[ ! -f "/var/www/convoy/resources/views/app.blade.php.convoy_bak" ]]; then
+        cp "$blade_file" "/var/www/convoy/resources/views/app.blade.php.convoy_bak"
+    fi
+
+    # Inject data-theme on <html> tag
+    sed -i 's/ data-theme="[^"]*"//g' "$blade_file"
+    sed -i "s/<html/<html data-theme=\"${pal_id}\"/g" "$blade_file"
+
+    if ! grep -q "arixbyte-theme/theme.css" "$blade_file"; then
+        sed -i 's|</head>|    <!-- ArixByte Studios Convoy Theme Suite -->\n    <link rel="stylesheet" href="/arixbyte-theme/theme.css">\n    <script defer src="/arixbyte-theme/theme.js"></script>\n</head>|' "$blade_file"
+    fi
+
+    cat <<EOF > /var/www/convoy/public/arixbyte-theme/theme.info
+INSTALLED_AT="$(date '+%Y-%m-%d %H:%M:%S')"
+ACTIVE_THEME="${pal_name}"
+ACTIVE_THEME_ID="${pal_id}"
+DESIGNER="Mudit @ ArixByte Studios"
+VERSION="2.0.0"
+EOF
+
+    chmod -R 777 /var/www/convoy/public/arixbyte-theme
+    chmod 666 "$blade_file" 2>/dev/null || true
+
+    (cd /var/www/convoy && docker compose exec -T workspace php artisan view:clear 2>/dev/null || true)
+
+    echo -e "\n${MINT}✔ Convoy Theme Installed Successfully!${NC}"
+    echo -e " ${GRAY}Active Theme :${NC} ${GOLD}${pal_name}${NC}"
+    echo -e " ${GRAY}Designer     :${NC} ${WHITE}Mudit @ ArixByte Studios${NC}"
+    echo -e " ${GRAY}Web Access   :${NC} ${WHITE}http://${PUB_IP}${NC}"
+    echo -e " ${GRAY}Features     :${NC} ${CYAN}Live Traffic Graph, Attack Logs, Floating Switcher & Protected Footer active!${NC}\n"
+    read -rp "Press [Enter] to continue..."
+}
+
+switch_convoy_theme_color() {
+    require_root || return
+    if [[ ! -f "/var/www/convoy/public/arixbyte-theme/theme.css" ]]; then
+        echo -e "\n ${RED}✘ Convoy Theme is not installed yet.${NC}"
+        read -rp "Press [Enter] to return..."
+        return
+    fi
+
+    echo -e "\n ${C1}◈ Select Color Theme to Activate:${NC}"
+    echo -e "   ${CYAN}[1] Nebula Azure / Electric Cyan (Deep Space Glass)${NC}"
+    echo -e "   ${P1}[2] Cyberpunk Violet / Neon Amethyst (Vibrant Synthwave)${NC}"
+    echo -e "   ${MINT}[3] Emerald Matrix / Hyper Mint (Futuristic Tech)${NC}"
+    echo -e "   ${RED}[4] Crimson Blood / Obsidian Ruby (Stealth Dark)${NC}"
+    echo -ne " ${C1}➜${NC} ${WHITE}Choose Theme${NC} ${GRAY}(1-4):${NC} "
+    local s_choice
+    read -r s_choice || true
+    local pal_id="nebula"
+    local pal_name="Nebula Cyan"
+    case "$s_choice" in
+        2) pal_id="cyberpunk"; pal_name="Cyberpunk Violet" ;;
+        3) pal_id="emerald"; pal_name="Emerald Matrix" ;;
+        4) pal_id="crimson"; pal_name="Crimson Blood" ;;
+        *) pal_id="nebula"; pal_name="Nebula Cyan" ;;
+    esac
+
+    local blade_file="/var/www/convoy/resources/views/app.blade.php"
+    if [[ -f "$blade_file" ]]; then
+        sed -i 's/ data-theme="[^"]*"//g' "$blade_file"
+        sed -i "s/<html/<html data-theme=\"${pal_id}\"/g" "$blade_file"
+        (cd /var/www/convoy && docker compose exec -T workspace php artisan view:clear 2>/dev/null || true)
+    fi
+
+    if [[ -f "/var/www/convoy/public/arixbyte-theme/theme.info" ]]; then
+        sed -i "s/^ACTIVE_THEME=.*/ACTIVE_THEME=\"${pal_name}\"/" /var/www/convoy/public/arixbyte-theme/theme.info
+        sed -i "s/^ACTIVE_THEME_ID=.*/ACTIVE_THEME_ID=\"${pal_id}\"/" /var/www/convoy/public/arixbyte-theme/theme.info
+    fi
+
+    echo -e "\n${MINT}✔ Default Theme Switched to: ${pal_name}!${NC}"
+    echo -e " ${GRAY}Note: Users can also switch themes live inside the panel via the floating selector!${NC}\n"
+    read -rp "Press [Enter] to continue..."
+}
+
+update_convoy_theme() {
+    require_root || return
+    echo -e "\n${P1}⚙ Updating Convoy Theme to Latest ArixByte Studios Build...${NC}"
+
+    if [[ ! -d "/var/www/convoy" ]]; then
+        echo -e "\n ${RED}✘ Convoy Panel is not installed at /var/www/convoy.${NC}"
+        read -rp "Press [Enter] to return..."
+        return
+    fi
+
+    mkdir -p /var/www/convoy/public/arixbyte-theme
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+    if [[ -f "${script_dir}/themes/convoy/theme.css" && -f "${script_dir}/themes/convoy/theme.js" ]]; then
+        cp "${script_dir}/themes/convoy/theme.css" /var/www/convoy/public/arixbyte-theme/theme.css
+        cp "${script_dir}/themes/convoy/theme.js" /var/www/convoy/public/arixbyte-theme/theme.js
+    else
+        echo -e "${GRAY}Downloading latest theme assets from GitHub repository...${NC}"
+        curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/theme.css" -o /var/www/convoy/public/arixbyte-theme/theme.css 2>/dev/null || true
+        curl -sSL "https://raw.githubusercontent.com/muditkumarprajapati/ArixByte-Cloud/main/themes/convoy/theme.js" -o /var/www/convoy/public/arixbyte-theme/theme.js 2>/dev/null || true
+    fi
+
+    local blade_file="/var/www/convoy/resources/views/app.blade.php"
+    if [[ -f "$blade_file" ]] && ! grep -q "arixbyte-theme/theme.css" "$blade_file"; then
+        sed -i 's|</head>|    <!-- ArixByte Studios Convoy Theme Suite -->\n    <link rel="stylesheet" href="/arixbyte-theme/theme.css">\n    <script defer src="/arixbyte-theme/theme.js"></script>\n</head>|' "$blade_file"
+    fi
+
+    chmod -R 777 /var/www/convoy/public/arixbyte-theme
+    (cd /var/www/convoy && docker compose exec -T workspace php artisan view:clear 2>/dev/null || true)
+
+    echo -e "\n${MINT}✔ Convoy Theme Updated to Latest Version!${NC}\n"
+    read -rp "Press [Enter] to continue..."
+}
+
+uninstall_convoy_theme() {
+    require_root || return
+    echo -e "\n${RED}⚠ Are you sure you want to uninstall the ArixByte Theme and restore stock Convoy?${NC}"
+    echo -ne " ${C1}➜${NC} ${WHITE}Type 'CONFIRM' to proceed:${NC} "
+    local u_c
+    read -r u_c || true
+    if [[ "$u_c" == "CONFIRM" ]]; then
+        echo -e "${GRAY}Restoring original Convoy blade view...${NC}"
+        local blade_file="/var/www/convoy/resources/views/app.blade.php"
+        if [[ -f "/var/www/convoy/resources/views/app.blade.php.convoy_bak" ]]; then
+            cp "/var/www/convoy/resources/views/app.blade.php.convoy_bak" "$blade_file"
+        else
+            sed -i '/arixbyte-theme/d' "$blade_file" 2>/dev/null || true
+            sed -i 's/ data-theme="[^"]*"//g' "$blade_file" 2>/dev/null || true
+        fi
+
+        rm -rf /var/www/convoy/public/arixbyte-theme
+        (cd /var/www/convoy && docker compose exec -T workspace php artisan view:clear 2>/dev/null || true)
+
+        echo -e "\n${MINT}✔ Convoy Theme Uninstalled Successfully. Stock Convoy restored.${NC}\n"
+    else
+        echo -e "\n ${GOLD}⚠ Theme uninstallation cancelled.${NC}\n"
+    fi
+    read -rp "Press [Enter] to continue..."
 }
 
 # ==============================================================================
@@ -2915,7 +3166,7 @@ while true; do
         9)  detect_corrupt_files; clear ;;
         10) monitor_pterodactyl_usage; clear ;;
         11) manage_vps_panels; clear ;;
-        12) coming_soon_surprise; clear ;;
+        12) menu_vps_panel_themes; clear ;;
         13) setup_firewall; clear ;;
         14) monitor_ddos; clear ;;
         15) monitor_traffic; clear ;;
