@@ -1915,7 +1915,7 @@ manage_vps_panels() {
         local v_sel
         read -r v_sel || true
         case "$v_sel" in
-            1) manage_single_vps_panel "Convoy" "8080" ;;
+            1) manage_single_vps_panel "Convoy" "80" ;;
             2) manage_single_vps_panel "Virtualizor" "4085" ;;
             3) manage_single_vps_panel "VirtFusion" "443" ;;
             4) manage_single_vps_panel "Proxmox" "8006" ;;
@@ -1965,15 +1965,16 @@ manage_single_vps_panel() {
                 fi
                 ;;
             Convoy)
-                if command -v convoy &>/dev/null || [[ -d "/var/www/convoy" ]]; then
+                if [[ -f "/var/www/convoy/docker-compose.yml" ]] || command -v convoy &>/dev/null; then
                     is_inst="true"
                     inst_status="${MINT}● INSTALLED${NC}"
-                    inst_date="$(stat -c %y /var/www/convoy 2>/dev/null | cut -d'.' -f1 || echo "Active")"
+                    inst_date="$(stat -c %y /var/www/convoy/docker-compose.yml 2>/dev/null | cut -d'.' -f1 || echo "Active")"
                 fi
                 ;;
         esac
 
         local panel_url="https://${PUB_IP}:${panel_port}"
+        [[ "$panel_port" == "80" ]] && panel_url="http://${PUB_IP}"
         [[ "$panel_port" == "8080" ]] && panel_url="http://${PUB_IP}:${panel_port}"
         [[ "$panel_port" == "443" ]] && panel_url="https://${PUB_IP}"
 
@@ -2031,12 +2032,60 @@ manage_single_vps_panel() {
                         echo -e "\n${MINT}✔ VirtFusion Provisioning Finished! Access at: https://${PUB_IP}${NC}"
                         ;;
                     Convoy)
-                        echo -e "${P1}⚙ Deploying Convoy Panel container stack...${NC}"
+                        echo -e "${P1}⚙ Deploying Convoy Panel stack via Docker Compose...${NC}"
                         if ! command -v docker &>/dev/null; then
+                            echo -e "${GRAY}Installing Docker Engine...${NC}"
                             curl -fsSL https://get.docker.com | bash
+                            systemctl enable --now docker 2>/dev/null || true
                         fi
+                        if ! docker compose version &>/dev/null; then
+                            echo -e "${GRAY}Installing Docker Compose plugin...${NC}"
+                            apt-get update -y && apt-get install -y docker-compose-plugin 2>/dev/null || true
+                        fi
+
                         mkdir -p /var/www/convoy
-                        echo -e "${MINT}✔ Convoy Stack Ready! Access at: http://${PUB_IP}:8080${NC}"
+                        cd /var/www/convoy
+
+                        echo -e "${GRAY}Downloading latest Convoy Panel release...${NC}"
+                        curl -sSL https://github.com/ConvoyPanel/panel/releases/latest/download/panel.tar.gz -o panel.tar.gz
+                        if [[ ! -f panel.tar.gz ]] || [[ ! -s panel.tar.gz ]]; then
+                            echo -e "${RED}✘ Failed to download Convoy Panel archive from GitHub.${NC}"
+                            cd - &>/dev/null
+                            read -rp "Press [Enter] to continue..."
+                            continue
+                        fi
+                        tar -xzf panel.tar.gz
+                        rm -f panel.tar.gz
+
+                        chmod -R o+w storage bootstrap/cache 2>/dev/null || true
+
+                        if [[ ! -f .env ]]; then
+                            cp .env.example .env
+                            local db_pass="$(openssl rand -hex 16 2>/dev/null || tr -dc A-Za-z0-9 </dev/urandom | head -c 24)"
+                            local redis_pass="$(openssl rand -hex 16 2>/dev/null || tr -dc A-Za-z0-9 </dev/urandom | head -c 24)"
+                            sed -i "s|APP_URL=.*|APP_URL=http://${PUB_IP}|g" .env
+                            sed -i "s|APP_ENV=.*|APP_ENV=production|g" .env
+                            sed -i "s|APP_DEBUG=.*|APP_DEBUG=false|g" .env
+                            sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${db_pass}|g" .env
+                            sed -i "s|REDIS_PASSWORD=.*|REDIS_PASSWORD=${redis_pass}|g" .env
+                        fi
+
+                        echo -e "${GRAY}Building and launching Convoy containers (this may take 2-3 minutes)...${NC}"
+                        docker compose up -d --build
+
+                        echo -e "${GRAY}Waiting for services to initialize...${NC}"
+                        sleep 10
+
+                        echo -e "${GRAY}Configuring application key and running database migrations...${NC}"
+                        docker compose exec -T workspace php artisan key:generate --force 2>/dev/null || true
+                        docker compose exec -T workspace php artisan optimize 2>/dev/null || true
+                        docker compose exec -T workspace php artisan migrate --force 2>/dev/null || true
+
+                        echo -e "\n${CYAN}✦ Create your Convoy Administrator Account:${NC}"
+                        docker compose exec workspace php artisan c:user:make || true
+
+                        cd - &>/dev/null
+                        echo -e "\n${MINT}✔ Convoy Stack Ready! Access at: http://${PUB_IP}${NC}"
                         ;;
                 esac
                 read -rp "Press [Enter] to continue..."
@@ -2055,7 +2104,21 @@ manage_single_vps_panel() {
                         apt-get update && apt-get install --only-upgrade virtfusion* 2>/dev/null || true
                         ;;
                     Convoy)
-                        echo -e "${P1}⚙ Pulling latest Convoy container image...${NC}"
+                        if [[ -d "/var/www/convoy" && -f "/var/www/convoy/docker-compose.yml" ]]; then
+                            echo -e "${P1}⚙ Pulling latest Convoy release and rebuilding containers...${NC}"
+                            cd /var/www/convoy
+                            curl -sSL https://github.com/ConvoyPanel/panel/releases/latest/download/panel.tar.gz -o panel.tar.gz
+                            tar -xzf panel.tar.gz
+                            rm -f panel.tar.gz
+                            chmod -R o+w storage bootstrap/cache 2>/dev/null || true
+                            docker compose up -d --build
+                            docker compose exec -T workspace php artisan migrate --force 2>/dev/null || true
+                            docker compose exec -T workspace php artisan optimize 2>/dev/null || true
+                            cd - &>/dev/null
+                            echo -e "\n${MINT}✔ Convoy successfully updated!${NC}"
+                        else
+                            echo -e "${RED}✘ Convoy installation not found at /var/www/convoy${NC}"
+                        fi
                         ;;
                 esac
                 echo -e "\n${MINT}✔ Update Completed!${NC}"
@@ -2079,7 +2142,14 @@ manage_single_vps_panel() {
                             echo -e "${MINT}✔ Password reset command executed.${NC}"
                             ;;
                         Convoy)
-                            echo -e "${MINT}✔ Admin credentials updated.${NC}"
+                            if [[ -d "/var/www/convoy" && -f "/var/www/convoy/docker-compose.yml" ]]; then
+                                echo -e "${P1}⚙ Managing Convoy User Accounts...${NC}"
+                                cd /var/www/convoy
+                                docker compose exec workspace php artisan c:user:make || true
+                                cd - &>/dev/null
+                            else
+                                echo -e "${RED}✘ Convoy is not installed.${NC}"
+                            fi
                             ;;
                     esac
                 fi
@@ -2146,7 +2216,12 @@ manage_single_vps_panel() {
                             rm -rf /opt/virtfusion
                             ;;
                         Convoy)
-                            rm -rf /var/www/convoy
+                            if [[ -d "/var/www/convoy" ]]; then
+                                cd /var/www/convoy
+                                [[ -f docker-compose.yml ]] && docker compose down -v --remove-orphans 2>/dev/null || true
+                                cd - &>/dev/null
+                                rm -rf /var/www/convoy
+                            fi
                             ;;
                         Proxmox)
                             echo -e "${GOLD}Proxmox packages can be purged via apt.${NC}"
