@@ -2003,6 +2003,19 @@ manage_single_vps_panel() {
             1)
                 require_root || continue
                 echo -e "\n${P1}⚙ Installing ${panel_name}...${NC}"
+                echo -ne " ${C1}➜${NC} ${WHITE}Install all dependencies for ${panel_name}?${NC} ${GRAY}[y/N]:${NC} "
+                local inst_dep
+                read -r inst_dep || true
+                case "$inst_dep" in
+                    [yY]|[yY][eE][sS])
+                        ;;
+                    *)
+                        echo -e "\n ${GOLD}⚠ Installation cancelled by user.${NC}"
+                        sleep 1
+                        continue
+                        ;;
+                esac
+
                 read -rp "Enter Admin Email for ${panel_name}: " ADM_MAIL
                 ADM_MAIL="${ADM_MAIL:-admin@local.host}"
                 read -rp "Enter Admin Password for ${panel_name}: " ADM_PASS
@@ -2050,6 +2063,9 @@ manage_single_vps_panel() {
                             apt-get update -y && apt-get install -y docker-compose-plugin 2>/dev/null || true
                         fi
 
+                        # Ensure host utilities
+                        apt-get update -y && apt-get install -y curl tar ca-certificates openssl 2>/dev/null || true
+
                         mkdir -p /var/www/convoy
                         cd /var/www/convoy
 
@@ -2063,6 +2079,15 @@ manage_single_vps_panel() {
                         fi
                         tar -xzf panel.tar.gz
                         rm -f panel.tar.gz
+
+                        # Patch Dockerfile to prevent Debian Bullseye apt cache 404 error
+                        if [[ -f dockerfiles/workspace/Dockerfile ]]; then
+                            sed -i 's/^RUN apt-get update$/RUN apt-get update \&\& apt-get -y --no-install-recommends install ca-certificates gnupg software-properties-common curl sudo unzip default-mysql-client/' dockerfiles/workspace/Dockerfile
+                            sed -i '/RUN apt-get -y install ca-certificates/d' dockerfiles/workspace/Dockerfile
+                        fi
+                        if [[ -f dockerfiles/caddy/Dockerfile ]]; then
+                            sed -i 's/Caddyfile-production/Caddyfile-development/g' dockerfiles/caddy/Dockerfile
+                        fi
 
                         chmod -R o+w storage bootstrap/cache 2>/dev/null || true
 
@@ -2080,8 +2105,20 @@ manage_single_vps_panel() {
                         echo -e "${GRAY}Building and launching Convoy containers (this may take 2-3 minutes)...${NC}"
                         docker compose up -d --build
 
-                        echo -e "${GRAY}Waiting for services to initialize...${NC}"
-                        sleep 10
+                        echo -e "${GRAY}Waiting for workspace service to initialize...${NC}"
+                        local wait_cnt=0
+                        while ! docker compose ps 2>/dev/null | grep -qE "workspace.*(running|Up)" && [[ $wait_cnt -lt 40 ]]; do
+                            sleep 2
+                            wait_cnt=$((wait_cnt + 2))
+                        done
+
+                        if ! docker compose ps 2>/dev/null | grep -qE "workspace.*(running|Up)"; then
+                            echo -e " ${RED}✘ Workspace service failed to start. Container logs:${NC}"
+                            docker compose logs --tail=25 workspace 2>/dev/null || true
+                            cd - &>/dev/null
+                            read -rp "Press [Enter] to continue..."
+                            continue
+                        fi
 
                         echo -e "${GRAY}Configuring application key and running database migrations...${NC}"
                         docker compose exec -T workspace php artisan key:generate --force 2>/dev/null || true
