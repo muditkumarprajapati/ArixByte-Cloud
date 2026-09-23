@@ -2447,20 +2447,20 @@ install_convoy_theme() {
     fi
 
     echo -e "\n ${C1}◈ Select Initial Default Color Palette:${NC}"
-    echo -e "   ${MINT}[1] Dribbble Lime / Neon Chartreuse (Dark Minimalist - Image 1 Style)${NC}"
-    echo -e "   ${GOLD}[2] Copper Amber / FinTech Luxury (Warm Obsidian - Image 2 Style)${NC}"
-    echo -e "   ${CYAN}[3] Nebula Azure / Electric Cyan (Deep Space Glass)${NC}"
-    echo -e "   ${P1}[4] Cyberpunk Violet / Neon Amethyst (Vibrant Synthwave)${NC}"
+    echo -e "   ${WHITE}[1] Virtualizor Light (Image 1 Classic Cloud - Clean White)${NC}"
+    echo -e "   ${CYAN}[2] Virtualizor Dark Navy (Image 2 Admin Obsidian - Sleek Dark)${NC}"
+    echo -e "   ${P1}[3] Softaculous Blue (Royal Enterprise Cloud)${NC}"
+    echo -e "   ${MINT}[4] Cyber Emerald (High-Tech Matrix Green)${NC}"
     echo -ne " ${C1}➜${NC} ${WHITE}Choose Palette${NC} ${GRAY}(1-4, Default: 1):${NC} "
     local pal_choice
     read -r pal_choice || true
-    local pal_id="lime"
-    local pal_name="Dribbble Lime"
+    local pal_id="light"
+    local pal_name="Virtualizor Light"
     case "$pal_choice" in
-        2) pal_id="amber"; pal_name="Copper Amber" ;;
-        3) pal_id="nebula"; pal_name="Nebula Cyan" ;;
-        4) pal_id="cyberpunk"; pal_name="Cyberpunk Violet" ;;
-        *) pal_id="lime"; pal_name="Dribbble Lime" ;;
+        2) pal_id="dark"; pal_name="Virtualizor Dark Navy" ;;
+        3) pal_id="blue"; pal_name="Softaculous Blue" ;;
+        4) pal_id="emerald"; pal_name="Cyber Emerald" ;;
+        *) pal_id="light"; pal_name="Virtualizor Light" ;;
     esac
 
     echo -e "\n${GRAY}Deploying ArixByte Theme assets to /var/www/convoy/public/arixbyte-theme...${NC}"
@@ -2526,20 +2526,20 @@ switch_convoy_theme_color() {
     fi
 
     echo -e "\n ${C1}◈ Select Color Theme to Activate:${NC}"
-    echo -e "   ${MINT}[1] Dribbble Lime / Neon Chartreuse (Dark Minimalist - Image 1 Style)${NC}"
-    echo -e "   ${GOLD}[2] Copper Amber / FinTech Luxury (Warm Obsidian - Image 2 Style)${NC}"
-    echo -e "   ${CYAN}[3] Nebula Azure / Electric Cyan (Deep Space Glass)${NC}"
-    echo -e "   ${P1}[4] Cyberpunk Violet / Neon Amethyst (Vibrant Synthwave)${NC}"
+    echo -e "   ${WHITE}[1] Virtualizor Light (Image 1 Classic Cloud - Clean White)${NC}"
+    echo -e "   ${CYAN}[2] Virtualizor Dark Navy (Image 2 Admin Obsidian - Sleek Dark)${NC}"
+    echo -e "   ${P1}[3] Softaculous Blue (Royal Enterprise Cloud)${NC}"
+    echo -e "   ${MINT}[4] Cyber Emerald (High-Tech Matrix Green)${NC}"
     echo -ne " ${C1}➜${NC} ${WHITE}Choose Theme${NC} ${GRAY}(1-4):${NC} "
     local s_choice
     read -r s_choice || true
-    local pal_id="lime"
-    local pal_name="Dribbble Lime"
+    local pal_id="light"
+    local pal_name="Virtualizor Light"
     case "$s_choice" in
-        2) pal_id="amber"; pal_name="Copper Amber" ;;
-        3) pal_id="nebula"; pal_name="Nebula Cyan" ;;
-        4) pal_id="cyberpunk"; pal_name="Cyberpunk Violet" ;;
-        *) pal_id="lime"; pal_name="Dribbble Lime" ;;
+        2) pal_id="dark"; pal_name="Virtualizor Dark Navy" ;;
+        3) pal_id="blue"; pal_name="Softaculous Blue" ;;
+        4) pal_id="emerald"; pal_name="Cyber Emerald" ;;
+        *) pal_id="light"; pal_name="Virtualizor Light" ;;
     esac
 
     local blade_file="/var/www/convoy/resources/views/app.blade.php"
