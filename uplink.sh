@@ -41,14 +41,14 @@ render_header() {
     clear
     echo -e ""
     # Elegant Multi-Tone Gradient Banner
-    echo -e "${C1}   █████╗ ██████╗ ██╗██╗   ██╗██████╗ ██╗   ██╗████████╗███████╗${NC}"
-    echo -e "${C2}  ██╔══██╗██╔══██╗██║╚██╗ ██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝${NC}"
-    echo -e "${C3}  ███████║██████╔╝██║ ╚████╔╝ ██████╔╝ ╚████╔╝    ██║   █████╗  ${NC}"
-    echo -e "${P1}  ██╔══██║██╔══██╗██║  ╚██╔╝  ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ${NC}"
-    echo -e "${P2}  ██║  ██║██║  ██║██║   ██║   ██████╔╝   ██║      ██║   ███████╗${NC}"
-    echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
+    echo -e "${C1}   █████╗ ██████╗ ██╗██╗  ██╗██████╗ ██╗   ██╗████████╗███████╗${NC}"
+    echo -e "${C2}  ██╔══██╗██╔══██╗██║╚██╗██╔╝██╔══██╗╚██╗ ██╔╝╚══██╔══╝██╔════╝${NC}"
+    echo -e "${C3}  ███████║██████╔╝██║ ╚███╔╝ ██████╔╝ ╚████╔╝    ██║   █████╗  ${NC}"
+    echo -e "${P1}  ██╔══██║██╔══██╗██║ ██╔██╗ ██╔══██╗  ╚██╔╝     ██║   ██╔══╝  ${NC}"
+    echo -e "${P2}  ██║  ██║██║  ██║██║██╔╝ ██╗██████╔╝   ██║      ██║   ███████╗${NC}"
+    echo -e "${P3}  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═════╝    ╚═╝      ╚═╝   ╚══════╝${NC}"
     echo -e "       ${C2}⚡ NEXT-GEN CLOUD INFRASTRUCTURE${NC} ${BORDER}•${NC} ${P1}AUTOMATION PLATFORM${NC}"
-    echo -e "       ${DIM}${GRAY}Made with Love ${RED}♥${NC}${DIM}${GRAY} & Brain ${PINK}🧠${NC}${DIM}${GRAY} by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
+    echo -e "       ${DIM}${GRAY}Made with Love ${RED}❤️${NC}${DIM}${GRAY} & Brain ${PINK}🧠${NC}${DIM}${GRAY} by ${WHITE}Mudit${NC}${DIM}${GRAY} @ ${C1}ArixByte Studios${NC}"
     echo -e "                           ${DIM}${GRAY}ArixByte v1.0.0${NC}"
     echo -e ""
 
