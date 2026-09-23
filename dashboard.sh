@@ -2362,101 +2362,595 @@ coming_soon_surprise() {
 }
 
 # ==============================================================================
-# [14] DDOS ATTACK MONITOR
+# [14] DDOS ATTACK MONITOR & THREAT MITIGATION SUITE
 # ==============================================================================
-monitor_ddos() {
-    render_page_header "REAL-TIME DDOS ATTACK MONITOR"
-    require_root || return
 
-    echo -e "${P1}⚙ Sampling active socket states & packet ingress...${NC}\n"
-
-    local syn_count=0
-    if command -v ss &>/dev/null; then
-        syn_count=$(ss -n state syn-recv 2>/dev/null | wc -l)
-        ((syn_count > 0)) && syn_count=$((syn_count - 1))
-    elif command -v netstat &>/dev/null; then
-        syn_count=$(netstat -ant 2>/dev/null | grep -c "SYN_RECV" || echo "0")
-    fi
-
-    local total_conns=0
-    if command -v ss &>/dev/null; then
-        total_conns=$(ss -t state established 2>/dev/null | wc -l)
-        ((total_conns > 0)) && total_conns=$((total_conns - 1))
-    fi
-
-    echo -e " ${DARK_GRAY}╭──${NC} ${C1}◈ LIVE THREAT TELEMETRY${NC} ${DARK_GRAY}───────────────────────────────────────────────╮${NC}"
-    printf " ${DARK_GRAY}│${NC}  ${GRAY}Active Established Connections :${NC} ${WHITE}%-40s${NC} ${DARK_GRAY}│${NC}\n" "$total_conns"
-    if (( syn_count > 50 )); then
-        printf " ${DARK_GRAY}│${NC}  ${GRAY}SYN_RECV Backlog (Flood Alert) :${NC} ${RED}%-40s${NC} ${DARK_GRAY}│${NC}\n" "${syn_count} (POSSIBLE ATTACK!)"
+# Internal Telemetry Helpers
+_format_speed_human() {
+    local bytes=$1
+    if (( bytes < 1024 )); then
+        echo "${bytes} B/s"
+    elif (( bytes < 1048576 )); then
+        local kb=$(( bytes / 1024 ))
+        local rem=$(( (bytes % 1024) * 10 / 1024 ))
+        echo "${kb}.${rem} KB/s"
+    elif (( bytes < 1073741824 )); then
+        local mb=$(( bytes / 1048576 ))
+        local rem=$(( (bytes % 1048576) * 10 / 1048576 ))
+        echo "${mb}.${rem} MB/s"
     else
-        printf " ${DARK_GRAY}│${NC}  ${GRAY}SYN_RECV Backlog (Normal)      :${NC} ${MINT}%-40s${NC} ${DARK_GRAY}│${NC}\n" "${syn_count} (Healthy)"
-    fi
-    echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
-
-    echo -e " ${GOLD}Top 10 Remote IP Addresses by Active Connection Count:${NC}"
-    echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
-    printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}%-10s${NC} ${C1}%-30s${NC} ${GRAY}%-30s${NC} ${DARK_GRAY}│${NC}\n" "COUNT" "REMOTE IP ADDRESS" "GEO / IDENTIFIER"
-    echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
-
-    local top_ips
-    top_ips=$(netstat -ntu 2>/dev/null | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr | head -n 10 || ss -ntu 2>/dev/null | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr | head -n 10 || true)
-    
-    if [[ -z "$top_ips" ]]; then
-        echo -e " ${DARK_GRAY}│${NC}  ${GRAY}No external active sockets currently connected.${NC}                            ${DARK_GRAY}│${NC}"
-    else
-        while IFS= read -r line; do
-            [[ -z "$line" ]] && continue
-            local cnt=$(echo "$line" | awk '{print $1}')
-            local ip=$(echo "$line" | awk '{print $2}')
-            [[ -z "$ip" || "$ip" == "Address" || "$ip" == "127.0.0.1" ]] && continue
-            printf " ${DARK_GRAY}│${NC}  ${GOLD}%-10s${NC} ${WHITE}%-30s${NC} ${GRAY}%-30s${NC} ${DARK_GRAY}│${NC}\n" "$cnt" "$ip" "Established Socket"
-        done <<< "$top_ips"
-    fi
-    echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
-
-    echo -e " Attack Mitigation:"
-    echo -e "   ${RED}[1] Nullroute / Block an Attacking IP Address${NC}"
-    echo -e "   ${DARK_GRAY}[0] Return to Main Menu${NC}\n"
-    read -rp "Select Option [Default 0]: " ddos_opt
-    if [[ "$ddos_opt" == "1" ]]; then
-        read -rp "Enter IP to instantly drop via iptables: " BAD_IP
-        if [[ -n "$BAD_IP" ]]; then
-            iptables -I INPUT -s "$BAD_IP" -j DROP
-            echo -e "\n${MINT}✔ IP ${BAD_IP} successfully blocked and nullrouted!${NC}\n"
-        fi
-        read -rp "Press [Enter] to continue..."
+        local gb=$(( bytes / 1073741824 ))
+        local rem=$(( (bytes % 1073741824) * 10 / 1073741824 ))
+        echo "${gb}.${rem} GB/s"
     fi
 }
 
+_format_bytes_human() {
+    local bytes=$1
+    if (( bytes < 1048576 )); then
+        echo "$(( bytes / 1024 )) KiB"
+    elif (( bytes < 1073741824 )); then
+        local mb=$(( bytes / 1048576 ))
+        local rem=$(( (bytes % 1048576) * 10 / 1048576 ))
+        echo "${mb}.${rem} MiB"
+    else
+        local gb=$(( bytes / 1073741824 ))
+        local rem=$(( (bytes % 1073741824) * 10 / 1073741824 ))
+        echo "${gb}.${rem} GiB"
+    fi
+}
+
+_render_sparkline() {
+    local -a vals=("$@")
+    local max=1
+    for v in "${vals[@]}"; do
+        (( v > max )) && max=$v
+    done
+    local sparks=(" " "▂" "▃" "▄" "▅" "▆" "▇" "█")
+    local out=""
+    for v in "${vals[@]}"; do
+        local idx=$(( (v * 7) / max ))
+        (( idx < 0 )) && idx=0
+        (( idx > 7 )) && idx=7
+        out+="${sparks[$idx]}"
+    done
+    echo "$out"
+}
+
+_render_gauge_bar() {
+    local val=$1
+    local max=$2
+    local width=${3:-20}
+    local color=${4:-"$C1"}
+    (( max <= 0 )) && max=1
+    local fill=$(( (val * width) / max ))
+    (( fill > width )) && fill=$width
+    (( fill < 0 )) && fill=0
+    local empty=$(( width - fill ))
+    
+    local bar=""
+    for ((i=0; i<fill; i++)); do bar+="█"; done
+    local spaces=""
+    for ((i=0; i<empty; i++)); do spaces+="░"; done
+    echo -e "${color}${bar}${DARK_GRAY}${spaces}${NC}"
+}
+
+_is_ip_blocked() {
+    local ip=$1
+    iptables -C INPUT -s "$ip" -j DROP 2>/dev/null
+}
+
+_block_ip() {
+    local ip=$1
+    local reason=${2:-"DDoS Attack / Malicious Flooding"}
+    if [[ -z "$ip" ]]; then return 1; fi
+    if _is_ip_blocked "$ip"; then
+        echo -e " ${GOLD}⚠ IP ${ip} is already blocked in iptables DROP chain.${NC}"
+        return 0
+    fi
+    iptables -I INPUT -s "$ip" -m comment --comment "ArixByte-Block: ${reason}" -j DROP
+    echo -e " ${MINT}✔ Successfully blocked IP ${WHITE}${ip}${MINT} via iptables DROP!${NC}"
+    mkdir -p /var/log
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] BLOCKED: ${ip} | Reason: ${reason}" >> /var/log/arixbyte-ddos.log 2>/dev/null || true
+}
+
+_unblock_ip() {
+    local ip=$1
+    if [[ -z "$ip" ]]; then return 1; fi
+    if iptables -D INPUT -s "$ip" -j DROP 2>/dev/null || iptables -D INPUT -s "$ip" -m comment --comment "ArixByte-Block: DDoS Attack / Malicious Flooding" -j DROP 2>/dev/null; then
+        echo -e " ${MINT}✔ IP ${WHITE}${ip}${MINT} successfully unblocked and removed from iptables!${NC}"
+        mkdir -p /var/log
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] UNBLOCKED: ${ip}" >> /var/log/arixbyte-ddos.log 2>/dev/null || true
+    else
+        echo -e " ${RED}✘ IP ${ip} not found in iptables DROP rules.${NC}"
+    fi
+}
+
+view_active_blacklist() {
+    render_page_header "ACTIVE BLACKLIST & BLOCKED IPS (IPTABLES)"
+    require_root || return
+
+    echo -e " ${DARK_GRAY}╭──${NC} ${C1}◈ CURRENTLY NULLROUTED / BLOCKED THREATS${NC} ${DARK_GRAY}─────────────────────────────╮${NC}"
+    printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}%-6s${NC} ${BOLD}%-12s${NC} ${BOLD}%-12s${NC} ${BOLD}%-24s${NC} ${BOLD}%-18s${NC} ${DARK_GRAY}│${NC}\n" "NUM" "PKTS DROP" "BYTES DROP" "BLOCKED SOURCE IP" "REASON / COMMENT"
+    echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────┤${NC}"
+
+    local raw_rules
+    raw_rules=$(iptables -L INPUT -v -n --line-numbers 2>/dev/null | grep -E "DROP.*(0.0.0.0/0|ArixByte|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" || true)
+
+    if [[ -z "$raw_rules" ]]; then
+        echo -e " ${DARK_GRAY}│${NC}  ${GRAY}No individual IP addresses are currently blocked in iptables.${NC}            ${DARK_GRAY}│${NC}"
+    else
+        local count=0
+        while IFS= read -r rule; do
+            [[ -z "$rule" ]] && continue
+            local num=$(echo "$rule" | awk '{print $1}')
+            local pkts=$(echo "$rule" | awk '{print $2}')
+            local bytes=$(echo "$rule" | awk '{print $3}')
+            local src=$(echo "$rule" | awk '{print $9}')
+            [[ "$src" == "0.0.0.0/0" ]] && src=$(echo "$rule" | awk '{print $8}')
+            local comment="Nullrouted"
+            if echo "$rule" | grep -q "ArixByte-Block:"; then
+                comment=$(echo "$rule" | sed -n 's/.*ArixByte-Block: \([^"]*\).*/\1/p')
+            fi
+            ((count++))
+            printf " ${DARK_GRAY}│${NC}  ${GOLD}%-6s${NC} ${RED}%-12s${NC} ${CYAN}%-12s${NC} ${WHITE}%-24s${NC} ${GRAY}%-18s${NC} ${DARK_GRAY}│${NC}\n" "$count" "$pkts" "$bytes" "$src" "${comment:0:18}"
+        done <<< "$raw_rules"
+    fi
+    echo -e " ${DARK_GRAY}╰────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+
+    echo -e " Blacklist Management:"
+    echo -e "   ${MINT}[U]${NC} Unblock / Whitelist an IP from this list"
+    echo -e "   ${RED}[F]${NC} Flush All ArixByte Blacklist Rules"
+    echo -e "   ${DARK_GRAY}[0]${NC} Return to DDoS Monitor Menu\n"
+    read -rp "Select Option [Default 0]: " bl_opt
+    case "$bl_opt" in
+        [uU])
+            read -rp "Enter IP address to unblock: " un_ip
+            if [[ -n "$un_ip" ]]; then
+                _unblock_ip "$un_ip"
+            fi
+            read -rp "Press [Enter] to continue..."
+            ;;
+        [fF])
+            read -rp "Are you sure you want to FLUSH all ArixByte drop rules? [y/N]: " confirm_flush
+            if [[ "$confirm_flush" =~ ^[Yy]$ ]]; then
+                local del_rules
+                del_rules=$(iptables -L INPUT -n --line-numbers 2>/dev/null | grep "ArixByte-Block" | awk '{print $1}' | tac || true)
+                for r_num in $del_rules; do
+                    iptables -D INPUT "$r_num" 2>/dev/null || true
+                done
+                echo -e "\n${MINT}✔ All ArixByte threat blacklist rules flushed!${NC}\n"
+            fi
+            read -rp "Press [Enter] to continue..."
+            ;;
+        *) ;;
+    esac
+}
+
+apply_kernel_ddos_hardening() {
+    render_page_header "KERNEL ANTI-DDOS & TCP STACK HARDENING"
+    require_root || return
+
+    echo -e "${P1}⚙ Tuning Linux kernel network parameters (sysctl)...${NC}\n"
+
+    # Enable TCP SYN Cookies (Prevents SYN Flood memory exhaustion)
+    sysctl -w net.ipv4.tcp_syncookies=1 >/dev/null 2>&1 || true
+    # Increase maximum SYN backlog queue
+    sysctl -w net.ipv4.tcp_max_syn_backlog=4096 >/dev/null 2>&1 || true
+    # Reduce SYN-ACK retries
+    sysctl -w net.ipv4.tcp_synack_retries=2 >/dev/null 2>&1 || true
+    # Reduce FIN timeout to free dead sockets faster
+    sysctl -w net.ipv4.tcp_fin_timeout=15 >/dev/null 2>&1 || true
+    # Enable TCP TIME_WAIT socket reuse
+    sysctl -w net.ipv4.tcp_tw_reuse=1 >/dev/null 2>&1 || true
+    # Protect against bad ICMP error messages
+    sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1 >/dev/null 2>&1 || true
+    sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1 >/dev/null 2>&1 || true
+
+    echo -e " ${MINT}✔ sysctl parameters tuned for high-volume DDoS resilience!${NC}"
+
+    echo -e "${P1}⚙ Injecting automated firewall anti-scan & invalid packet filters...${NC}"
+    # Drop Invalid TCP Packets
+    iptables -C INPUT -m conntrack --ctstate INVALID -j DROP 2>/dev/null || iptables -I INPUT 1 -m conntrack --ctstate INVALID -m comment --comment "ArixByte-Block: Invalid Packets" -j DROP
+    # Drop TCP Null Packets (Port Scanning)
+    iptables -C INPUT -p tcp --tcp-flags ALL NONE -j DROP 2>/dev/null || iptables -I INPUT 2 -p tcp --tcp-flags ALL NONE -m comment --comment "ArixByte-Block: Null Scan" -j DROP
+    # Drop TCP XMAS Packets
+    iptables -C INPUT -p tcp --tcp-flags ALL ALL -j DROP 2>/dev/null || iptables -I INPUT 3 -p tcp --tcp-flags ALL ALL -m comment --comment "ArixByte-Block: XMAS Scan" -j DROP
+
+    echo -e " ${MINT}✔ Firewall invalid packet & scan scrubbers active!${NC}\n"
+    read -rp "Press [Enter] to return..."
+}
+
+monitor_ddos() {
+    require_root || return
+    local -a ddos_history=(5 8 12 10 15 14 18 22 20 25 30 28 35 40 38 42 45 40 35 30)
+
+    while true; do
+        render_page_header "REAL-TIME DDOS ATTACK MONITOR & MITIGATION"
+
+        # 1. Telemetry Gathering
+        local syn_count=0
+        local total_conns=0
+        local timewait_count=0
+        local closewait_count=0
+        local udp_count=0
+
+        if command -v ss &>/dev/null; then
+            syn_count=$(ss -n state syn-recv 2>/dev/null | wc -l)
+            ((syn_count > 0)) && syn_count=$((syn_count - 1))
+            total_conns=$(ss -t state established 2>/dev/null | wc -l)
+            ((total_conns > 0)) && total_conns=$((total_conns - 1))
+            timewait_count=$(ss -t state time-wait 2>/dev/null | wc -l)
+            ((timewait_count > 0)) && timewait_count=$((timewait_count - 1))
+            closewait_count=$(ss -t state close-wait 2>/dev/null | wc -l)
+            ((closewait_count > 0)) && closewait_count=$((closewait_count - 1))
+            udp_count=$(ss -u state established,connected 2>/dev/null | wc -l)
+            ((udp_count > 0)) && udp_count=$((udp_count - 1))
+        elif command -v netstat &>/dev/null; then
+            syn_count=$(netstat -ant 2>/dev/null | grep -c "SYN_RECV" || echo "0")
+            total_conns=$(netstat -ant 2>/dev/null | grep -c "ESTABLISHED" || echo "0")
+            timewait_count=$(netstat -ant 2>/dev/null | grep -c "TIME_WAIT" || echo "0")
+            closewait_count=$(netstat -ant 2>/dev/null | grep -c "CLOSE_WAIT" || echo "0")
+            udp_count=$(netstat -anu 2>/dev/null | grep -c "udp" || echo "0")
+        fi
+
+        local primary_iface
+        primary_iface="$(ip route get 8.8.8.8 2>/dev/null | awk '{print $5; exit}' || echo "eth0")"
+        [[ -z "$primary_iface" ]] && primary_iface="eth0"
+        local dropped_pkts
+        dropped_pkts=$(cat "/sys/class/net/${primary_iface}/statistics/rx_dropped" 2>/dev/null || echo "0")
+
+        # Update Rolling Sparkline Array
+        ddos_history+=("$total_conns")
+        if (( ${#ddos_history[@]} > 20 )); then
+            ddos_history=("${ddos_history[@]:1}")
+        fi
+
+        # Compute Threat Severity
+        local threat_score=10
+        local threat_label="${MINT}NORMAL / HEALTHY${NC}"
+        local threat_color="$MINT"
+
+        if (( syn_count > 30 || total_conns > 200 )); then
+            threat_score=95
+            threat_label="${RED}CRITICAL: ACTIVE DDOS IN PROGRESS!${NC}"
+            threat_color="$RED"
+        elif (( syn_count > 10 || total_conns > 100 )); then
+            threat_score=65
+            threat_label="${GOLD}ELEVATED: SUSPICIOUS VOLUMETRIC SURGE${NC}"
+            threat_color="$GOLD"
+        elif (( total_conns > 50 )); then
+            threat_score=35
+            threat_label="${CYAN}MODERATE: HIGH CONNECTION LOAD${NC}"
+            threat_color="$CYAN"
+        fi
+
+        local sparkline_str
+        sparkline_str=$(_render_sparkline "${ddos_history[@]}")
+        local gauge_str
+        gauge_str=$(_render_gauge_bar "$threat_score" 100 24 "$threat_color")
+
+        # Telemetry Display Box
+        echo -e " ${DARK_GRAY}╭──${NC} ${C1}◈ LIVE ATTACK TELEMETRY & CONNECTION PROFILE${NC} ${DARK_GRAY}────────────────────────╮${NC}"
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}Established Sockets :${NC} ${WHITE}%-14s${NC}  ${GRAY}SYN_RECV Backlog  :${NC} %-25s ${DARK_GRAY}│${NC}\n" "$total_conns" "$([ "$syn_count" -gt 15 ] && echo -e "${RED}${syn_count} (FLOOD!)${NC}" || echo -e "${MINT}${syn_count} (Normal)${NC}")"
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}TIME_WAIT Sockets   :${NC} ${WHITE}%-14s${NC}  ${GRAY}CLOSE_WAIT Sockets:${NC} ${WHITE}%-14s${NC}   ${DARK_GRAY}│${NC}\n" "$timewait_count" "$closewait_count"
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}Active UDP Sockets  :${NC} ${WHITE}%-14s${NC}  ${GRAY}Ingress Dropped Pk:${NC} ${GOLD}%-14s${NC}   ${DARK_GRAY}│${NC}\n" "$udp_count" "$dropped_pkts"
+        echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────┤${NC}"
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}Live Threat Index   :${NC} [${gauge_str}] %-30s ${DARK_GRAY}│${NC}\n" "${threat_label}"
+        printf " ${DARK_GRAY}│${NC}  ${GRAY}Connection Sparkline:${NC} ${C1}[${sparkline_str}]${NC} ${DARK_GRAY}(Rolling 20s Active Load Graph)${NC}       ${DARK_GRAY}│${NC}\n"
+        echo -e " ${DARK_GRAY}╰────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+
+        # 2. Top Remote Attacker IPs Deep Inspection
+        echo -e " ${GOLD}Top 10 Remote IP Addresses (Inspected & Classified):${NC}"
+        echo -e " ${DARK_GRAY}╭────────────────────────────────────────────────────────────────────────────╮${NC}"
+        printf " ${DARK_GRAY}│${NC} ${BOLD}${WHITE}%-3s${NC} ${BOLD}%-19s${NC} ${BOLD}%-7s${NC} ${BOLD}%-12s${NC} ${BOLD}%-18s${NC} ${BOLD}%-10s${NC} ${DARK_GRAY}│${NC}\n" "#" "REMOTE IP" "CONNS" "TARGET PORT" "ATTACK VECTOR" "STATUS"
+        echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────┤${NC}"
+
+        local -a detected_ips=()
+        local -a detected_counts=()
+        local -a detected_vectors=()
+        local top_raw
+        top_raw=$(netstat -ntu 2>/dev/null | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr | head -n 10 || ss -ntu 2>/dev/null | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr | head -n 10 || true)
+
+        local row_idx=0
+        if [[ -z "$top_raw" ]]; then
+            echo -e " ${DARK_GRAY}│${NC}  ${GRAY}No external remote IP addresses currently connected.${NC}                    ${DARK_GRAY}│${NC}"
+        else
+            while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+                local cnt=$(echo "$line" | awk '{print $1}')
+                local ip=$(echo "$line" | awk '{print $2}')
+                [[ -z "$ip" || "$ip" == "Address" || "$ip" == "127.0.0.1" || "$ip" =~ ^:: ]] && continue
+
+                ((row_idx++))
+                detected_ips+=("$ip")
+                detected_counts+=("$cnt")
+
+                # Detect Target Port for this IP
+                local tgt_port="All/Raw"
+                if command -v ss &>/dev/null; then
+                    tgt_port=$(ss -ntu 2>/dev/null | grep "$ip" | awk '{print $4}' | cut -d: -f2 | sort | uniq -c | sort -nr | head -n 1 | awk '{print $2}' || echo "N/A")
+                elif command -v netstat &>/dev/null; then
+                    tgt_port=$(netstat -ntu 2>/dev/null | grep "$ip" | awk '{print $4}' | cut -d: -f2 | sort | uniq -c | sort -nr | head -n 1 | awk '{print $2}' || echo "N/A")
+                fi
+                [[ -z "$tgt_port" ]] && tgt_port="Multi"
+
+                # Classify Vector
+                local vector="Normal TCP"
+                if (( cnt > 100 )); then
+                    if [[ "$tgt_port" == "80" || "$tgt_port" == "443" ]]; then
+                        vector="HTTP/S L7 Flood"
+                    elif [[ "$tgt_port" == "22" ]]; then
+                        vector="SSH Brute Botnet"
+                    else
+                        vector="TCP Syn/Ack Flood"
+                    fi
+                elif (( cnt > 40 )); then
+                    vector="Connection Spikes"
+                elif (( cnt > 15 )); then
+                    vector="Active Sockets"
+                fi
+                detected_vectors+=("$vector")
+
+                # Status Check (Blocked vs Active)
+                local st_label="${MINT}● ACTIVE${NC}"
+                if _is_ip_blocked "$ip"; then
+                    st_label="${RED}⛔ BLOCKED${NC}"
+                fi
+
+                # Color Count
+                local cnt_colored="${MINT}${cnt}${NC}"
+                (( cnt > 30 )) && cnt_colored="${GOLD}${cnt}${NC}"
+                (( cnt > 70 )) && cnt_colored="${RED}${cnt}${NC}"
+
+                printf " ${DARK_GRAY}│${NC} ${GOLD}%-3s${NC} ${WHITE}%-19s${NC} %-16s ${CYAN}%-12s${NC} ${GRAY}%-18s${NC} %-19s ${DARK_GRAY}│${NC}\n" "[$row_idx]" "$ip" "$cnt_colored" "${tgt_port:0:12}" "${vector:0:18}" "$st_label"
+            done <<< "$top_raw"
+        fi
+        echo -e " ${DARK_GRAY}╰────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+
+        # Action Options
+        echo -e " ${C1}◈ Threat Mitigation Actions & Blacklist Controls:${NC}"
+        echo -e "   ${WHITE}[1..${#detected_ips[@]}]${NC} ${WHITE}Quick-Block IP${NC}             ${GRAY}(Instantly drop specific attacker by number)${NC}"
+        echo -e "   ${RED}[A]${NC}     ${WHITE}Auto-Block Threat IPs${NC}      ${GRAY}(Auto-drop all IPs with >40 connections)${NC}"
+        echo -e "   ${GOLD}[M]${NC}     ${WHITE}Manual Blacklist IP/CIDR${NC}   ${GRAY}(Enter any custom IP or subnet to block)${NC}"
+        echo -e "   ${CYAN}[B]${NC}     ${WHITE}View Active Blacklist${NC}      ${GRAY}(List all currently blocked IPs in iptables)${NC}"
+        echo -e "   ${MINT}[U]${NC}     ${WHITE}Unblock / Whitelist IP${NC}     ${GRAY}(Remove IP from iptables DROP chain)${NC}"
+        echo -e "   ${P1}[K]${NC}     ${WHITE}Kernel Anti-DDoS Tuning${NC}    ${GRAY}(Enable SYN Cookies, TCP window hardening)${NC}"
+        echo -e "   ${BLUE}[R]${NC}     ${WHITE}Live Auto-Refresh Stream${NC}   ${GRAY}(Continuous real-time graphs and telemetry)${NC}"
+        echo -e "   ${GRAY}[L]${NC}     ${WHITE}Export Incident Log${NC}        ${GRAY}(Write report to /var/log/arixbyte-ddos.log)${NC}"
+        echo -e "   ${DARK_GRAY}[0]${NC}     ${GRAY}Return to Main Menu${NC}\n"
+
+        read -rp "Select Mitigation Action [0-${#detected_ips[@]}, A, M, B, U, K, R, L]: " action_opt
+        case "$action_opt" in
+            [1-9]|10)
+                local sel_idx=$(( action_opt - 1 ))
+                if [[ -n "${detected_ips[$sel_idx]}" ]]; then
+                    local target_ip="${detected_ips[$sel_idx]}"
+                    local target_vec="${detected_vectors[$sel_idx]}"
+                    echo -e "\n${RED}Initiating immediate nullroute for ${target_ip}...${NC}"
+                    _block_ip "$target_ip" "${target_vec}"
+                else
+                    echo -e "\n${RED}✘ Invalid IP selection.${NC}"
+                fi
+                read -rp "Press [Enter] to continue..."
+                ;;
+            [aA])
+                echo -e "\n${P1}⚙ Scanning for aggressive connection abusers (>40 sockets)...${NC}"
+                local banned_cnt=0
+                for ((i=0; i<${#detected_ips[@]}; i++)); do
+                    if (( detected_counts[i] >= 40 )); then
+                        _block_ip "${detected_ips[i]}" "Automated: ${detected_vectors[i]} (${detected_counts[i]} conns)"
+                        ((banned_cnt++))
+                    fi
+                done
+                if (( banned_cnt == 0 )); then
+                    echo -e " ${MINT}✔ No remote IPs exceeded the 40-connection attack threshold.${NC}"
+                else
+                    echo -e " ${MINT}✔ Successfully auto-blocked ${banned_cnt} attacking IP(s)!${NC}"
+                fi
+                read -rp "Press [Enter] to continue..."
+                ;;
+            [mM])
+                read -rp "Enter IP or CIDR Subnet to block (e.g., 185.220.101.4 or 45.154.255.0/24): " manual_ip
+                if [[ -n "$manual_ip" ]]; then
+                    _block_ip "$manual_ip" "Manual Operator Blacklist"
+                fi
+                read -rp "Press [Enter] to continue..."
+                ;;
+            [bB])
+                view_active_blacklist
+                ;;
+            [uU])
+                read -rp "Enter IP address to unblock / whitelist: " un_ip
+                if [[ -n "$un_ip" ]]; then
+                    _unblock_ip "$un_ip"
+                fi
+                read -rp "Press [Enter] to continue..."
+                ;;
+            [kK])
+                apply_kernel_ddos_hardening
+                ;;
+            [rR])
+                echo -e "\n${GRAY}Starting continuous auto-refresh stream (Press 'Q' or Ctrl+C to return)...${NC}"
+                sleep 1
+                while true; do
+                    render_page_header "LIVE CONTINUOUS DDOS THREAT MONITOR"
+                    local live_conns=0
+                    local live_syn=0
+                    if command -v ss &>/dev/null; then
+                        live_conns=$(ss -t state established 2>/dev/null | wc -l)
+                        ((live_conns > 0)) && live_conns=$((live_conns - 1))
+                        live_syn=$(ss -n state syn-recv 2>/dev/null | wc -l)
+                        ((live_syn > 0)) && live_syn=$((live_syn - 1))
+                    fi
+                    ddos_history+=("$live_conns")
+                    (( ${#ddos_history[@]} > 24 )) && ddos_history=("${ddos_history[@]:1}")
+                    local l_spark=$(_render_sparkline "${ddos_history[@]}")
+                    local l_gauge=$(_render_gauge_bar "$live_conns" 200 30 "$C1")
+
+                    echo -e " ${DARK_GRAY}╭──${NC} ${C1}◈ LIVE PULSE TELEMETRY${NC} ${DARK_GRAY}───────────────────────────────────────────────╮${NC}"
+                    printf " ${DARK_GRAY}│${NC}  ${GRAY}Established Sockets :${NC} ${WHITE}%-15s${NC} ${GRAY}SYN Floods :${NC} ${RED}%-15s${NC}       ${DARK_GRAY}│${NC}\n" "$live_conns" "$live_syn"
+                    printf " ${DARK_GRAY}│${NC}  ${GRAY}Connection Surge    :${NC} [${l_gauge}]       ${DARK_GRAY}│${NC}\n"
+                    printf " ${DARK_GRAY}│${NC}  ${GRAY}Waveform History    :${NC} ${C1}[${l_spark}]${NC} ${DARK_GRAY}(24s Rolling Buffer)${NC}            ${DARK_GRAY}│${NC}\n"
+                    echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+                    echo -e " ${DARK_GRAY}Sampling live packets every 1.5s... Press ${WHITE}'q'${DARK_GRAY} to return.${NC}"
+
+                    local key_in=""
+                    read -t 1.5 -n 1 key_in || true
+                    if [[ "$key_in" == "q" || "$key_in" == "Q" || "$key_in" == "0" ]]; then
+                        break
+                    fi
+                done
+                ;;
+            [lL])
+                mkdir -p /var/log
+                local log_file="/var/log/arixbyte-ddos.log"
+                {
+                    echo "================================================================="
+                    echo "ARIXBYTE DDOS THREAT INCIDENT REPORT - $(date '+%Y-%m-%d %H:%M:%S')"
+                    echo "Primary Interface: ${primary_iface} | Established Sockets: ${total_conns} | SYN: ${syn_count}"
+                    echo "Top Remote IPs:"
+                    for ((i=0; i<${#detected_ips[@]}; i++)); do
+                        echo "  #$((i+1)) IP: ${detected_ips[i]} | Conns: ${detected_counts[i]} | Vector: ${detected_vectors[i]}"
+                    done
+                    echo "================================================================="
+                } >> "$log_file" 2>/dev/null || true
+                echo -e "\n${MINT}✔ Threat report exported to ${WHITE}${log_file}${NC}\n"
+                read -rp "Press [Enter] to continue..."
+                ;;
+            0|[qQ]|[bB][aA][cC][kK])
+                return
+                ;;
+            *)
+                echo -e "\n ${RED}✘ Invalid selection!${NC}"
+                sleep 1
+                ;;
+        esac
+    done
+}
+
 # ==============================================================================
-# [15] TRAFFIC MONITOR
+# [15] REAL-TIME TRAFFIC & BANDWIDTH MONITOR
 # ==============================================================================
 monitor_traffic() {
-    render_page_header "REAL-TIME NETWORK TRAFFIC MONITOR"
+    render_page_header "REAL-TIME NETWORK TRAFFIC & BANDWIDTH ENGINE"
 
     local iface
     iface="$(ip route get 8.8.8.8 2>/dev/null | awk '{print $5; exit}' || echo "eth0")"
     [[ -z "$iface" ]] && iface="eth0"
 
-    echo -e " ${GRAY}Monitoring primary network interface:${NC} ${WHITE}${iface}${NC}"
-    echo -e " ${DARK_GRAY}Sampling live throughput (Press Ctrl+C or Enter after test to return)...${NC}\n"
+    local rx_peak=0
+    local tx_peak=0
+    local -a rx_history=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+    local -a tx_history=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+    local is_paused="false"
 
-    local rx1 tx1 rx2 tx2
-    rx1=$(cat "/sys/class/net/${iface}/statistics/rx_bytes" 2>/dev/null || echo "0")
-    tx1=$(cat "/sys/class/net/${iface}/statistics/tx_bytes" 2>/dev/null || echo "0")
-    sleep 1
-    rx2=$(cat "/sys/class/net/${iface}/statistics/rx_bytes" 2>/dev/null || echo "0")
-    tx2=$(cat "/sys/class/net/${iface}/statistics/tx_bytes" 2>/dev/null || echo "0")
+    while true; do
+        # Sample Rx/Tx Bytes with 1s delta
+        local rx1 tx1 rx2 tx2
+        rx1=$(cat "/sys/class/net/${iface}/statistics/rx_bytes" 2>/dev/null || echo "0")
+        tx1=$(cat "/sys/class/net/${iface}/statistics/tx_bytes" 2>/dev/null || echo "0")
+        local rx_tot_pkts=$(cat "/sys/class/net/${iface}/statistics/rx_packets" 2>/dev/null || echo "0")
+        local tx_tot_pkts=$(cat "/sys/class/net/${iface}/statistics/tx_packets" 2>/dev/null || echo "0")
+        local rx_drops=$(cat "/sys/class/net/${iface}/statistics/rx_dropped" 2>/dev/null || echo "0")
+        local tx_drops=$(cat "/sys/class/net/${iface}/statistics/tx_dropped" 2>/dev/null || echo "0")
 
-    local rx_speed=$(( (rx2 - rx1) / 1024 ))
-    local tx_speed=$(( (tx2 - tx1) / 1024 ))
+        local key_pressed=""
+        read -t 1 -n 1 key_pressed || true
 
-    echo -e " ${DARK_GRAY}╭──${NC} ${C1}◈ LIVE BANDWIDTH SPEED${NC} ${DARK_GRAY}───────────────────────────────────────────────╮${NC}"
-    printf " ${DARK_GRAY}│${NC}  ${GRAY}Ingress Speed (Rx) :${NC} ${MINT}%-10s KB/s${NC}  ${WHITE}[════════════════════]${NC}        ${DARK_GRAY}│${NC}\n" "$rx_speed"
-    printf " ${DARK_GRAY}│${NC}  ${GRAY}Egress Speed  (Tx) :${NC} ${C1}%-10s KB/s${NC}  ${WHITE}[════════════════════]${NC}        ${DARK_GRAY}│${NC}\n" "$tx_speed"
-    echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+        if [[ "$key_pressed" == "q" || "$key_pressed" == "Q" || "$key_pressed" == "0" ]]; then
+            break
+        elif [[ "$key_pressed" == "p" || "$key_pressed" == "P" ]]; then
+            if [[ "$is_paused" == "true" ]]; then is_paused="false"; else is_paused="true"; fi
+        elif [[ "$key_pressed" == "r" || "$key_pressed" == "R" ]]; then
+            rx_peak=0
+            tx_peak=0
+            rx_history=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+            tx_history=(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+        elif [[ "$key_pressed" == "i" || "$key_pressed" == "I" ]]; then
+            echo -e "\n Available Network Interfaces:"
+            ls /sys/class/net/ 2>/dev/null | sed 's/^/   ● /'
+            read -rp "Enter Interface Name to monitor (e.g., eth0, ens3, docker0): " new_iface
+            if [[ -d "/sys/class/net/${new_iface}" ]]; then
+                iface="$new_iface"
+                rx_peak=0
+                tx_peak=0
+            fi
+        fi
 
-    read -rp "Press [Enter] to return..."
+        if [[ "$is_paused" == "false" ]]; then
+            rx2=$(cat "/sys/class/net/${iface}/statistics/rx_bytes" 2>/dev/null || echo "0")
+            tx2=$(cat "/sys/class/net/${iface}/statistics/tx_bytes" 2>/dev/null || echo "0")
+
+            local rx_bytes_sec=$(( rx2 - rx1 ))
+            local tx_bytes_sec=$(( tx2 - tx1 ))
+            (( rx_bytes_sec < 0 )) && rx_bytes_sec=0
+            (( tx_bytes_sec < 0 )) && tx_bytes_sec=0
+
+            (( rx_bytes_sec > rx_peak )) && rx_peak=$rx_bytes_sec
+            (( tx_bytes_sec > tx_peak )) && tx_peak=$tx_bytes_sec
+
+            rx_history+=("$rx_bytes_sec")
+            (( ${#rx_history[@]} > 20 )) && rx_history=("${rx_history[@]:1}")
+            tx_history+=("$tx_bytes_sec")
+            (( ${#tx_history[@]} > 20 )) && tx_history=("${tx_history[@]:1}")
+        fi
+
+        local rx_speed_fmt=$(_format_speed_human "$rx_bytes_sec")
+        local tx_speed_fmt=$(_format_speed_human "$tx_bytes_sec")
+        local rx_peak_fmt=$(_format_speed_human "$rx_peak")
+        local tx_peak_fmt=$(_format_speed_human "$tx_peak")
+        local rx_tot_fmt=$(_format_bytes_human "$rx2")
+        local tx_tot_fmt=$(_format_bytes_human "$tx2")
+
+        local rx_spark=$(_render_sparkline "${rx_history[@]}")
+        local tx_spark=$(_render_sparkline "${tx_history[@]}")
+        local rx_gauge=$(_render_gauge_bar "$rx_bytes_sec" "$(( rx_peak > 0 ? rx_peak : 1048576 ))" 20 "$MINT")
+        local tx_gauge=$(_render_gauge_bar "$tx_bytes_sec" "$(( tx_peak > 0 ? tx_peak : 1048576 ))" 20 "$C1")
+
+        # Scan active ports consuming bandwidth
+        local web_conns=0
+        local ssh_conns=0
+        local db_conns=0
+        local panel_conns=0
+        if command -v ss &>/dev/null; then
+            web_conns=$(ss -t state established '( sport = :80 or sport = :443 or dport = :80 or dport = :443 )' 2>/dev/null | wc -l)
+            ((web_conns > 0)) && web_conns=$((web_conns - 1))
+            ssh_conns=$(ss -t state established '( sport = :22 or dport = :22 )' 2>/dev/null | wc -l)
+            ((ssh_conns > 0)) && ssh_conns=$((ssh_conns - 1))
+            panel_conns=$(ss -t state established '( sport = :8080 or sport = :4085 or sport = :8006 or sport = :2022 )' 2>/dev/null | wc -l)
+            ((panel_conns > 0)) && panel_conns=$((panel_conns - 1))
+            db_conns=$(ss -t state established '( sport = :3306 or sport = :5432 or sport = :6379 )' 2>/dev/null | wc -l)
+            ((db_conns > 0)) && db_conns=$((db_conns - 1))
+        fi
+
+        render_page_header "REAL-TIME NETWORK TRAFFIC & BANDWIDTH ENGINE"
+
+        echo -e " ${DARK_GRAY}╭──${NC} ${C1}◈ LIVE INTERFACE: ${WHITE}${iface}${NC} ${GRAY}(MTU: $(cat /sys/class/net/${iface}/mtu 2>/dev/null || echo 1500) | State: $(cat /sys/class/net/${iface}/operstate 2>/dev/null || echo UP))${NC} ${DARK_GRAY}─────────────────────╮${NC}"
+        
+        # INGRESS (Rx) CARD
+        printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}▼ INGRESS (Rx / Download)${NC}%*s${DARK_GRAY}│${NC}\n" 49 ""
+        printf " ${DARK_GRAY}│${NC}  Current Throughput : ${MINT}%-14s${NC}  [${rx_gauge}]   ${DARK_GRAY}│${NC}\n" "$rx_speed_fmt"
+        printf " ${DARK_GRAY}│${NC}  Session Peak Speed : ${WHITE}%-14s${NC}  Waveform: ${MINT}[${rx_spark}]${NC}         ${DARK_GRAY}│${NC}\n" "$rx_peak_fmt"
+        printf " ${DARK_GRAY}│${NC}  Total Transferred  : ${WHITE}%-14s${NC}  Packets: ${GRAY}%-10s${NC} Drops: ${GOLD}%-6s${NC}  ${DARK_GRAY}│${NC}\n" "$rx_tot_fmt" "$rx_tot_pkts" "$rx_drops"
+        echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────┤${NC}"
+
+        # EGRESS (Tx) CARD
+        printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}▲ EGRESS (Tx / Upload)${NC}%*s${DARK_GRAY}│${NC}\n" 51 ""
+        printf " ${DARK_GRAY}│${NC}  Current Throughput : ${C1}%-14s${NC}  [${tx_gauge}]   ${DARK_GRAY}│${NC}\n" "$tx_speed_fmt"
+        printf " ${DARK_GRAY}│${NC}  Session Peak Speed : ${WHITE}%-14s${NC}  Waveform: ${C1}[${tx_spark}]${NC}         ${DARK_GRAY}│${NC}\n" "$tx_peak_fmt"
+        printf " ${DARK_GRAY}│${NC}  Total Transferred  : ${WHITE}%-14s${NC}  Packets: ${GRAY}%-10s${NC} Drops: ${GOLD}%-6s${NC}  ${DARK_GRAY}│${NC}\n" "$tx_tot_fmt" "$tx_tot_pkts" "$tx_drops"
+        echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────┤${NC}"
+
+        # PROTOCOL SOCKET ACTIVITY
+        printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}ACTIVE SERVICES CONCURRENT LOAD${NC}%*s${DARK_GRAY}│${NC}\n" 43 ""
+        printf " ${DARK_GRAY}│${NC}  Web (80/443)  : ${WHITE}%-8s${NC} sockets  ${GRAY}│${NC}  Panel (8080/4085): ${WHITE}%-8s${NC} sockets ${DARK_GRAY}│${NC}\n" "$web_conns" "$panel_conns"
+        printf " ${DARK_GRAY}│${NC}  SSH (22)      : ${WHITE}%-8s${NC} sockets  ${GRAY}│${NC}  Database/Redis   : ${WHITE}%-8s${NC} sockets ${DARK_GRAY}│${NC}\n" "$ssh_conns" "$db_conns"
+        echo -e " ${DARK_GRAY}╰────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+
+        echo -e " Live Engine Controls:"
+        echo -e "   ${WHITE}[P]${NC} $([ "$is_paused" == "true" ] && echo -e "${GOLD}Resume Graph${NC}" || echo -e "Pause Graph")   ${WHITE}[R]${NC} Reset Session Peaks   ${WHITE}[I]${NC} Switch Interface   ${WHITE}[Q / 0]${NC} Exit\n"
+    done
 }
 
 # ==============================================================================
