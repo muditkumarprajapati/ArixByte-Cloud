@@ -946,20 +946,21 @@ detect_corrupt_files() {
     echo -e "${P1}⚙ Initiating deep filesystem scan for broken & corrupt stubs...${NC}\n"
 
     local corrupt_files=()
-    local total_scanned=0
     local spin_idx=0
     local spinner=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
 
-    # Single-line live animated status renderer
+    # Single-line live animated status renderer (strictly formatted to fit any 80-col terminal)
     render_scan_status() {
         local p_num="$1"
         local p_label="$2"
         local pct="$3"
-        local current_path="$4"
+        local current_f="$4"
+        local p_cur="$5"
+        local p_tot="$6"
 
         local spin="${spinner[spin_idx % 10]}"
         spin_idx=$((spin_idx + 1))
-        local bar_len=10
+        local bar_len=8
         local filled=$(( (pct * bar_len) / 100 ))
         if (( filled > bar_len )); then filled=$bar_len; fi
         local empty=$(( bar_len - filled ))
@@ -968,16 +969,18 @@ detect_corrupt_files() {
         for ((b=0; b<filled; b++)); do bar+="█"; done
         for ((b=0; b<empty; b++)); do bar+="░"; done
 
-        local disp_path="$current_path"
-        if [[ ${#disp_path} -gt 28 ]]; then
-            disp_path="...${disp_path: -25}"
+        local disp_path="$current_f"
+        if [[ ${#disp_path} -gt 20 ]]; then
+            disp_path="...${disp_path: -17}"
         fi
 
-        printf "\r ${C1}%s${NC} ${BOLD}${WHITE}[%d/4 %s]${NC} ${P1}[%s]${NC} ${MINT}%3d%%${NC} ${DARK_GRAY}│${NC} ${GRAY}Scanned:${NC} ${WHITE}%-5d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt:${NC} ${RED}%-3d${NC} ${DARK_GRAY}│${NC} ${C2}%-28s${NC}\033[K" \
-            "$spin" "$p_num" "$p_label" "$bar" "$pct" "$total_scanned" "${#corrupt_files[@]}" "$disp_path"
+        printf "\r ${C1}%s${NC} ${BOLD}${WHITE}[%d/4 %-10s]${NC} ${P1}[%s]${NC} ${MINT}%3d%%${NC} ${DARK_GRAY}│${NC} ${GRAY}%d/%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Issues:${NC} ${RED}%d${NC} ${DARK_GRAY}│${NC} ${C2}%-20s${NC}\033[K" \
+            "$spin" "$p_num" "$p_label" "$bar" "$pct" "$p_cur" "$p_tot" "${#corrupt_files[@]}" "$disp_path"
     }
 
-    # 1. Broken / Dangling Symbolic Links
+    # =========================================================================
+    # PHASE 1: Real System Symlinks & Broken Pointers (Targeted system roots)
+    # =========================================================================
     local p1_targets=("/etc" "/tmp" "/var/log" "/var/tmp" "/var/cache" "/var/run" "/var/spool" "/usr/local/bin" "/usr/local/etc")
     for d in /var/*; do
         [[ -d "$d" ]] || continue
@@ -986,7 +989,6 @@ detect_corrupt_files() {
         esac
         p1_targets+=("$d")
     done
-
     if [[ -d "/var/lib" ]]; then
         for d in /var/lib/*; do
             [[ -d "$d" ]] || continue
@@ -997,88 +999,149 @@ detect_corrupt_files() {
         done
     fi
 
-    local p1_unique=()
-    for d in "${p1_targets[@]}"; do
-        [[ -d "$d" ]] && p1_unique+=("$d")
-    done
-    local total_p1=${#p1_unique[@]}
-    if [[ "$total_p1" -eq 0 ]]; then total_p1=1; fi
-    local p1_idx=0
+    local p1_items=()
+    while IFS= read -r f; do
+        [[ -n "$f" ]] && p1_items+=("$f")
+    done < <(find "${p1_targets[@]}" -maxdepth 4 -path "*/docker*" -prune -o -path "*/containers*" -prune -o -path "*/pterodactyl*" -prune -o -type l -print 2>/dev/null || true)
 
-    for target_dir in "${p1_unique[@]}"; do
-        p1_idx=$((p1_idx + 1))
-        local pct=$(( (p1_idx * 25) / total_p1 ))
-        render_scan_status 1 "Symlinks" "$pct" "$target_dir"
-        while IFS= read -r f; do
-            [[ -z "$f" ]] && continue
-            total_scanned=$((total_scanned + 1))
-            if [[ ! -e "$f" ]]; then
-                corrupt_files+=("$f|BROKEN_SYMLINK")
+    local p1_tot=${#p1_items[@]}
+    local p1_scanned=0
+    local p1_issues=0
+    if (( p1_tot == 0 )); then p1_tot=1; fi
+
+    for f in "${p1_items[@]}"; do
+        p1_scanned=$((p1_scanned + 1))
+        if [[ ! -e "$f" ]]; then
+            corrupt_files+=("$f|BROKEN_SYMLINK")
+            p1_issues=$((p1_issues + 1))
+        fi
+        if (( p1_scanned % 10 == 0 || p1_scanned == p1_tot )); then
+            local pct=$(( (p1_scanned * 25) / p1_tot ))
+            render_scan_status 1 "Symlinks" "$pct" "$f" "$p1_scanned" "$p1_tot"
+            sleep 0.005 2>/dev/null || true
+        fi
+    done
+    printf "\r\033[K ${MINT}✔${NC} ${BOLD}${WHITE}[1/4 Symlinks]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d Symlinks${NC} ${DARK_GRAY}│${NC} ${GRAY}Broken: ${RED}%d${NC}\n" "$p1_scanned" "$p1_issues"
+
+    # =========================================================================
+    # PHASE 2: Crash Dumps, Corrupted Logs & Broken Archives
+    # =========================================================================
+    local p2_items=()
+    while IFS= read -r f; do
+        [[ -n "$f" ]] && p2_items+=("$f")
+    done < <(find /var/crash /var/log /tmp /var/tmp -maxdepth 3 -type f \( -name "core*" -o -name "*.dump" -o -name "*.crash" -o -name "*.dmp" -o -name "*.gz" -o -name "*.log" \) 2>/dev/null || true)
+
+    local p2_tot=${#p2_items[@]}
+    local p2_scanned=0
+    local p2_issues=0
+    if (( p2_tot == 0 )); then p2_tot=1; fi
+
+    for f in "${p2_items[@]}"; do
+        p2_scanned=$((p2_scanned + 1))
+        case "$f" in
+            *.dump|*.crash|*/core*|*.dmp)
+                corrupt_files+=("$f|CRASH_DUMP")
+                p2_issues=$((p2_issues + 1))
+                ;;
+            *.gz)
+                if ! gzip -t "$f" 2>/dev/null; then
+                    corrupt_files+=("$f|CORRUPT_GZIP_LOG")
+                    p2_issues=$((p2_issues + 1))
+                fi
+                ;;
+            *.log)
+                if [[ ! -r "$f" ]]; then
+                    corrupt_files+=("$f|UNREADABLE_LOG")
+                    p2_issues=$((p2_issues + 1))
+                fi
+                ;;
+        esac
+        if (( p2_scanned % 5 == 0 || p2_scanned == p2_tot )); then
+            local pct=$(( 25 + (p2_scanned * 25) / p2_tot ))
+            render_scan_status 2 "Logs&Crash" "$pct" "$f" "$p2_scanned" "$p2_tot"
+            sleep 0.005 2>/dev/null || true
+        fi
+    done
+    printf "\r\033[K ${MINT}✔${NC} ${BOLD}${WHITE}[2/4 Logs&Crash]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d Logs & Dumps${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt: ${RED}%d${NC}\n" "$p2_scanned" "$p2_issues"
+
+    # =========================================================================
+    # PHASE 3: Package Manager Integrity & Corrupted Download Caches
+    # =========================================================================
+    local p3_items=()
+    while IFS= read -r f; do
+        [[ -n "$f" ]] && p3_items+=("$f")
+    done < <(find /var/cache/apt /var/lib/apt/lists /var/cache/dnf /var/cache/yum -maxdepth 3 -type f 2>/dev/null || true)
+
+    if [[ ${#p3_items[@]} -eq 0 ]]; then
+        for f in /var/log/dpkg.log* /var/log/apt/term.log* /var/log/dnf.log*; do
+            [[ -f "$f" ]] && p3_items+=("$f")
+        done
+    fi
+
+    local p3_tot=${#p3_items[@]}
+    local p3_scanned=0
+    local p3_issues=0
+    if (( p3_tot == 0 )); then p3_tot=1; fi
+
+    for f in "${p3_items[@]}"; do
+        p3_scanned=$((p3_scanned + 1))
+        if [[ "$f" == *"/partial/"* || "$f" == *".part" || "$f" == *".partial" ]]; then
+            corrupt_files+=("$f|PARTIAL_PKG_DOWNLOAD")
+            p3_issues=$((p3_issues + 1))
+        elif [[ "$f" == *.deb && ! -s "$f" ]]; then
+            corrupt_files+=("$f|ZERO_BYTE_DEB")
+            p3_issues=$((p3_issues + 1))
+        fi
+        if (( p3_scanned % 5 == 0 || p3_scanned == p3_tot )); then
+            local pct=$(( 50 + (p3_scanned * 25) / p3_tot ))
+            render_scan_status 3 "PkgCaches" "$pct" "$f" "$p3_scanned" "$p3_tot"
+            sleep 0.005 2>/dev/null || true
+        fi
+    done
+    printf "\r\033[K ${MINT}✔${NC} ${BOLD}${WHITE}[3/4 PkgCaches]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d Package Files${NC} ${DARK_GRAY}│${NC} ${GRAY}Partial/Corrupt: ${RED}%d${NC}\n" "$p3_scanned" "$p3_issues"
+
+    # =========================================================================
+    # PHASE 4: Abandoned Locks, Dead PIDs & Stale IPC Descriptors
+    # =========================================================================
+    local p4_items=()
+    while IFS= read -r f; do
+        [[ -n "$f" ]] && p4_items+=("$f")
+    done < <(find /run /var/run /var/lock /tmp /var/tmp -maxdepth 3 \( -name "*.pid" -o -name "*.lock" -o -name "*.sock" \) 2>/dev/null || true)
+
+    local p4_tot=${#p4_items[@]}
+    local p4_scanned=0
+    local p4_issues=0
+    if (( p4_tot == 0 )); then p4_tot=1; fi
+
+    for f in "${p4_items[@]}"; do
+        p4_scanned=$((p4_scanned + 1))
+        if [[ "$f" == *.pid ]]; then
+            local pid
+            pid=$(head -n1 "$f" 2>/dev/null | tr -cd '0-9')
+            if [[ -n "$pid" && "$pid" -gt 1 ]]; then
+                if ! kill -0 "$pid" 2>/dev/null && [[ ! -d "/proc/$pid" ]]; then
+                    corrupt_files+=("$f|ORPHANED_PID_LOCK")
+                    p4_issues=$((p4_issues + 1))
+                fi
             fi
-            if (( total_scanned % 8 == 0 )); then
-                render_scan_status 1 "Symlinks" "$pct" "$f"
+        elif [[ "$f" == *.lock && ! -s "$f" ]]; then
+            if [[ $(find "$f" -mtime +2 2>/dev/null) ]]; then
+                corrupt_files+=("$f|STALE_ZERO_LOCK")
+                p4_issues=$((p4_issues + 1))
             fi
-        done < <(find "$target_dir" -maxdepth 4 -path "*/docker*" -prune -o -path "*/containers*" -prune -o -path "*/pterodactyl*" -prune -o -type l -print 2>/dev/null || true)
+        fi
+        if (( p4_scanned % 3 == 0 || p4_scanned == p4_tot )); then
+            local pct=$(( 75 + (p4_scanned * 25) / p4_tot ))
+            render_scan_status 4 "Locks&PIDs" "$pct" "$f" "$p4_scanned" "$p4_tot"
+            sleep 0.005 2>/dev/null || true
+        fi
     done
-    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[1/4 Symlinks]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt Found: ${RED}%d${NC}\033[K\n" "$total_scanned" "${#corrupt_files[@]}"
+    printf "\r\033[K ${MINT}✔${NC} ${BOLD}${WHITE}[4/4 Locks&PIDs]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d Descriptors${NC} ${DARK_GRAY}│${NC} ${GRAY}Stale/Dead: ${RED}%d${NC}\n\n" "$p4_scanned" "$p4_issues"
 
-    # 2. Corrupt core dumps / crash files
-    local p2_targets=("/var/crash" "/tmp" "/var/log" "/var/tmp")
-    local total_p2=${#p2_targets[@]}
-    local p2_idx=0
-    for target_dir in "${p2_targets[@]}"; do
-        p2_idx=$((p2_idx + 1))
-        [[ -d "$target_dir" ]] || continue
-        local pct=$(( 25 + (p2_idx * 25) / total_p2 ))
-        render_scan_status 2 "CrashDumps" "$pct" "$target_dir"
-        while IFS= read -r f; do
-            [[ -z "$f" ]] && continue
-            total_scanned=$((total_scanned + 1))
-            corrupt_files+=("$f|CRASH_DUMP")
-            render_scan_status 2 "CrashDumps" "$pct" "$f"
-        done < <(find "$target_dir" -maxdepth 3 -type f \( -name "core*" -o -name "*.dump" -o -name "*.crash" -o -name "*.dmp" \) 2>/dev/null || true)
-    done
-    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[2/4 CrashDumps]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt Found: ${RED}%d${NC}\033[K\n" "$total_scanned" "${#corrupt_files[@]}"
-
-    # 3. Partial package manager archives
-    local p3_targets=("/var/cache/apt/archives/partial" "/var/cache/dnf" "/var/cache/yum" "/var/lib/apt/lists/partial")
-    local total_p3=${#p3_targets[@]}
-    local p3_idx=0
-    for target_dir in "${p3_targets[@]}"; do
-        p3_idx=$((p3_idx + 1))
-        [[ -d "$target_dir" ]] || continue
-        local pct=$(( 50 + (p3_idx * 25) / total_p3 ))
-        render_scan_status 3 "PkgCaches" "$pct" "$target_dir"
-        while IFS= read -r f; do
-            [[ -z "$f" ]] && continue
-            total_scanned=$((total_scanned + 1))
-            corrupt_files+=("$f|PARTIAL_PKG")
-            render_scan_status 3 "PkgCaches" "$pct" "$f"
-        done < <(find "$target_dir" -type f 2>/dev/null || true)
-    done
-    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[3/4 PkgCaches]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt Found: ${RED}%d${NC}\033[K\n" "$total_scanned" "${#corrupt_files[@]}"
-
-    # 4. Zero-byte lock files / stale pid files
-    local p4_targets=("/tmp" "/var/lock" "/run/lock" "/var/run")
-    local total_p4=${#p4_targets[@]}
-    local p4_idx=0
-    for target_dir in "${p4_targets[@]}"; do
-        p4_idx=$((p4_idx + 1))
-        [[ -d "$target_dir" ]] || continue
-        local pct=$(( 75 + (p4_idx * 25) / total_p4 ))
-        render_scan_status 4 "LockFiles" "$pct" "$target_dir"
-        while IFS= read -r f; do
-            [[ -z "$f" ]] && continue
-            total_scanned=$((total_scanned + 1))
-            corrupt_files+=("$f|STALE_LOCK")
-            render_scan_status 4 "LockFiles" "$pct" "$f"
-        done < <(find "$target_dir" -maxdepth 2 -type f -size 0 -name "*.lock" 2>/dev/null || true)
-    done
-    printf "\r ${MINT}✔${NC} ${BOLD}${WHITE}[4/4 LockFiles]${NC} ${MINT}Scan Completed${NC} ${DARK_GRAY}──${NC} ${GRAY}Scanned: ${WHITE}%d${NC} ${DARK_GRAY}│${NC} ${GRAY}Corrupt Found: ${RED}%d${NC}\033[K\n\n" "$total_scanned" "${#corrupt_files[@]}"
-
+    local total_scanned=$((p1_scanned + p2_scanned + p3_scanned + p4_scanned))
     local total_found="${#corrupt_files[@]}"
     if [[ "$total_found" -eq 0 ]]; then
-        echo -e " ${MINT}✔ SYSTEM INTEGRITY OPTIMAL: No corrupt or orphaned files detected!${NC}\n"
+        echo -e " ${MINT}✔ SYSTEM INTEGRITY OPTIMAL: No corrupt or orphaned files detected across ${total_scanned} inspected objects!${NC}\n"
         read -rp "Press [Enter] to return..."
         return
     fi
