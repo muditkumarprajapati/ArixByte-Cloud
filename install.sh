@@ -1572,8 +1572,37 @@ monitor_pterodactyl_usage() {
             return
         fi
 
-        # Arrays to hold container records
+        # Pre-fetch status map for all containers (Running, Starting, Stopping)
+        declare -A container_status_map 2>/dev/null || true
+        while IFS=$'\t' read -r ps_id ps_state ps_status; do
+            [[ -z "${ps_id:-}" ]] && continue
+            ps_id=$(echo "$ps_id" | tr -d '\r\n ')
+            local s_norm="Running"
+            local ps_state_low
+            ps_state_low=$(echo "${ps_state:-}" | tr '[:upper:]' '[:lower:]')
+            local ps_status_low
+            ps_status_low=$(echo "${ps_status:-}" | tr '[:upper:]' '[:lower:]')
+
+            if [[ "$ps_status_low" =~ (stopping|terminat|shutting) || "$ps_state_low" =~ (removing|dead) ]]; then
+                s_norm="Stopping"
+            elif [[ "$ps_state_low" =~ (restarting|created) || "$ps_status_low" =~ (starting|health:\ starting|init) ]]; then
+                s_norm="Starting"
+            elif [[ "$ps_state_low" == "running" || "$ps_status_low" =~ ^up ]]; then
+                s_norm="Running"
+            elif [[ "$ps_state_low" == "exited" || "$ps_status_low" =~ ^exited ]]; then
+                s_norm="Stopping"
+            else
+                s_norm="Running"
+            fi
+            container_status_map["$ps_id"]="$s_norm"
+            container_status_map["${ps_id:0:12}"]="$s_norm"
+        done < <(docker ps -a --format "{{.ID}}\t{{.State}}\t{{.Status}}" 2>/dev/null || true)
+
+        # Arrays to hold container records and status counters
         local container_list=()
+        local count_running=0
+        local count_starting=0
+        local count_stopping=0
         local highest_cid=""
         local highest_cname=""
         local highest_cpu_raw=0
@@ -1581,6 +1610,7 @@ monitor_pterodactyl_usage() {
         local highest_mem_str="0.00%"
         local highest_mem_usage="0B / 0B"
         local highest_server_name=""
+        local highest_status="Running"
 
         while IFS=$'\t' read -r c_id c_name c_cpu c_mem_usage c_mem_pct c_net c_pids; do
             c_id=$(echo "${c_id:-}" | tr -d '\r\n ' || echo "")
@@ -1610,6 +1640,20 @@ monitor_pterodactyl_usage() {
             cpu_frac="${cpu_frac:-0}"
             local cpu_int=$(( cpu_whole * 100 + cpu_frac ))
 
+            # Determine Server Status (Running / Starting / Stopping)
+            local c_status="${container_status_map["$c_id"]:-}"
+            if [[ -z "$c_status" ]]; then
+                c_status="${container_status_map["${c_id:0:12}"]:-Running}"
+            fi
+
+            if [[ "$c_status" == "Starting" ]]; then
+                count_starting=$((count_starting + 1))
+            elif [[ "$c_status" == "Stopping" ]]; then
+                count_stopping=$((count_stopping + 1))
+            else
+                count_running=$((count_running + 1))
+            fi
+
             # Detect friendly server game/name from volume if Pterodactyl server
             local s_label=""
             local vol_dir="/var/lib/pterodactyl/volumes/$c_name"
@@ -1638,7 +1682,7 @@ monitor_pterodactyl_usage() {
                 fi
             fi
 
-            container_list+=("$cpu_int|$c_id|$c_name|$c_cpu|$c_mem_usage|$c_mem_pct|$c_net|$c_pids|$s_label")
+            container_list+=("$cpu_int|$c_id|$c_name|$c_cpu|$c_mem_usage|$c_mem_pct|$c_net|$c_pids|$s_label|$c_status")
 
             if (( cpu_int >= highest_cpu_raw )); then
                 highest_cpu_raw=$cpu_int
@@ -1648,6 +1692,7 @@ monitor_pterodactyl_usage() {
                 highest_mem_str="$c_mem_pct"
                 highest_mem_usage="$c_mem_usage"
                 highest_server_name="$s_label"
+                highest_status="$c_status"
             fi
         done <<< "$stats_raw"
 
@@ -1661,18 +1706,22 @@ monitor_pterodactyl_usage() {
 
         # If highest_cid is empty, default to first container
         if [[ -z "$highest_cid" && ${#sorted_containers[@]} -gt 0 ]]; then
-            IFS='|' read -r _ highest_cid highest_cname highest_cpu_str highest_mem_usage highest_mem_str _ _ highest_server_name <<< "${sorted_containers[0]}"
+            IFS='|' read -r _ highest_cid highest_cname highest_cpu_str highest_mem_usage highest_mem_str _ _ highest_server_name highest_status <<< "${sorted_containers[0]}"
         fi
 
-        # Render Table of All Pterodactyl Containers
-        echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
-        printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}%-12s${NC} ${C2}%-22s${NC} ${WHITE}%-11s${NC} ${P1}%-24s${NC}${DARK_GRAY}│${NC}\n" "CONTAINER ID" "SERVER UUID / TYPE" "CPU LOAD" "RAM USAGE (MEM %)"
-        echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+        # Render Fleet Status Overview Summary
+        echo -e " ${GRAY}Fleet Status Overview:${NC} ${MINT}● ${count_running} Running${NC}  ${DARK_GRAY}│${NC}  ${GOLD}◐ ${count_starting} Starting${NC}  ${DARK_GRAY}│${NC}  ${RED}○ ${count_stopping} Stopping${NC}  ${DARK_GRAY}│${NC}  ${WHITE}Total Servers: ${#sorted_containers[@]}${NC}\n"
+
+        # Render Table of All Pterodactyl Containers with STATUS Column
+        echo -e " ${DARK_GRAY}╭────────────────────────────────────────────────────────────────────────────────────────╮${NC}"
+        printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}%-12s${NC} ${C2}%-22s${NC} ${WHITE}%-10s${NC} ${P1}%-26s${NC} ${WHITE}%-10s${NC} ${DARK_GRAY}│${NC}\n" \
+            "CONTAINER ID" "SERVER UUID / TYPE" "CPU LOAD" "RAM USAGE (MEM %)" "STATUS"
+        echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────────────────┤${NC}"
 
         local row_idx=0
         for entry in "${sorted_containers[@]}"; do
             row_idx=$((row_idx + 1))
-            IFS='|' read -r c_val c_id c_name c_cpu c_mem_usage c_mem_pct c_net c_pids s_label <<< "$entry"
+            IFS='|' read -r c_val c_id c_name c_cpu c_mem_usage c_mem_pct c_net c_pids s_label c_status <<< "$entry"
             
             local disp_uuid="${c_name:0:16}..."
             local disp_name="${disp_uuid}"
@@ -1685,28 +1734,52 @@ monitor_pterodactyl_usage() {
             local fire_badge=""
             if [[ "$c_id" == "$highest_cid" ]]; then
                 cpu_col="${RED}${BOLD}"
-                fire_badge=" 🔥"
+                fire_badge="🔥"
             elif (( c_val >= 8000 )); then
                 cpu_col="${RED}"
             elif (( c_val >= 4000 )); then
                 cpu_col="${GOLD}"
             fi
 
-            printf " ${DARK_GRAY}│${NC}  ${WHITE}%-12s${NC} ${C2}%-22s${NC} ${cpu_col}%-8s${NC}%-3s ${GRAY}%-24s${NC}${DARK_GRAY}│${NC}\n" \
-                "$c_id" "${disp_name:0:22}" "$c_cpu" "$fire_badge" "${c_mem_usage} (${c_mem_pct})"
+            # Color code Status
+            local status_col="${MINT}"
+            case "$c_status" in
+                Starting)
+                    status_col="${GOLD}${BOLD}"
+                    ;;
+                Stopping)
+                    status_col="${RED}${BOLD}"
+                    ;;
+                Running|*)
+                    status_col="${MINT}"
+                    ;;
+            esac
+
+            local mem_disp="${c_mem_usage} (${c_mem_pct})"
+            printf " ${DARK_GRAY}│${NC}  ${WHITE}%-12s${NC} ${C2}%-22s${NC} ${cpu_col}%-7s${NC}%-3s ${GRAY}%-26s${NC} ${status_col}%-10s${NC} ${DARK_GRAY}│${NC}\n" \
+                "$c_id" "${disp_name:0:22}" "$c_cpu" "$fire_badge" "${mem_disp:0:26}" "${c_status:0:10}"
         done
-        echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+        echo -e " ${DARK_GRAY}╰────────────────────────────────────────────────────────────────────────────────────────╯${NC}\n"
 
         # Prominent Highlight Card for the Highest Load Server
         if [[ -n "$highest_cid" ]]; then
+            local high_stat_col="${MINT}"
+            case "$highest_status" in
+                Starting) high_stat_col="${GOLD}${BOLD}" ;;
+                Stopping) high_stat_col="${RED}${BOLD}" ;;
+                Running|*) high_stat_col="${MINT}" ;;
+            esac
+
             echo -e " ${GOLD}🔥 HIGHEST LOAD SERVER IDENTIFIED:${NC}"
-            echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
-            printf " ${DARK_GRAY}│${NC}  ${WHITE}Server UUID   :${NC} ${C1}%-56s${NC}${DARK_GRAY}│${NC}\n" "${highest_cname:0:56}"
-            printf " ${DARK_GRAY}│${NC}  ${WHITE}Container ID  :${NC} ${WHITE}%-16s${NC} ${WHITE}Game/Tag:${NC} ${C2}%-30s${NC}${DARK_GRAY}│${NC}\n" "$highest_cid" "${highest_server_name:-[Pterodactyl Server]}"
-            printf " ${DARK_GRAY}│${NC}  ${WHITE}Current CPU   :${NC} ${RED}${BOLD}%-16s${NC} ${WHITE}RAM Usage:${NC} ${P1}%-30s${NC}${DARK_GRAY}│${NC}\n" "$highest_cpu_str" "${highest_mem_usage} (${highest_mem_str})"
-            echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
-            echo -e " ${DARK_GRAY}│${NC}  ${BOLD}${GOLD}WHAT IS CONSUMING THE HIGHEST LOAD ON THIS SERVER:${NC}                        ${DARK_GRAY}│${NC}"
-            echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+            echo -e " ${DARK_GRAY}╭────────────────────────────────────────────────────────────────────────────────────────╮${NC}"
+            printf " ${DARK_GRAY}│${NC}  ${WHITE}Server UUID   :${NC} ${C1}%-67s${NC}${DARK_GRAY}│${NC}\n" "${highest_cname:0:67}"
+            printf " ${DARK_GRAY}│${NC}  ${WHITE}Container ID  :${NC} ${WHITE}%-14s${NC} ${WHITE}Tag:${NC} ${C2}%-20s${NC} ${WHITE}Status:${NC} ${high_stat_col}%-16s${NC}${DARK_GRAY}│${NC}\n" \
+                "$highest_cid" "${highest_server_name:-[GameServer]}" "$highest_status"
+            printf " ${DARK_GRAY}│${NC}  ${WHITE}Current CPU   :${NC} ${RED}${BOLD}%-14s${NC} ${WHITE}RAM Usage:${NC} ${P1}%-41s${NC}${DARK_GRAY}│${NC}\n" \
+                "$highest_cpu_str" "${highest_mem_usage} (${highest_mem_str})"
+            echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────────────────┤${NC}"
+            echo -e " ${DARK_GRAY}│${NC}  ${BOLD}${GOLD}WHAT IS CONSUMING THE HIGHEST LOAD ON THIS SERVER:${NC}                                    ${DARK_GRAY}│${NC}"
+            echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────────────────┤${NC}"
 
             # Deep Process & Thread Inspection inside the Highest Load Container
             local top_processes=""
@@ -1752,19 +1825,19 @@ monitor_pterodactyl_usage() {
             fi
 
             if [[ -n "$java_args" ]]; then
-                echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
-                echo -e " ${DARK_GRAY}│${NC}  ${MINT}⚡ JAVA / MINECRAFT DIAGNOSTICS:${NC}                                           ${DARK_GRAY}│${NC}"
+                echo -e " ${DARK_GRAY}├────────────────────────────────────────────────────────────────────────────────────────┤${NC}"
+                echo -e " ${DARK_GRAY}│${NC}  ${MINT}⚡ JAVA / MINECRAFT DIAGNOSTICS:${NC}                                                          ${DARK_GRAY}│${NC}"
                 local jar_name=""
                 jar_name=$(echo "$java_args" | grep -oE "[-a-zA-Z0-9_\.]+\.jar" 2>/dev/null | tail -n1 || echo "server.jar")
                 local max_heap=""
                 max_heap=$(echo "$java_args" | grep -oE -- "-Xmx[0-9]+[MGmg]" 2>/dev/null || echo "N/A")
                 local init_heap=""
                 init_heap=$(echo "$java_args" | grep -oE -- "-Xms[0-9]+[MGmg]" 2>/dev/null || echo "N/A")
-                printf " ${DARK_GRAY}│${NC}  ${GRAY}Server Jar:${NC} ${WHITE}%-16s${NC} ${GRAY}Max Memory (Xmx):${NC} ${P1}%-8s${NC} ${GRAY}Init Heap (Xms):${NC} ${WHITE}%-6s${NC}${DARK_GRAY}│${NC}\n" \
-                    "${jar_name:0:16}" "$max_heap" "$init_heap"
-                printf " ${DARK_GRAY}│${NC}  ${GRAY}Load Cause:${NC} ${GOLD}%-60s${NC}${DARK_GRAY}│${NC}\n" "High tick load on entity physics, plugins or world chunk generation"
+                printf " ${DARK_GRAY}│${NC}  ${GRAY}Server Jar:${NC} ${WHITE}%-18s${NC} ${GRAY}Max Memory (Xmx):${NC} ${P1}%-10s${NC} ${GRAY}Init Heap (Xms):${NC} ${WHITE}%-12s${NC}${DARK_GRAY}│${NC}\n" \
+                    "${jar_name:0:18}" "$max_heap" "$init_heap"
+                printf " ${DARK_GRAY}│${NC}  ${GRAY}Load Cause:${NC} ${GOLD}%-71s${NC}${DARK_GRAY}│${NC}\n" "High tick load on entity physics, plugins or world chunk generation"
             fi
-            echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
+            echo -e " ${DARK_GRAY}╰────────────────────────────────────────────────────────────────────────────────────────╯${NC}\n"
         fi
 
         # Interactive Actions
