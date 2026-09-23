@@ -2122,6 +2122,9 @@ manage_single_vps_panel() {
                             continue
                         fi
 
+                        echo -e "${GRAY}Installing PHP dependencies via Composer...${NC}"
+                        docker compose exec -T -e COMPOSER_ALLOW_SUPERUSER=1 workspace composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
                         echo -e "${GRAY}Configuring application key and running database migrations...${NC}"
                         docker compose exec -T workspace php artisan key:generate --force 2>/dev/null || true
                         docker compose exec -T workspace php artisan optimize 2>/dev/null || true
@@ -2170,6 +2173,7 @@ manage_single_vps_panel() {
                             chmod -R o+w storage bootstrap/cache 2>/dev/null || true
                             docker compose build --no-cache workspace
                             docker compose up -d --build
+                            docker compose exec -T -e COMPOSER_ALLOW_SUPERUSER=1 workspace composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
                             docker compose exec -T workspace php artisan migrate --force 2>/dev/null || true
                             docker compose exec -T workspace php artisan optimize 2>/dev/null || true
                             cd - &>/dev/null
