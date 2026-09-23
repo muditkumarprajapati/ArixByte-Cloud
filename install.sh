@@ -1226,6 +1226,10 @@ detect_corrupt_files() {
 # PTERODACTYL CORRUPT PLUGIN & GAME SERVER SECURITY SCANNER (WITH ELAPSED & ETA)
 # ==============================================================================
 detect_corrupt_plugins() {
+    set +e 2>/dev/null || true
+    set +u 2>/dev/null || true
+    set +o pipefail 2>/dev/null || true
+
     render_page_header "PTERODACTYL GAME SERVER SECURITY SCANNER"
     require_root || return
 
@@ -1483,15 +1487,31 @@ detect_corrupt_plugins() {
 # [10] PTERODACTYL SERVER RESOURCE USAGE & LOAD MONITOR
 # ==============================================================================
 render_host_top_processes() {
+    set +e 2>/dev/null || true
+    set +u 2>/dev/null || true
+    set +o pipefail 2>/dev/null || true
+
     echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
     printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}%-8s${NC} ${GRAY}%-12s${NC} ${WHITE}%-8s${NC} ${P1}%-8s${NC} ${C1}%-31s${NC}${DARK_GRAY}│${NC}\n" "PID" "USER" "CPU %" "MEM %" "PROCESS COMMAND"
     echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
     local proc_found=0
-    while read -r p u c m cmd; do
-        [[ -z "$p" ]] && continue
-        proc_found=$((proc_found + 1))
-        printf " ${DARK_GRAY}│${NC}  ${WHITE}%-8s${NC} ${GRAY}%-12s${NC} ${RED}%-8s${NC} ${P1}%-8s${NC} ${C2}%-31s${NC}${DARK_GRAY}│${NC}\n" "$p" "${u:0:12}" "$c%" "$m%" "${cmd:0:31}"
-    done < <(ps -eo pid,user,%cpu,%mem,comm --sort=-%cpu 2>/dev/null | tail -n +2 | head -n 8 || ps aux 2>/dev/null | awk 'NR>1 {print $2, $1, $3, $4, $11}' | sort -k3,3nr | head -n 8)
+    local ps_output=""
+    ps_output=$(ps -eo pid,user,%cpu,%mem,comm --sort=-%cpu 2>/dev/null | tail -n +2 | head -n 8 || true)
+    if [[ -z "$ps_output" ]]; then
+        ps_output=$(ps aux 2>/dev/null | awk 'NR>1 {print $2, $1, $3, $4, $11}' | sort -k3,3nr 2>/dev/null | head -n 8 || true)
+    fi
+
+    if [[ -n "$ps_output" ]]; then
+        while read -r p u c m cmd; do
+            [[ -z "${p:-}" ]] && continue
+            proc_found=$((proc_found + 1))
+            c="${c:-0}"
+            m="${m:-0}"
+            cmd="${cmd:-proc}"
+            u="${u:-user}"
+            printf " ${DARK_GRAY}│${NC}  ${WHITE}%-8s${NC} ${GRAY}%-12s${NC} ${RED}%-8s${NC} ${P1}%-8s${NC} ${C2}%-31s${NC}${DARK_GRAY}│${NC}\n" "$p" "${u:0:12}" "$c%" "$m%" "${cmd:0:31}"
+        done <<< "$ps_output"
+    fi
     
     if (( proc_found == 0 )); then
         echo -e " ${DARK_GRAY}│${NC}  ${GRAY}No process metrics available from standard ps.${NC}                             ${DARK_GRAY}│${NC}"
@@ -1500,6 +1520,10 @@ render_host_top_processes() {
 }
 
 monitor_pterodactyl_usage() {
+    set +e 2>/dev/null || true
+    set +u 2>/dev/null || true
+    set +o pipefail 2>/dev/null || true
+
     require_root || return
 
     while true; do
@@ -1515,8 +1539,8 @@ monitor_pterodactyl_usage() {
         fi
 
         # Gather active containers
-        local active_cids
-        active_cids=$(docker ps -q 2>/dev/null)
+        local active_cids=""
+        active_cids=$(docker ps -q 2>/dev/null || true)
         if [[ -z "$active_cids" ]]; then
             echo -e " ${GOLD}● No active Docker containers currently running on this node.${NC}\n"
             echo -e " ${GRAY}Inspecting host system for high-load server processes...${NC}\n"
@@ -1528,11 +1552,22 @@ monitor_pterodactyl_usage() {
         echo -e " ${P1}⚙ Sampling real-time resource telemetry across active game servers...${NC}\n"
 
         # Query stats from Docker
-        local stats_raw
-        stats_raw=$(docker stats --no-stream --format "{{.ID}}\t{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.NetIO}}\t{{.PIDs}}" 2>/dev/null)
+        local stats_raw=""
+        stats_raw=$(docker stats --no-stream --format "{{.ID}}\t{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.NetIO}}\t{{.PIDs}}" 2>/dev/null || true)
+
+        # Fallback if --format template returned empty
+        if [[ -z "$stats_raw" ]]; then
+            local fallback_stats=""
+            fallback_stats=$(docker stats --no-stream 2>/dev/null || true)
+            if [[ -n "$fallback_stats" ]]; then
+                stats_raw=$(echo "$fallback_stats" | tail -n +2 | awk '{print $1 "\t" $2 "\t" $3 "\t" $4 " " $5 " " $6 "\t" $7 "\t" $8 " / " $10 "\t" $NF}' 2>/dev/null || true)
+            fi
+        fi
 
         if [[ -z "$stats_raw" ]]; then
-            echo -e " ${RED}✘ Failed to retrieve container telemetry from Docker.${NC}\n"
+            echo -e " ${GOLD}● Notice: Docker telemetry did not return active metrics stream.${NC}\n"
+            echo -e " ${GRAY}Inspecting host system for high-load server processes...${NC}\n"
+            render_host_top_processes
             read -rp "Press [Enter] to return..."
             return
         fi
@@ -1548,18 +1583,32 @@ monitor_pterodactyl_usage() {
         local highest_server_name=""
 
         while IFS=$'\t' read -r c_id c_name c_cpu c_mem_usage c_mem_pct c_net c_pids; do
+            c_id=$(echo "${c_id:-}" | tr -d '\r\n ' || echo "")
             [[ -z "$c_id" ]] && continue
 
+            c_name=$(echo "${c_name:-}" | tr -d '\r\n ' || echo "$c_id")
+            c_cpu=$(echo "${c_cpu:-0.00%}" | tr -d '\r\n ' || echo "0.00%")
+            c_mem_usage=$(echo "${c_mem_usage:-0B / 0B}" | tr -d '\r\n' || echo "0B / 0B")
+            c_mem_pct=$(echo "${c_mem_pct:-0.00%}" | tr -d '\r\n ' || echo "0.00%")
+            c_net=$(echo "${c_net:-0B / 0B}" | tr -d '\r\n' || echo "0B / 0B")
+            c_pids=$(echo "${c_pids:-0}" | tr -d '\r\n ' || echo "0")
+
             # Clean CPU percentage to an integer for sorting (e.g., 145.20% -> 14520)
-            local cpu_num="${c_cpu//%/}"
-            local cpu_whole="${cpu_num%%.*}"
-            local cpu_frac="${cpu_num##*.}"
-            if [[ "$cpu_whole" == "$cpu_num" ]]; then
+            local clean_cpu
+            clean_cpu=$(echo "$c_cpu" | sed 's/[^0-9.]//g')
+            local cpu_whole="${clean_cpu%%.*}"
+            local cpu_frac="${clean_cpu##*.}"
+            if [[ "$cpu_whole" == "$clean_cpu" ]]; then
                 cpu_frac="00"
             fi
             cpu_frac="${cpu_frac:0:2}"
-            if [[ ${#cpu_frac} -eq 1 ]]; then cpu_frac="${cpu_frac}0"; fi
-            local cpu_int=$(( 10#${cpu_whole:-0} * 100 + 10#${cpu_frac:-0} ))
+            while [[ ${#cpu_frac} -lt 2 ]]; do cpu_frac="${cpu_frac}0"; done
+            cpu_whole="${cpu_whole:-0}"
+            cpu_whole=$(echo "$cpu_whole" | sed 's/^0*//')
+            cpu_whole="${cpu_whole:-0}"
+            cpu_frac=$(echo "$cpu_frac" | sed 's/^0*//')
+            cpu_frac="${cpu_frac:-0}"
+            local cpu_int=$(( cpu_whole * 100 + cpu_frac ))
 
             # Detect friendly server game/name from volume if Pterodactyl server
             local s_label=""
@@ -1569,12 +1618,14 @@ monitor_pterodactyl_usage() {
             fi
             if [[ -d "$vol_dir" ]]; then
                 if [[ -f "$vol_dir/server.properties" ]]; then
+                    local raw_motd
+                    raw_motd=$(grep -E "^motd=" "$vol_dir/server.properties" 2>/dev/null | head -n1 | cut -d'=' -f2- || true)
                     local motd
-                    motd=$(grep -E "^motd=" "$vol_dir/server.properties" 2>/dev/null | cut -d'=' -f2- | tr -cd '[:alnum:] _-')
+                    motd=$(echo "$raw_motd" | sed 's/[^a-zA-Z0-9 _-]//g')
                     s_label="[MC: ${motd:0:14}]"
                 elif [[ -f "$vol_dir/package.json" ]]; then
                     local bname
-                    bname=$(grep -E '"name":' "$vol_dir/package.json" 2>/dev/null | head -n1 | cut -d'"' -f4)
+                    bname=$(grep -E '"name":' "$vol_dir/package.json" 2>/dev/null | head -n1 | cut -d'"' -f4 || true)
                     s_label="[Node: ${bname:0:12}]"
                 elif [[ -f "$vol_dir/RustDedicated" || -f "$vol_dir/RustDedicated.exe" ]]; then
                     s_label="[Rust]"
@@ -1589,7 +1640,7 @@ monitor_pterodactyl_usage() {
 
             container_list+=("$cpu_int|$c_id|$c_name|$c_cpu|$c_mem_usage|$c_mem_pct|$c_net|$c_pids|$s_label")
 
-            if (( cpu_int > highest_cpu_raw )); then
+            if (( cpu_int >= highest_cpu_raw )); then
                 highest_cpu_raw=$cpu_int
                 highest_cid="$c_id"
                 highest_cname="$c_name"
@@ -1600,21 +1651,23 @@ monitor_pterodactyl_usage() {
             fi
         done <<< "$stats_raw"
 
+        # Sort containers by CPU descending
+        local sorted_containers=()
+        if [[ ${#container_list[@]} -gt 0 ]]; then
+            while IFS= read -r line; do
+                [[ -n "$line" ]] && sorted_containers+=("$line")
+            done < <(printf '%s\n' "${container_list[@]}" | sort -t'|' -k1,1nr 2>/dev/null || true)
+        fi
+
         # If highest_cid is empty, default to first container
-        if [[ -z "$highest_cid" && ${#container_list[@]} -gt 0 ]]; then
-            IFS='|' read -r _ highest_cid highest_cname highest_cpu_str highest_mem_usage highest_mem_str _ _ highest_server_name <<< "${container_list[0]}"
+        if [[ -z "$highest_cid" && ${#sorted_containers[@]} -gt 0 ]]; then
+            IFS='|' read -r _ highest_cid highest_cname highest_cpu_str highest_mem_usage highest_mem_str _ _ highest_server_name <<< "${sorted_containers[0]}"
         fi
 
         # Render Table of All Pterodactyl Containers
         echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
         printf " ${DARK_GRAY}│${NC}  ${BOLD}${WHITE}%-12s${NC} ${C2}%-22s${NC} ${WHITE}%-11s${NC} ${P1}%-24s${NC}${DARK_GRAY}│${NC}\n" "CONTAINER ID" "SERVER UUID / TYPE" "CPU LOAD" "RAM USAGE (MEM %)"
         echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
-
-        # Sort containers by CPU descending
-        local sorted_containers=()
-        while IFS= read -r line; do
-            [[ -n "$line" ]] && sorted_containers+=("$line")
-        done < <(printf '%s\n' "${container_list[@]}" | sort -t'|' -k1,1nr)
 
         local row_idx=0
         for entry in "${sorted_containers[@]}"; do
@@ -1645,63 +1698,74 @@ monitor_pterodactyl_usage() {
         echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
 
         # Prominent Highlight Card for the Highest Load Server
-        echo -e " ${GOLD}🔥 HIGHEST LOAD SERVER IDENTIFIED:${NC}"
-        echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
-        printf " ${DARK_GRAY}│${NC}  ${WHITE}Server UUID   :${NC} ${C1}%-56s${NC}${DARK_GRAY}│${NC}\n" "$highest_cname"
-        printf " ${DARK_GRAY}│${NC}  ${WHITE}Container ID  :${NC} ${WHITE}%-16s${NC} ${WHITE}Game/Tag:${NC} ${C2}%-30s${NC}${DARK_GRAY}│${NC}\n" "$highest_cid" "${highest_server_name:-[Pterodactyl Server]}"
-        printf " ${DARK_GRAY}│${NC}  ${WHITE}Current CPU   :${NC} ${RED}${BOLD}%-16s${NC} ${WHITE}RAM Usage:${NC} ${P1}%-30s${NC}${DARK_GRAY}│${NC}\n" "$highest_cpu_str" "$highest_mem_usage ($highest_mem_str)"
-        echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
-        echo -e " ${DARK_GRAY}│${NC}  ${BOLD}${GOLD}WHAT IS CONSUMING THE HIGHEST LOAD ON THIS SERVER:${NC}                        ${DARK_GRAY}│${NC}"
-        echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
-
-        # Deep Process & Thread Inspection inside the Highest Load Container
-        local top_processes
-        top_processes=$(docker top "$highest_cid" -o pid,%cpu,%mem,time,comm 2>/dev/null | tail -n +2 | sort -k2,2nr | head -n 5)
-
-        if [[ -n "$top_processes" ]]; then
-            printf " ${DARK_GRAY}│${NC}  ${GRAY}%-8s${NC} ${WHITE}%-8s${NC} ${WHITE}%-8s${NC} ${GRAY}%-10s${NC} ${C1}%-33s${NC}${DARK_GRAY}│${NC}\n" "PID" "CPU %" "MEM %" "TIME" "PROCESS / THREAD"
-            echo -e " ${DARK_GRAY}│${NC}  ${DARK_GRAY}───────────────────────────────────────────────────────────────────────────${NC}${DARK_GRAY}│${NC}"
-            while read -r p_pid p_cpu p_mem p_time p_cmd; do
-                [[ -z "$p_pid" ]] && continue
-                printf " ${DARK_GRAY}│${NC}  ${GRAY}%-8s${NC} ${RED}%-8s${NC} ${P1}%-8s${NC} ${GRAY}%-10s${NC} ${WHITE}%-33s${NC}${DARK_GRAY}│${NC}\n" \
-                    "$p_pid" "$p_cpu%" "$p_mem%" "$p_time" "${p_cmd:0:33}"
-            done <<< "$top_processes"
-        else
-            # Fallback to inspecting host namespace PID
-            local h_pid
-            h_pid=$(docker inspect --format '{{.State.Pid}}' "$highest_cid" 2>/dev/null)
-            if [[ -n "$h_pid" && "$h_pid" -gt 0 ]]; then
-                local full_cmd
-                full_cmd=$(ps -p "$h_pid" -o args= 2>/dev/null)
-                printf " ${DARK_GRAY}│${NC}  ${GRAY}Host PID:${NC} ${WHITE}%-8s${NC} ${GRAY}Main Process:${NC} ${WHITE}%-46s${NC}${DARK_GRAY}│${NC}\n" "$h_pid" "${full_cmd:0:46}"
-            else
-                echo -e " ${DARK_GRAY}│${NC}  ${GRAY}No individual sub-processes could be queried.${NC}                             ${DARK_GRAY}│${NC}"
-            fi
-        fi
-
-        # Java-specific deep diagnosis if jar is running
-        local java_args
-        java_args=$(docker exec "$highest_cid" ps -eo args 2>/dev/null | grep -E "java.*\.jar" | head -n1 || true)
-        if [[ -z "$java_args" ]]; then
-            local h_pid
-            h_pid=$(docker inspect --format '{{.State.Pid}}' "$highest_cid" 2>/dev/null)
-            [[ -n "$h_pid" ]] && java_args=$(ps -p "$h_pid" -o args= 2>/dev/null | grep -E "java.*\.jar" || true)
-        fi
-
-        if [[ -n "$java_args" ]]; then
+        if [[ -n "$highest_cid" ]]; then
+            echo -e " ${GOLD}🔥 HIGHEST LOAD SERVER IDENTIFIED:${NC}"
+            echo -e " ${DARK_GRAY}╭─────────────────────────────────────────────────────────────────────────────╮${NC}"
+            printf " ${DARK_GRAY}│${NC}  ${WHITE}Server UUID   :${NC} ${C1}%-56s${NC}${DARK_GRAY}│${NC}\n" "${highest_cname:0:56}"
+            printf " ${DARK_GRAY}│${NC}  ${WHITE}Container ID  :${NC} ${WHITE}%-16s${NC} ${WHITE}Game/Tag:${NC} ${C2}%-30s${NC}${DARK_GRAY}│${NC}\n" "$highest_cid" "${highest_server_name:-[Pterodactyl Server]}"
+            printf " ${DARK_GRAY}│${NC}  ${WHITE}Current CPU   :${NC} ${RED}${BOLD}%-16s${NC} ${WHITE}RAM Usage:${NC} ${P1}%-30s${NC}${DARK_GRAY}│${NC}\n" "$highest_cpu_str" "${highest_mem_usage} (${highest_mem_str})"
             echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
-            echo -e " ${DARK_GRAY}│${NC}  ${MINT}⚡ JAVA / MINECRAFT DIAGNOSTICS:${NC}                                           ${DARK_GRAY}│${NC}"
-            local jar_name
-            jar_name=$(echo "$java_args" | grep -oE "[-a-zA-Z0-9_\.]+\.jar" | tail -n1 || echo "server.jar")
-            local max_heap
-            max_heap=$(echo "$java_args" | grep -oE -- "-Xmx[0-9]+[MGmg]" || echo "N/A")
-            local init_heap
-            init_heap=$(echo "$java_args" | grep -oE -- "-Xms[0-9]+[MGmg]" || echo "N/A")
-            printf " ${DARK_GRAY}│${NC}  ${GRAY}Server Jar:${NC} ${WHITE}%-16s${NC} ${GRAY}Max Memory (Xmx):${NC} ${P1}%-8s${NC} ${GRAY}Init Heap (Xms):${NC} ${WHITE}%-6s${NC}${DARK_GRAY}│${NC}\n" \
-                "${jar_name:0:16}" "$max_heap" "$init_heap"
-            printf " ${DARK_GRAY}│${NC}  ${GRAY}Load Cause:${NC} ${GOLD}%-60s${NC}${DARK_GRAY}│${NC}\n" "High tick load on entity physics, plugins or world chunk generation"
+            echo -e " ${DARK_GRAY}│${NC}  ${BOLD}${GOLD}WHAT IS CONSUMING THE HIGHEST LOAD ON THIS SERVER:${NC}                        ${DARK_GRAY}│${NC}"
+            echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+
+            # Deep Process & Thread Inspection inside the Highest Load Container
+            local top_processes=""
+            top_processes=$(docker top "$highest_cid" -o pid,%cpu,%mem,time,comm 2>/dev/null | tail -n +2 | sort -k2,2nr 2>/dev/null | head -n 5 || true)
+            if [[ -z "$top_processes" ]]; then
+                top_processes=$(docker top "$highest_cid" 2>/dev/null | tail -n +2 | head -n 5 || true)
+            fi
+
+            if [[ -n "$top_processes" ]]; then
+                printf " ${DARK_GRAY}│${NC}  ${GRAY}%-8s${NC} ${WHITE}%-8s${NC} ${WHITE}%-8s${NC} ${GRAY}%-10s${NC} ${C1}%-33s${NC}${DARK_GRAY}│${NC}\n" "PID" "CPU %" "MEM %" "TIME" "PROCESS / THREAD"
+                echo -e " ${DARK_GRAY}│${NC}  ${DARK_GRAY}───────────────────────────────────────────────────────────────────────────${NC}${DARK_GRAY}│${NC}"
+                while read -r p_pid p_cpu p_mem p_time p_cmd; do
+                    [[ -z "${p_pid:-}" ]] && continue
+                    p_cpu="${p_cpu:-0}"
+                    p_mem="${p_mem:-0}"
+                    p_time="${p_time:-00:00}"
+                    p_cmd="${p_cmd:-proc}"
+                    printf " ${DARK_GRAY}│${NC}  ${GRAY}%-8s${NC} ${RED}%-8s${NC} ${P1}%-8s${NC} ${GRAY}%-10s${NC} ${WHITE}%-33s${NC}${DARK_GRAY}│${NC}\n" \
+                        "$p_pid" "${p_cpu}%" "${p_mem}%" "$p_time" "${p_cmd:0:33}"
+                done <<< "$top_processes"
+            else
+                # Fallback to inspecting host namespace PID
+                local h_pid=""
+                h_pid=$(docker inspect --format '{{.State.Pid}}' "$highest_cid" 2>/dev/null || echo "")
+                if [[ -n "$h_pid" && "$h_pid" != "0" ]]; then
+                    local full_cmd=""
+                    full_cmd=$(ps -p "$h_pid" -o args= 2>/dev/null || echo "")
+                    printf " ${DARK_GRAY}│${NC}  ${GRAY}Host PID:${NC} ${WHITE}%-8s${NC} ${GRAY}Main Process:${NC} ${WHITE}%-46s${NC}${DARK_GRAY}│${NC}\n" "$h_pid" "${full_cmd:0:46}"
+                else
+                    echo -e " ${DARK_GRAY}│${NC}  ${GRAY}No individual sub-processes could be queried.${NC}                             ${DARK_GRAY}│${NC}"
+                fi
+            fi
+
+            # Java-specific deep diagnosis if jar is running
+            local java_args=""
+            java_args=$(docker exec "$highest_cid" ps -eo args 2>/dev/null | grep -E "java.*\.jar" | head -n1 || true)
+            if [[ -z "$java_args" ]]; then
+                local h_pid=""
+                h_pid=$(docker inspect --format '{{.State.Pid}}' "$highest_cid" 2>/dev/null || echo "")
+                if [[ -n "$h_pid" && "$h_pid" != "0" ]]; then
+                    java_args=$(ps -p "$h_pid" -o args= 2>/dev/null | grep -E "java.*\.jar" | head -n1 || true)
+                fi
+            fi
+
+            if [[ -n "$java_args" ]]; then
+                echo -e " ${DARK_GRAY}├─────────────────────────────────────────────────────────────────────────────┤${NC}"
+                echo -e " ${DARK_GRAY}│${NC}  ${MINT}⚡ JAVA / MINECRAFT DIAGNOSTICS:${NC}                                           ${DARK_GRAY}│${NC}"
+                local jar_name=""
+                jar_name=$(echo "$java_args" | grep -oE "[-a-zA-Z0-9_\.]+\.jar" 2>/dev/null | tail -n1 || echo "server.jar")
+                local max_heap=""
+                max_heap=$(echo "$java_args" | grep -oE -- "-Xmx[0-9]+[MGmg]" 2>/dev/null || echo "N/A")
+                local init_heap=""
+                init_heap=$(echo "$java_args" | grep -oE -- "-Xms[0-9]+[MGmg]" 2>/dev/null || echo "N/A")
+                printf " ${DARK_GRAY}│${NC}  ${GRAY}Server Jar:${NC} ${WHITE}%-16s${NC} ${GRAY}Max Memory (Xmx):${NC} ${P1}%-8s${NC} ${GRAY}Init Heap (Xms):${NC} ${WHITE}%-6s${NC}${DARK_GRAY}│${NC}\n" \
+                    "${jar_name:0:16}" "$max_heap" "$init_heap"
+                printf " ${DARK_GRAY}│${NC}  ${GRAY}Load Cause:${NC} ${GOLD}%-60s${NC}${DARK_GRAY}│${NC}\n" "High tick load on entity physics, plugins or world chunk generation"
+            fi
+            echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
         fi
-        echo -e " ${DARK_GRAY}╰─────────────────────────────────────────────────────────────────────────────╯${NC}\n"
 
         # Interactive Actions
         echo -e " Actions:"
@@ -1718,28 +1782,35 @@ monitor_pterodactyl_usage() {
                 continue
                 ;;
             2)
-                echo -e "\n${P1}=== STREAMING RECENT CONSOLE LOGS FOR ${highest_cid} (Press Ctrl+C to stop) ===${NC}\n"
-                timeout 15 docker logs --tail 50 -f "$highest_cid" 2>&1 || true
-                echo -e "\n${GRAY}Log stream closed.${NC}"
-                read -rp "Press [Enter] to return to usage monitor..."
+                if [[ -n "$highest_cid" ]]; then
+                    echo -e "\n${P1}=== STREAMING RECENT CONSOLE LOGS FOR ${highest_cid} (Press Ctrl+C to stop) ===${NC}\n"
+                    timeout 15 docker logs --tail 50 -f "$highest_cid" 2>&1 || true
+                    echo -e "\n${GRAY}Log stream closed.${NC}"
+                    read -rp "Press [Enter] to return to usage monitor..."
+                else
+                    echo -e "\n${GOLD}No container active to stream logs.${NC}"
+                    sleep 1
+                fi
                 clear
                 ;;
             3)
                 read -rp "Enter Container ID to inspect: " custom_cid
                 if [[ -n "$custom_cid" ]]; then
                     echo -e "\n${C1}Top processes for $custom_cid:${NC}"
-                    docker top "$custom_cid" -o pid,%cpu,%mem,time,comm 2>/dev/null || docker exec "$custom_cid" ps aux 2>/dev/null || echo "Unable to inspect container."
+                    docker top "$custom_cid" -o pid,%cpu,%mem,time,comm 2>/dev/null || docker exec "$custom_cid" ps aux 2>/dev/null || docker top "$custom_cid" 2>/dev/null || echo "Unable to inspect container."
                     read -rp "Press [Enter] to continue..."
                 fi
                 clear
                 ;;
             4)
-                echo -e "\n${GOLD}⚠ Are you sure you want to restart container ${highest_cid}?${NC}"
-                read -rp "Restart container? [y/N]: " confirm_restart
-                if [[ "$confirm_restart" =~ ^[Yy]$ ]]; then
-                    docker restart "$highest_cid"
-                    echo -e "${MINT}✔ Container ${highest_cid} restarted successfully!${NC}\n"
-                    sleep 2
+                if [[ -n "$highest_cid" ]]; then
+                    echo -e "\n${GOLD}⚠ Are you sure you want to restart container ${highest_cid}?${NC}"
+                    read -rp "Restart container? [y/N]: " confirm_restart
+                    if [[ "$confirm_restart" =~ ^[Yy]$ ]]; then
+                        docker restart "$highest_cid" 2>/dev/null || true
+                        echo -e "${MINT}✔ Container ${highest_cid} restarted successfully!${NC}\n"
+                        sleep 2
+                    fi
                 fi
                 clear
                 ;;
@@ -2581,6 +2652,9 @@ install_dev_stack() {
 # MAIN EVENT LOOP (ENTER TO CONFIRM - NO ACCIDENTAL EXECUTION)
 # ==============================================================================
 clear
+set +e 2>/dev/null || true
+set +u 2>/dev/null || true
+set +o pipefail 2>/dev/null || true
 while true; do
     render_ui
 
